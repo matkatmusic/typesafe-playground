@@ -14,7 +14,8 @@ export function readTopKey(answer: Answer, keys: string[]): string {
   if (answer.type === 'choice')
     return answer.choice;
   if (answer.type === 'noul')
-    return answer.noul > 0.5 ? NOUL_KEY : NOUL_NO_KEY;
+    // return answer.noul > 0.5 ? NOUL_KEY : NOUL_NO_KEY;
+    return answer.noul >= 0.5 ? NOUL_KEY : NOUL_NO_KEY;
   let topKey = keys[0];
   for (const key of keys) {
     const keyValue = readValue(answer, key);

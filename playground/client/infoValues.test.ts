@@ -19,7 +19,9 @@ function validateReadTopKey() {
   expect(NOUL_NO_KEY).toBe('no');
   expect(readTopKey({ type: 'noul', noul: 0.8 }, ['yes'])).toBe('yes');
   expect(readTopKey({ type: 'noul', noul: 0.2 }, ['yes'])).toBe('no');
-  expect(readTopKey({ type: 'noul', noul: 0.5 }, ['yes'])).toBe('no');
+  expect(readTopKey({ type: 'noul', noul: 0.5 }, ['yes'])).toBe('yes');
+  expect(readTopKey({ type: 'noul', noul: 0.49 }, ['yes'])).toBe('no');
+  expect(readTopKey({ type: 'noul', noul: 0.51 }, ['yes'])).toBe('yes');
 }
 
 function validateReadDescription() {
