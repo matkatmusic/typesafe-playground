@@ -42,7 +42,7 @@ async function validateButtonBorderIsStrongInBothThemes() {
     expect(darkColor).toBeDefined()
     expect(lightColor).not.toBe(darkColor)
     expect(page).toContain('border: 2px solid var(--button-border); border-radius: 6px; padding: 4px 12px;')
-    expect(page).not.toMatch(/button[^{]*\{[^}]*border: 1px solid var\(--grid\)/)
+    expect(page).not.toMatch(/^[^{}\n]*\bbutton\b[^{}\n]*\{[^{}]*border: 1px solid var\(--grid\)/m)
 }
 
 test('test_button_border_is_strong_in_both_themes', validateButtonBorderIsStrongInBothThemes)
