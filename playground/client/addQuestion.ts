@@ -1,6 +1,6 @@
 import { snippet } from '@codemirror/autocomplete';
 import { syntaxTree } from '@codemirror/language';
-import { StateField } from '@codemirror/state';
+import { EditorSelection, StateField } from '@codemirror/state';
 import type { EditorState, Extension, Transaction } from '@codemirror/state';
 import { Decoration, EditorView, WidgetType } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
@@ -14,7 +14,11 @@ export function insertQuestion(view: EditorView, type: QuestionType): void {
     return;
   const text = view.state.doc.toString();
   const plan = buildInsertPlan(syntaxTree(view.state), text, type);
+  const lengthBefore = view.state.doc.length;
   snippet(plan.template)(view, null, plan.from, plan.to);
+  const insertedEnd = plan.to + view.state.doc.length - lengthBefore;
+  const insertedRange = EditorSelection.range(plan.from, insertedEnd);
+  view.dispatch({ effects: EditorView.scrollIntoView(insertedRange, { y: 'nearest' }) });
   view.focus();
 }
 

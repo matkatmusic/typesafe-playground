@@ -2,12 +2,14 @@ import { test, expect } from 'bun:test';
 import { snippet } from '@codemirror/autocomplete';
 import { json } from '@codemirror/lang-json';
 import { syntaxTree } from '@codemirror/language';
-import { EditorState } from '@codemirror/state';
-import type { Transaction } from '@codemirror/state';
-import type { EditorView } from '@codemirror/view';
+import { EditorState, Transaction } from '@codemirror/state';
+import type { StateEffectType, TransactionSpec } from '@codemirror/state';
+import { EditorView } from '@codemirror/view';
 import { findClosingBracePosition, insertQuestion } from './addQuestion';
 import { buildInsertPlan } from './questionSnippets';
 import type { QuestionType } from './questionSnippets';
+
+const SCROLL_EFFECT_TYPE = (EditorView.scrollIntoView(0) as unknown as { type: StateEffectType<unknown> }).type;
 
 function runInsert(doc: string, type: QuestionType): string {
   const state = EditorState.create({ doc: doc, extensions: [json()] });
@@ -56,10 +58,32 @@ function validateInsertIntoEmptyObjectIsValidJson() {
 }
 
 function validateLockedEditorIgnoresInsert() {
-  expect(countDispatchesFromInsert(false)).toBe(1);
+  expect(countDispatchesFromInsert(false)).toBe(2);
   expect(countDispatchesFromInsert(true)).toBe(0);
 }
 
+function validateInsertScrollsTheWholeNewQuestionIntoView() {
+  const doc = '{\n  "q": {\n    "type": "noul"\n  }\n}';
+  const view = { state: EditorState.create({ doc: doc, extensions: [json()] }), scrollRanges: [] as { from: number; to: number; y: string }[], focus: (): void => {} };
+  function applyDispatch(spec: Transaction | TransactionSpec): void {
+    const transaction = spec instanceof Transaction ? spec : view.state.update(spec);
+    for (const effect of transaction.effects) {
+      const target = effect.value as { range: { from: number; to: number }; y: string };
+      if (effect.is(SCROLL_EFFECT_TYPE))
+        view.scrollRanges.push({ from: target.range.from, to: target.range.to, y: target.y });
+    }
+    view.state = transaction.state;
+  }
+  Object.assign(view, { dispatch: applyDispatch });
+  insertQuestion(view as unknown as EditorView, 'choice');
+  const insertedFrom = doc.indexOf('\n  }') + 4;
+  expect(view.scrollRanges.length).toBe(1);
+  expect(view.scrollRanges[0].y).toBe('nearest');
+  expect(view.scrollRanges[0].from).toBe(insertedFrom);
+  expect(view.scrollRanges[0].to).toBe(view.state.doc.length - '\n}'.length);
+}
+
+test('test_insert_scrolls_the_whole_new_question_into_view', validateInsertScrollsTheWholeNewQuestionIntoView);
 test('test_closing_brace_position_comes_from_the_syntax_tree', validateClosingBracePosition);
 test('test_insert_after_last_question_gives_valid_json', validateInsertAfterLastQuestionIsValidJson);
 test('test_insert_into_empty_object_gives_valid_json', validateInsertIntoEmptyObjectIsValidJson);
