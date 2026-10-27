@@ -79,9 +79,11 @@ function validateNoulHoverDoesNotThrowAndShowsTheValue() {
       hits.push(child);
   }
   expect(hits.length).toBe(1);
-  const blankBox = block.children[2];
-  expect(blankBox.className).toBe('bar-info');
-  expect(blankBox.children.length).toBe(8);
+  const defaultBox = block.children[2];
+  expect(defaultBox.className).toBe('bar-info');
+  expect(defaultBox.children.length).toBe(10);
+  expect(defaultBox.children[1].children[0].textContent).toBe('yes');
+  expect(hits[0].attrs.stroke).toBe('hotpink');
   hits[0].listeners.mouseenter();
   expect(hits[0].attrs.stroke).toBe('hotpink');
   const labels = listByName(svg.children, 'g');
