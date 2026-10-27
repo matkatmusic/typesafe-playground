@@ -2,9 +2,12 @@ import { test, expect } from 'bun:test';
 import { json } from '@codemirror/lang-json';
 import { EditorState } from '@codemirror/state';
 import { keymap } from '@codemirror/view';
+import { addPlaceholderRanges, findInsertedRanges, placeholderRangesField } from './placeholderRanges';
 import { createPlaceholderTab, selectNextPlaceholder, selectPreviousPlaceholder } from './placeholderTab';
 
 const DOC = '{\n  "new_noul_1": {\n    "type": "noul",\n    "instructions": "instruction",\n    "criteria": {\n      "true": "description",\n      "false": "description"\n    }\n  }\n}';
+
+const PLACEHOLDER_RANGES = findInsertedRanges(DOC, ['new_noul_1', 'instruction', 'description', 'description'], 0);
 
 interface Harness {
   state: EditorState;
@@ -13,7 +16,7 @@ interface Harness {
 
 function buildHarness(cursor: number): Harness {
   const harness: Harness = {
-    state: EditorState.create({ doc: DOC, selection: { anchor: cursor }, extensions: [json()] }),
+    state: EditorState.create({ doc: DOC, selection: { anchor: cursor }, extensions: [json(), placeholderRangesField] }).update({ effects: addPlaceholderRanges.of(PLACEHOLDER_RANGES) }).state,
     dispatch: (transaction) => {
       harness.state = transaction.state;
     },
@@ -43,9 +46,11 @@ function validateShiftTabWalksBackFromTheLastPlaceholder() {
 }
 
 function validateTabAndShiftTabSkipEditedPlaceholders() {
-  const editedDoc = DOC.replace('new_noul_1', 'new_noul_5').replace('"instruction"', '"my own text"');
   const harness = buildHarness(0);
-  harness.state = EditorState.create({ doc: editedDoc, selection: { anchor: 0 }, extensions: [json()] });
+  const nameStart = DOC.indexOf('new_noul_1');
+  const instructionStart = DOC.indexOf('instruction"');
+  const changes = [{ from: nameStart, to: nameStart + 10, insert: 'new_noul_5' }, { from: instructionStart + 3, insert: 'X' }];
+  harness.state = harness.state.update({ changes: changes }).state;
   const forward: string[] = [];
   while (selectNextPlaceholder(harness as never))
     forward.push(readSelectedText(harness));

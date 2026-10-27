@@ -1,7 +1,7 @@
 import { EditorSelection, Prec } from '@codemirror/state';
 import type { EditorState, Extension, Transaction } from '@codemirror/state';
 import { keymap } from '@codemirror/view';
-import { findPlaceholderRanges } from './placeholders';
+import { readPlaceholderRanges } from './placeholderRanges';
 import type { PlaceholderRange } from './placeholders';
 
 interface PlaceholderTarget {
@@ -15,7 +15,7 @@ function selectPlaceholderText(target: PlaceholderTarget, range: PlaceholderRang
 }
 
 export function selectNextPlaceholder(target: PlaceholderTarget): boolean {
-  const ranges = findPlaceholderRanges(target.state.doc.toString());
+  const ranges = readPlaceholderRanges(target.state);
   const cursorEnd = target.state.selection.main.to;
   for (let i = 0; i < ranges.length; i++) {
     const isAfterCursor = ranges[i].from + 1 > cursorEnd;
@@ -28,7 +28,7 @@ export function selectNextPlaceholder(target: PlaceholderTarget): boolean {
 }
 
 export function selectPreviousPlaceholder(target: PlaceholderTarget): boolean {
-  const ranges = findPlaceholderRanges(target.state.doc.toString());
+  const ranges = readPlaceholderRanges(target.state);
   const cursorStart = target.state.selection.main.from;
   for (let i = ranges.length - 1; i >= 0; i--) {
     const isBeforeCursor = ranges[i].to - 1 < cursorStart;

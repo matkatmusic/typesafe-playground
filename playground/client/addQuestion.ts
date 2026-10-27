@@ -5,6 +5,7 @@ import type { EditorState, Extension, Transaction } from '@codemirror/state';
 import { Decoration, EditorView, WidgetType } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { createAddQuestionElement } from './addQuestionMenu';
+import { addPlaceholderRanges, findInsertedRanges, listTemplateFieldTexts } from './placeholderRanges';
 import { findTopLevelObject } from './questionNames';
 import { buildInsertPlan } from './questionSnippets';
 import type { QuestionType } from './questionSnippets';
@@ -15,7 +16,13 @@ export function insertQuestion(view: EditorView, type: QuestionType): void {
   const text = view.state.doc.toString();
   const plan = buildInsertPlan(syntaxTree(view.state), text, type);
   const lengthBefore = view.state.doc.length;
-  snippet(plan.template)(view, null, plan.from, plan.to);
+  const fieldTexts = listTemplateFieldTexts(plan.template);
+  function dispatchWithPlaceholders(transaction: Transaction): void {
+    const ranges = findInsertedRanges(transaction.newDoc.toString(), fieldTexts, plan.from);
+    const effects = [...transaction.effects, addPlaceholderRanges.of(ranges)];
+    view.dispatch(view.state.update({ changes: transaction.changes, selection: transaction.selection, effects: effects, scrollIntoView: true }));
+  }
+  snippet(plan.template)({ state: view.state, dispatch: dispatchWithPlaceholders }, null, plan.from, plan.to);
   const insertedEnd = plan.to + view.state.doc.length - lengthBefore;
   const insertedRange = EditorSelection.range(plan.from, insertedEnd);
   view.dispatch({ effects: EditorView.scrollIntoView(insertedRange, { y: 'nearest' }) });
