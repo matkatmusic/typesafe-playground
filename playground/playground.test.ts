@@ -27,7 +27,7 @@ async function validatePageHoldsThreeBoxesInsidePlaygroundComponentBoxInOrder() 
 
 async function validatePageHoldsHeaderButtonsInOrderAndTheClientScript() {
     const page = await buildPage()
-    const buttonIds = ['newButton', 'openButton', 'saveButton', 'resetButton', 'lightDarkModeButton']
+    const buttonIds = ['newButton', 'openButton', 'saveButton', 'resetButton', 'typeSafeKeyLabel', 'typeSafeKeyEditor', 'showKeyButton', 'lightDarkModeButton']
     let previousIndex = page.indexOf('id="headerBox"')
     for (const buttonId of buttonIds) {
         const buttonIndex = page.indexOf(`id="${buttonId}"`)
@@ -55,9 +55,49 @@ async function validateBadOriginOnPostReturns403() {
     expect(response.status).toBe(403)
 }
 
+async function validatePageDataReportsWhetherAnEnvKeyExists() {
+    Bun.env.TYPESAFE_API_KEY = 'env-key'
+    expect((await buildPage()).includes('{"hasEnvKey":true}')).toBe(true)
+    Bun.env.TYPESAFE_API_KEY = '  '
+    expect((await buildPage()).includes('{"hasEnvKey":false}')).toBe(true)
+    expect((await buildPage()).includes('__DATA_JSON__')).toBe(false)
+}
+
+async function validateKeyEditorIsAPasswordInputWithAutocompleteAndSpellcheckOff() {
+    const page = await buildPage()
+    expect(page.includes('<input id="typeSafeKeyEditor" type="password" autocomplete="off" spellcheck="false"')).toBe(true)
+    expect(page.includes('>TypeSafe API key</label>')).toBe(true)
+    expect(page.includes('<button id="showKeyButton">Show</button>')).toBe(true)
+}
+
+function failCreatingClient(): never {
+    throw new Error('client must not be created')
+}
+
+async function validateRunPostUsesTheStubClient() {
+    Bun.env.TYPESAFE_API_KEY = ''
+    const headers = { host: ALLOWED_HOST, origin: `http://${ALLOWED_HOST}`, 'content-type': 'application/json' }
+    const noKeyRequest = new Request(`http://${ALLOWED_HOST}/run`, { method: 'POST', headers, body: '{}' })
+    const noKeyResponse = await dispatchRequest(noKeyRequest, PORT, failCreatingClient)
+    expect(noKeyResponse.status).toBe(400)
+    function createStubClient() {
+        async function stubSystemOne() {
+            return { answers: { requestsAction: { noul: 0.9 } } }
+        }
+        return { systemOne: stubSystemOne }
+    }
+    const keyRequest = new Request(`http://${ALLOWED_HOST}/run`, { method: 'POST', headers, body: '{"apiKey":"typed"}' })
+    const keyResponse = await dispatchRequest(keyRequest, PORT, createStubClient)
+    expect(keyResponse.status).toBe(200)
+    expect(await keyResponse.json()).toEqual({ answers: { requestsAction: { noul: 0.9 } } })
+}
+
 test('test_page_get_returns_200_html_with_css_filled_in', validatePageGetReturns200WithHtmlAndNoMarkersLeft)
 test('test_page_holds_header_version_and_input_results_boxes_in_order', validatePageHoldsThreeBoxesInsidePlaygroundComponentBoxInOrder)
 test('test_page_holds_header_buttons_in_order_and_the_client_script', validatePageHoldsHeaderButtonsInOrderAndTheClientScript)
+test('test_page_data_reports_whether_an_env_key_exists', validatePageDataReportsWhetherAnEnvKeyExists)
+test('test_key_editor_is_a_password_input_with_autocomplete_and_spellcheck_off', validateKeyEditorIsAPasswordInputWithAutocompleteAndSpellcheckOff)
+test('test_run_post_uses_the_stub_client', validateRunPostUsesTheStubClient)
 test('test_unknown_path_returns_404', validateUnknownPathReturns404)
 test('test_bad_host_returns_403', validateBadHostReturns403)
 test('test_bad_origin_on_post_returns_403', validateBadOriginOnPostReturns403)

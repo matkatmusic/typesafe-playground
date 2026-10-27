@@ -1,5 +1,7 @@
 import { isRequestAllowed } from './playgroundGuard';
 import { parsePortArgument } from './parsePortArgument';
+import { createTypeSafeClient, executeRunRequest, type CreateRunClient } from './playgroundRequests';
+import { buildErrorResponse } from './serverErrors';
 
 export const SERVER_HOSTNAME = '127.0.0.1';
 
@@ -24,21 +26,30 @@ export async function buildPage(): Promise<string> {
   const html = await htmlFile.text();
   const css = await cssFile.text();
   const script = await buildClientScript();
+  const hasEnvKey = (Bun.env.TYPESAFE_API_KEY ?? '').trim() !== '';
+  const safeJson = JSON.stringify({ hasEnvKey }).replaceAll('<', '\\u003c');
   function getCss() {
     return css;
   }
   function getScript() {
     return script;
   }
+  function getSafeJson() {
+    return safeJson;
+  }
   const withCss = html.replace('__PAGE_CSS__', getCss);
-  return withCss.replace('__PAGE_SCRIPT__', getScript);
+  const withScript = withCss.replace('__PAGE_SCRIPT__', getScript);
+  return withScript.replace('__DATA_JSON__', getSafeJson);
 }
 
-export async function dispatchRequest(request: Request, port: number): Promise<Response> {
+export async function dispatchRequest(request: Request, port: number, createClient: CreateRunClient = createTypeSafeClient): Promise<Response> {
   const isAllowed = isRequestAllowed(request, SERVER_HOSTNAME, port);
   if (!isAllowed)
     return new Response('forbidden', { status: 403 });
   const { pathname } = new URL(request.url);
+  const isRunPost = request.method === 'POST' && pathname === '/run';
+  if (isRunPost)
+    return executeRunRequest(request, createClient);
   const isPageGet = request.method === 'GET' && pathname === '/';
   if (isPageGet)
     return new Response(await buildPage(), { headers: { 'content-type': 'text/html; charset=utf-8' } });
@@ -54,6 +65,7 @@ if (import.meta.main) {
         throw new Error('server has no port');
       return dispatchRequest(request, server.port);
     },
+    error: buildErrorResponse,
   });
   console.log(`http://${SERVER_HOSTNAME}:${server.port}/`);
 }

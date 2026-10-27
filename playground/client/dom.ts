@@ -5,6 +5,13 @@ export function getElement(id: string): HTMLElement {
   return element;
 }
 
+export function getInput(id: string): HTMLInputElement {
+  const element = getElement(id);
+  if (!(element instanceof HTMLInputElement))
+    throw new Error(`element ${id} is not an input`);
+  return element;
+}
+
 export function getButton(id: string): HTMLButtonElement {
   const element = getElement(id);
   if (!(element instanceof HTMLButtonElement))

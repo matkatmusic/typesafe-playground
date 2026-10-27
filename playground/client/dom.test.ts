@@ -1,5 +1,5 @@
 import { test, expect } from 'bun:test'
-import { getButton, getElement } from './dom'
+import { getButton, getElement, getInput } from './dom'
 
 function validateModuleLoadsWithoutDom() {
     expect(typeof getElement).toBe('function')
@@ -9,6 +9,7 @@ function validateModuleLoadsWithoutDom() {
 function validateLookupWithoutDocumentThrows() {
     expect(() => getElement('newButton')).toThrow()
     expect(() => getButton('newButton')).toThrow()
+    expect(() => getInput('typeSafeKeyEditor')).toThrow()
 }
 
 test('test_dom_module_loads_without_touching_the_dom', validateModuleLoadsWithoutDom)
