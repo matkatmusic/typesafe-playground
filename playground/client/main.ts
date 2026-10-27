@@ -1,9 +1,10 @@
 import { refreshSubmitAvailability, setKeyPlaceholder, setTypedKeyToVisible, updateShowKeyButton } from './apiKey';
 import { getButton, getElement, getInput } from './dom';
-import { createQuestionsEditor, /* createResultEditor, */ createStateEditor } from './editors';
+import { createQuestionsEditor, createResultEditor, createStateEditor } from './editors';
 import { refreshFileView } from './fileView';
 import { initGraphs, renderGraphs } from './graphs';
 import { readPageData } from './pageData';
+import { toggleResultJson } from './resultJsonToggle';
 import { attachResizer } from './resizer';
 import { getShownVersion, pageState } from './state';
 import { executeSubmit } from './submit';
@@ -18,6 +19,7 @@ getButton('resetButton').addEventListener('click', resetToSavedFile);
 getButton('showKeyButton').addEventListener('click', setTypedKeyToVisible);
 getButton('lightDarkModeButton').addEventListener('click', toggleTheme);
 getButton('submitButton').addEventListener('click', executeSubmit);
+getButton('jsonToggleButton').addEventListener('click', toggleResultJson);
 getButton('prevVersionButton').addEventListener('click', moveToPreviousVersion);
 getButton('nextVersionButton').addEventListener('click', moveToNextVersion);
 document.addEventListener('keydown', moveOnArrowKey);
@@ -26,7 +28,7 @@ getInput('typeSafeKeyEditor').addEventListener('input', refreshSubmitAvailabilit
 attachResizer(getElement('columnResizer'), getElement('inputBox'), getElement('inputResultsBox'), 'columns');
 attachResizer(getElement('rowResizer'), getElement('stateJsonEditor'), getElement('stateAndQuestionsBox'), 'rows');
 updateShowKeyButton();
-// createResultEditor();
+createResultEditor();
 createStateEditor(updateOnEditorChange);
 createQuestionsEditor(updateOnEditorChange);
 setKeyPlaceholder(readPageData().hasEnvKey);

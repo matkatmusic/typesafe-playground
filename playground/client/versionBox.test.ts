@@ -96,13 +96,18 @@ function validateMovingWrapsAndRendersThatVersion() {
     const elements = installFakeDom()
     const shownStates: unknown[] = []
     const shownResults: unknown[] = []
+    const shownGraphOutputs: unknown[] = []
     function recordState(value: unknown) {
         shownStates.push(value)
     }
+    function recordResult(value: unknown) {
+        shownResults.push(value)
+    }
     function recordGraphs(version: { outputs: unknown[] }) {
-        shownResults.push(version.outputs)
+        shownGraphOutputs.push(version.outputs)
     }
     spyOn(editors, 'renderStateJson').mockImplementation(recordState)
+    spyOn(editors, 'renderResultJson').mockImplementation(recordResult)
     spyOn(graphs, 'renderGraphs').mockImplementation(recordGraphs as never)
     spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
     const renderQuestionsSpy = installQuestionsStub('{}')
@@ -113,6 +118,7 @@ function validateMovingWrapsAndRendersThatVersion() {
     expect(shownStates).toEqual([{ a: 1 }])
     expect(renderQuestionsSpy.mock.calls).toEqual([[{}]])
     expect(shownResults).toEqual([[]])
+    expect(shownGraphOutputs).toEqual([[]])
     expect(elements.versionLabel.textContent).toBe(`version 1 of 2 · ${new Date(ISO_TIME).toLocaleString()} · 1 call`)
     expect(elements.tokensLabel.textContent).toBe('Tokens: 0')
     expect(pageState.isDirty).toBe(false)
@@ -126,6 +132,7 @@ function validateArrowKeyMovesOnlyOutsideTypingTargets() {
     installFakeDom()
     Object.assign(globalThis, { Element: StubElement })
     spyOn(editors, 'renderStateJson').mockImplementation(() => {})
+    spyOn(editors, 'renderResultJson').mockImplementation(() => {})
     spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
     spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
     installQuestionsStub('{}')

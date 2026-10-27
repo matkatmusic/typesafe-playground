@@ -55,7 +55,8 @@ function spyOnLockCalls() {
     const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(questionsEditor)
     const renderStateSpy = spyOn(editors, 'renderStateJson').mockImplementation(() => {})
     const renderQuestionsSpy = spyOn(editors, 'renderQuestionsJson').mockImplementation(() => {})
-    const renderResultSpy = spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
+    const renderResultSpy = spyOn(editors, 'renderResultJson').mockImplementation(() => {})
+    const renderGraphsSpy = spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
     function restoreSpies() {
         lockSpy.mockRestore()
         stateSpy.mockRestore()
@@ -63,6 +64,7 @@ function spyOnLockCalls() {
         renderStateSpy.mockRestore()
         renderQuestionsSpy.mockRestore()
         renderResultSpy.mockRestore()
+        renderGraphsSpy.mockRestore()
     }
     return { lockCalls, lockedEditors, stateEditor, questionsEditor, restoreSpies }
 }

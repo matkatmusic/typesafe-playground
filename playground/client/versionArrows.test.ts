@@ -28,6 +28,7 @@ function makeVersion(id: number) {
 function installRenderStubs() {
     spyOn(editors, 'renderStateJson').mockImplementation(() => {})
     spyOn(editors, 'renderQuestionsJson').mockImplementation(() => {})
+    spyOn(editors, 'renderResultJson').mockImplementation(() => {})
     spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
     spyOn(editors, 'getStateEditor').mockReturnValue(buildStubEditor('{}'))
     return spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubEditor('{}'))

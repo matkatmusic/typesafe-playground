@@ -62,10 +62,8 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     function recordShownValue(value: unknown) {
         shownValues.push(value)
     }
-    function recordGraphs(version: Version) {
-        shownValues.push(version.outputs)
-    }
-    const renderSpy = spyOn(graphs, 'renderGraphs').mockImplementation(recordGraphs)
+    const renderSpy = spyOn(editors, 'renderResultJson').mockImplementation(recordShownValue)
+    const renderGraphsSpy = spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
     const renderStateSpy = spyOn(editors, 'renderStateJson').mockImplementation(recordShownValue)
     const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
     const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubStateEditor('{}'))
@@ -86,6 +84,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     pageState.isDirty = false
     await executeSubmit()
     renderSpy.mockRestore()
+    renderGraphsSpy.mockRestore()
     renderStateSpy.mockRestore()
     stateSpy.mockRestore()
     questionsSpy.mockRestore()
@@ -108,7 +107,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
 
 async function validateFailedSubmitShowsTheErrorLineAndLeavesTheResultAlone() {
     const elements = installFakeDom(true)
-    const renderSpy = spyOn(graphs, 'renderGraphs')
+    const renderSpy = spyOn(editors, 'renderResultJson')
     const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{}'))
     const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubStateEditor('{}'))
     pageState.versions = [VERSION]
