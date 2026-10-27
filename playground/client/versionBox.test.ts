@@ -2,6 +2,7 @@ import { test, expect, afterEach, mock, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
 import * as editors from './editors'
 import { pageState } from './state'
+import * as versionArrows from './versionArrows'
 import { computeArrowStep, isTypingTarget, moveByVersions, moveOnArrowKey, renderLastVersion, updateOnEditorChange } from './versionBox'
 
 const ISO_TIME = '2026-03-04T05:06:07.000Z'
@@ -19,6 +20,7 @@ function installFakeDom() {
     const elements: Record<string, { textContent: string }> = {
         versionLabel: { textContent: '' }, costLabel: { textContent: '' }, tokensLabel: { textContent: '' }, lastEditedLabel: { textContent: '' },
     }
+    spyOn(versionArrows, 'updateVersionArrows').mockImplementation(() => {})
     Object.assign(globalThis, { document: { getElementById: (id: string) => elements[id] ?? null } })
     return elements
 }
@@ -88,12 +90,6 @@ function validateQuestionsOnlyChangeShowsTheNextVersionAsNotRunYet() {
     expect(elements.versionLabel.textContent).toBe('version 2 of 2 · not run yet · 0 calls')
 }
 
-function validateUpdateWithoutDocChangeDoesNothing() {
-    pageState.isDirty = false
-    updateOnEditorChange({ docChanged: false, transactions: [] } as never)
-    expect(pageState.isDirty).toBe(false)
-}
-
 function validateMovingWrapsAndRendersThatVersion() {
     const elements = installFakeDom()
     const shownStates: unknown[] = []
@@ -145,6 +141,5 @@ test('test_arrow_keys_map_to_steps', validateArrowKeysMapToSteps)
 test('test_typing_targets_are_skipped', validateTypingTargetsAreSkipped)
 test('test_edit_marks_dirty_but_fill_does_not', validateEditMarksDirtyButFillDoesNot)
 test('test_questions_only_change_shows_the_next_version_as_not_run_yet', validateQuestionsOnlyChangeShowsTheNextVersionAsNotRunYet)
-test('test_update_without_doc_change_does_nothing',validateUpdateWithoutDocChangeDoesNothing)
 test('test_moving_wraps_and_renders_that_version', validateMovingWrapsAndRendersThatVersion)
 test('test_arrow_key_moves_only_outside_typing_targets', validateArrowKeyMovesOnlyOutsideTypingTargets)

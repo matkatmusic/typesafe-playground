@@ -4,6 +4,7 @@ import { getElement } from './dom';
 import { FILL_ANNOTATION, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson } from './editors';
 import { markPageChanged } from './pageChanged';
 import { getShownVersion, pageState } from './state';
+import { isVersionMovePossible, updateVersionArrows } from './versionArrows';
 import { computeWrappedIndex, createEditedVersion, formatVersionLabel, isJsonTextEdited } from './versionLabel';
 
 const TYPING_TARGET_SELECTOR = 'input, textarea, select, dialog, .cm-editor';
@@ -29,6 +30,7 @@ export function renderShownVersion(): void {
   refreshVersionBox();
   renderCostAndTokens(version);
   renderResultJson(version.outputs);
+  updateVersionArrows();
 }
 
 export function renderLastVersion(): void {
@@ -37,6 +39,9 @@ export function renderLastVersion(): void {
 }
 
 export function moveByVersions(step: number): void {
+  const isMovePossible = isVersionMovePossible();
+  if (!isMovePossible)
+    return;
   pageState.index = computeWrappedIndex(pageState.index, step, pageState.versions.length);
   renderShownVersion();
 }
