@@ -4,6 +4,7 @@ import * as dom from './dom';
 import { graphState } from './graphState';
 import * as graphs from './graphs';
 import * as state from './state';
+import * as winnersDom from './winnersDom';
 import { updateReferencesReplaced } from './referenceToggle';
 
 afterEach(removeFakeState);
@@ -21,10 +22,12 @@ function validateTheToggleSetsGraphStateAndRedrawsTheShownVersion() {
   spyOn(dom, 'getElement').mockReturnValue(container);
   spyOn(state, 'getShownVersion').mockReturnValue(version);
   const renderSpy = spyOn(graphs, 'renderGraphs').mockImplementation(() => {});
+  const winnersSpy = spyOn(winnersDom, 'renderWinners').mockImplementation(() => {});
   updateReferencesReplaced();
   expect(graphState.isReferencesReplaced).toBe(true);
   expect(renderSpy.mock.calls.length).toBe(1);
   expect(renderSpy.mock.calls[0].slice(0, 2)).toEqual([version, container]);
+  expect(winnersSpy.mock.calls).toEqual([[version, container]]);
   Object.assign(checkbox, { checked: false });
   updateReferencesReplaced();
   expect(graphState.isReferencesReplaced).toBe(false);

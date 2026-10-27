@@ -1,6 +1,7 @@
 import { test, expect, afterEach } from 'bun:test';
 import type { Version } from '../playgroundHistory';
 import type { Answer } from './graphTypes';
+import { graphState } from './graphState';
 import { createQuestionResultLabel, renderWinners } from './winnersDom';
 
 class FakeElement {
@@ -36,7 +37,7 @@ function buildNoulOutputs(...noulValues: number[]) {
 function validateLabelHoldsInstructionsThenOneLinePerGroup() {
   installFakeDocument();
   const answers: Answer[] = [{ type: 'noul', noul: 0.9 }, { type: 'noul', noul: 0.1 }];
-  const label = createQuestionResultLabel({ type: 'noul', instructions: 'Is it?', criteria: { true: 'yes!', false: 'no!' } }, answers) as unknown as FakeElement;
+  const label = createQuestionResultLabel({ type: 'noul', instructions: 'Is it?', criteria: { true: 'yes!', false: 'no!' } }, answers, (text) => text) as unknown as FakeElement;
   expect(label.children.length).toBe(3);
   expect(label.children[0].textContent).toBe('Is it?');
   expect(label.children[0].className).toBe('winner-instructions');
@@ -75,7 +76,32 @@ function validateRenderSkipsQuestionsWithoutOutputs() {
   expect(container.children[0].textContent).toBe('Winners:');
 }
 
-afterEach(removeFakeDocument);
+function readReplaceTestLines(isReferencesReplaced: boolean): string[] {
+  installFakeDocument();
+  graphState.isReferencesReplaced = isReferencesReplaced;
+  const questions = { q: { type: 'noul', instructions: 'Is `tone` it?', criteria: { true: 'yes `tone`', false: 'no' } } };
+  const version = { ...buildVersion(questions, buildNoulOutputs(0.9)), state: { tone: 'calm' } } as Version;
+  const container = new FakeElement();
+  renderWinners(version, container as unknown as HTMLElement);
+  return [container.children[1].children[0].textContent, container.children[1].children[1].textContent];
+}
+
+function validateReplaceReferencesChangesInstructionsAndWinnerLines() {
+  expect(readReplaceTestLines(true)).toEqual(["Is 'calm' it?", "yes 'calm' (1)"]);
+}
+
+function validateWinnersTextIsUnchangedWhenReplaceReferencesIsOff() {
+  expect(readReplaceTestLines(false)).toEqual(['Is `tone` it?', 'yes `tone` (1)']);
+}
+
+function removeFakeState() {
+  removeFakeDocument();
+  graphState.isReferencesReplaced = false;
+}
+
+afterEach(removeFakeState);
+test('test_replace_references_changes_instructions_and_winner_lines', validateReplaceReferencesChangesInstructionsAndWinnerLines);
+test('test_winners_text_is_unchanged_when_replace_references_is_off', validateWinnersTextIsUnchangedWhenReplaceReferencesIsOff);
 test('test_label_holds_instructions_then_one_line_per_group', validateLabelHoldsInstructionsThenOneLinePerGroup);
 test('test_render_shows_title_then_one_label_per_question', validateRenderShowsTitleThenOneLabelPerQuestion);
 test('test_render_twice_keeps_one_title', validateRenderTwiceKeepsOneTitle);
