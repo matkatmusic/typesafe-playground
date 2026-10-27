@@ -27,8 +27,8 @@ async function validateStateAndQuestionsBoxHoldsTwoRowsAndADragBarInOrder() {
 
 async function validateEachRowStartsWithItsTitleLabelInsideTheSizedBox() {
     const page = await buildPage(await buildTempHistoryPath())
-    const stateOpening = '<div id="stateJsonEditor"><span class="other-label">state</span></div>'
-    const questionsOpening = '<div id="questionsJsonEditor"><div id="questionsTitleRow"><span class="other-label">questions</span><div id="questionsAddQuestion"></div>'
+    const stateOpening = '<div id="stateJsonEditor"><div id="stateTitleRow"><span class="other-label">state</span><button class="format-json-button" id="stateFormatJsonButton">Format JSON</button></div></div>'
+    const questionsOpening = '<div id="questionsJsonEditor"><div id="questionsTitleRow"><span class="other-label">questions</span><div id="questionsAddQuestion"></div><button class="format-json-button" id="questionsFormatJsonButton">Format JSON</button></div>'
     expect(page).toContain(stateOpening)
     expect(page).toContain(questionsOpening)
     expect(page.indexOf(stateOpening)).toBeLessThan(page.indexOf('id="rowResizer"'))
