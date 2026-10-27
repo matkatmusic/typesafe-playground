@@ -3,6 +3,7 @@ import type { EditorView } from '@codemirror/view'
 import * as editors from './editors'
 import * as graphs from './graphs'
 import * as noteBox from './noteBox'
+import * as pinButtons from './pinButtons'
 import * as winnersDom from './winnersDom'
 import { pageState } from './state'
 import * as versionArrows from './versionArrows'
@@ -23,6 +24,7 @@ function installFakeDom() {
         graphContainerBox: { textContent: '' }, winnerBox: { textContent: '' },
     }
     spyOn(versionArrows, 'updateVersionArrows').mockImplementation(() => {})
+    spyOn(pinButtons, 'applyPinButtons').mockImplementation(() => {})
     spyOn(noteBox, 'applyNoteBox').mockImplementation(() => {})
     Object.assign(globalThis, { document: { getElementById: (id: string) => elements[id] ?? null } })
 }

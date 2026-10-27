@@ -6,6 +6,7 @@ import { renderGraphs } from './graphs';
 import { attachInfoBox } from './infoBox';
 import { applyNoteBox } from './noteBox';
 import { markPageChanged } from './pageChanged';
+import { applyPinButtons } from './pinButtons';
 import { getShownVersion, pageState } from './state';
 import { isVersionMovePossible, updateVersionArrows } from './versionArrows';
 import { computeWrappedIndex, createEditedVersion, formatVersionLabel, isJsonTextEdited } from './versionLabel';
@@ -38,6 +39,7 @@ export function renderShownVersion(): void {
   renderGraphs(version, getElement('graphContainerBox'), attachInfoBox);
   renderWinners(version, getElement('winnerBox'));
   updateVersionArrows();
+  applyPinButtons();
 }
 
 export function renderLastVersion(): void {

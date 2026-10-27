@@ -52,16 +52,19 @@ function validatePinAndUnpinButtonsFollowThePin() {
   expect(buttons.unpinButton.disabled).toBe(true)
 }
 
-function validateSetPinnedToShownWhilePinnedKeepsTheOldPin() {
-  installFakeDocument()
+function validatePinInsteadReplacesThePinFromAnotherVersion() {
+  const buttons = installFakeDocument()
   pageState.versions = [{ id: 5, time: 't', state: {}, questions: {}, calls: 0, outputs: [] }, { id: 6, time: 't', state: {}, questions: {}, calls: 0, outputs: [] }]
   pageState.index = 1
   pageState.pinnedId = 5
   setPinnedToShown()
-  expect(pageState.pinnedId).toBe(5)
+  expect(pageState.pinnedId).toBe(6)
+  expect(buttons.pinButton.disabled).toBe(true)
+  expect(buttons.pinButton.textContent).toBe('Pin')
+  expect(buttons.unpinButton.disabled).toBe(false)
 }
 
 test('test_pin_and_unpin_buttons_follow_the_pin', validatePinAndUnpinButtonsFollowThePin)
-test('test_set_pinned_to_shown_while_pinned_keeps_the_old_pin', validateSetPinnedToShownWhilePinnedKeepsTheOldPin)
+test('test_pin_instead_replaces_the_pin_from_another_version', validatePinInsteadReplacesThePinFromAnotherVersion)
 test('test_set_pinned_to_shown_pins_the_shown_version_id_without_dirtying_the_page', validateSetPinnedToShownPinsTheShownVersionId)
 test('test_clear_pinned_unpins', validateClearPinnedUnpins)

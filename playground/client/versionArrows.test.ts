@@ -14,6 +14,7 @@ function installFakeDom() {
     const elements: Record<string, { textContent: string, disabled?: boolean }> = {
         versionLabel: { textContent: '' }, costLabel: { textContent: '' }, tokensLabel: { textContent: '' }, graphContainerBox: { textContent: '' }, winnerBox: { textContent: '' },
         prevVersionButton: { textContent: '', disabled: false }, nextVersionButton: { textContent: '', disabled: false },
+        pinButton: { textContent: '', disabled: false }, unpinButton: { textContent: '', disabled: false },
     }
     Object.assign(globalThis, { document: { getElementById: (id: string) => elements[id] ?? null }, HTMLButtonElement: Object, Element: Object })
     return elements
