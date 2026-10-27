@@ -1,5 +1,6 @@
 import { refreshSubmitAvailability, setKeyPlaceholder, setTypedKeyToVisible, updateShowKeyButton } from './apiKey';
 import { getButton, getElement, getInput } from './dom';
+import { createHeaderAddQuestion } from './addQuestionHeader';
 import { setAllGraphsToCollapsed, setAllGraphsToExpanded } from './collapseActions';
 import { createQuestionsEditor, createResultEditor, createStateEditor } from './editors';
 import { refreshFileView } from './fileView';
@@ -37,6 +38,7 @@ updateShowKeyButton();
 createResultEditor();
 createStateEditor(updateOnEditorChange);
 createQuestionsEditor(updateOnEditorChange);
+createHeaderAddQuestion();
 setKeyPlaceholder(readPageData().hasEnvKey);
 refreshSubmitAvailability();
 const pageData = readPageData();

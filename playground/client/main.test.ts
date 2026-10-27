@@ -20,6 +20,7 @@ async function validateMainBundlesForTheBrowser() {
     expect(script.includes('questionsJsonEditor')).toBe(true)
     expect(script.includes('submitButton')).toBe(true)
     expect(script.includes('noteText')).toBe(true)
+    expect(script.includes('questionsAddQuestion')).toBe(true)
     expect(script.includes('resetButton')).toBe(true)
     expect(script.includes('prevVersionButton')).toBe(true)
     expect(script.includes('nextVersionButton')).toBe(true)
