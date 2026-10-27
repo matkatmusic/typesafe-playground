@@ -3,7 +3,7 @@ import { getButton, getElement, getInput } from './dom';
 import { getStateEditor } from './editors';
 import { computeJsonParseResult } from './jsonParse';
 import { markPageChanged } from './pageChanged';
-import { pageState } from './state';
+import { getShownVersion, pageState } from './state';
 import type { RunBody, RunResult } from './types';
 import { renderShownVersion } from './versionBox';
 
@@ -11,7 +11,7 @@ export const SUBMIT_TEXT = 'Submit (paid)';
 export const RUNNING_TEXT = 'running…';
 
 export function buildRunBody(state: unknown): RunBody {
-  return { calls: Number(getInput('callsPicker').value), apiKey: readTypedKey(), state: state };
+  return { id: getShownVersion().id, calls: Number(getInput('callsPicker').value), apiKey: readTypedKey(), state: state };
 }
 
 export function sendRun(runBody: RunBody): Promise<Response> {

@@ -22,7 +22,7 @@ async function validateRunPostUsesTheStubClientAndWritesTheTempFile() {
     Bun.env.TYPESAFE_API_KEY = ''
     const historyPath = await buildTempHistoryPath()
     const headers = { host: ALLOWED_HOST, origin: `http://${ALLOWED_HOST}`, 'content-type': 'application/json' }
-    const noKeyRequest = new Request(`http://${ALLOWED_HOST}/run`, { method: 'POST', headers, body: '{"calls":1,"state":{}}' })
+    const noKeyRequest = new Request(`http://${ALLOWED_HOST}/run`, { method: 'POST', headers, body: '{"id":1,"calls":1,"state":{}}' })
     const noKeyResponse = await dispatchRequest(noKeyRequest, PORT, historyPath, failCreatingClient)
     expect(noKeyResponse.status).toBe(400)
     const output = { answers: { requestsAction: { noul: 0.9 } }, usage: { input_tokens: 5, output_tokens: 1 } } as unknown as RunOutput
@@ -32,7 +32,7 @@ async function validateRunPostUsesTheStubClientAndWritesTheTempFile() {
         }
         return { systemOne: stubSystemOne }
     }
-    const keyRequest = new Request(`http://${ALLOWED_HOST}/run`, { method: 'POST', headers, body: '{"calls":2,"apiKey":"typed","state":{"message":{"text":"Please send me the report by Friday."}}}' })
+    const keyRequest = new Request(`http://${ALLOWED_HOST}/run`, { method: 'POST', headers, body: '{"id":1,"calls":2,"apiKey":"typed","state":{"message":{"text":"Please send me the report by Friday."}}}' })
     const keyResponse = await dispatchRequest(keyRequest, PORT, historyPath, createStubClient)
     expect(keyResponse.status).toBe(200)
     const result = (await keyResponse.json()) as RunResult

@@ -45,7 +45,9 @@ function validateRunBodyHoldsCallsTheTrimmedTypedKeyAndTheState() {
     const elements = installFakeDom(true)
     elements.callsPicker.value = '3'
     elements.typeSafeKeyEditor.value = ' typed '
-    expect(buildRunBody({ a: 1 })).toEqual({ calls: 3, apiKey: 'typed', state: { a: 1 } })
+    pageState.versions = [VERSION, { ...VERSION, id: 2 }]
+    pageState.index = 1
+    expect(buildRunBody({ a: 1 })).toEqual({ id: 2, calls: 3, apiKey: 'typed', state: { a: 1 } })
 }
 
 function validateRunFailureNamesTheStatusAndText() {
@@ -80,7 +82,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     renderSpy.mockRestore()
     renderStateSpy.mockRestore()
     stateSpy.mockRestore()
-    expect(JSON.parse(seenBody)).toEqual({ calls: 3, apiKey: '', state: { a: 1 } })
+    expect(JSON.parse(seenBody)).toEqual({ id: 1, calls: 3, apiKey: '', state: { a: 1 } })
     expect(wasDisabledWhileRunning).toBe(true)
     expect(textWhileRunning).toBe(RUNNING_TEXT)
     expect(elements.submitButton.disabled).toBe(false)
@@ -101,6 +103,7 @@ async function validateFailedSubmitShowsTheErrorLineAndLeavesTheResultAlone() {
     const elements = installFakeDom(true)
     const renderSpy = spyOn(editors, 'renderResultJson')
     const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{}'))
+    pageState.versions = [VERSION]
     async function stubFetch() {
         return new Response('boom', { status: 500 })
     }

@@ -52,13 +52,21 @@ export function isInputUnchanged(version: Version, state: unknown): boolean {
   return versionQuestionsText === questionsText;
 }
 
-export function addRunToHistory(history: Version[], outputs: RunOutput[], state: unknown): Version {
+export function findVersionById(history: Version[], id: unknown): Version | undefined {
+  for (const version of history) {
+    if (version.id === id)
+      return version;
+  }
+  return undefined;
+}
+
+export function addRunToHistory(history: Version[], shownVersion: Version, outputs: RunOutput[], state: unknown): Version {
   const lastVersion = history[history.length - 1];
-  const isUnchanged = isInputUnchanged(lastVersion, state);
+  const isUnchanged = isInputUnchanged(shownVersion, state);
   if (isUnchanged) {
-    lastVersion.outputs.push(...outputs);
-    lastVersion.calls += outputs.length;
-    return lastVersion;
+    shownVersion.outputs.push(...outputs);
+    shownVersion.calls += outputs.length;
+    return shownVersion;
   }
   const version: Version = { id: lastVersion.id + 1, time: new Date().toISOString(), state: state, questions: HARD_CODED_QUESTIONS, calls: outputs.length, outputs };
   history.push(version);
@@ -66,7 +74,7 @@ export function addRunToHistory(history: Version[], outputs: RunOutput[], state:
 }
 
 export async function executeRunRequest(request: Request, createClient: CreateRunClient, historyPath: string): Promise<Response> {
-  const body = (await request.json()) as { calls?: unknown; apiKey?: unknown; state?: unknown };
+  const body = (await request.json()) as { id?: unknown; calls?: unknown; apiKey?: unknown; state?: unknown };
   const typedKey = typeof body.apiKey === 'string' ? body.apiKey.trim() : '';
   setLastTypedKey(typedKey);
   const calls = body.calls;
@@ -77,13 +85,16 @@ export async function executeRunRequest(request: Request, createClient: CreateRu
   if (!isStateObject)
     return new Response('state must be a JSON object', { status: 400 });
   const state = body.state as Record<string, JsonValue>;
+  const history = await loadHistory(historyPath);
+  const shownVersion = findVersionById(history, body.id);
+  if (shownVersion === undefined)
+    return new Response('id must be the id of an existing version', { status: 400 });
   const envKey = (Bun.env.TYPESAFE_API_KEY ?? '').trim();
   const apiKey = selectApiKey(typedKey, envKey);
   if (apiKey === '')
     return new Response(MISSING_KEY_MESSAGE, { status: 400 });
-  const history = await loadHistory(historyPath);
   const outputs = await collectOutputs(createClient(apiKey), calls, state);
-  const version = addRunToHistory(history, outputs, state);
+  const version = addRunToHistory(history, shownVersion, outputs, state);
   await writeHistory(historyPath, history);
   return Response.json({ outputs, version });
 }
