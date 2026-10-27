@@ -41,7 +41,8 @@ async function validateButtonBorderIsStrongInBothThemes() {
     expect(lightColor).toBeDefined()
     expect(darkColor).toBeDefined()
     expect(lightColor).not.toBe(darkColor)
-    expect(page).toContain('border: 2px solid var(--button-border); border-radius: 6px; padding: 4px 12px;')
+    expect(page).toContain('border: 1px solid var(--button-border); border-radius: 6px; padding: 4px 12px;')
+    expect(page).not.toContain('2px solid var(--button-border)')
     expect(page).not.toMatch(/^[^{}\n]*\bbutton\b[^{}\n]*\{[^{}]*border: 1px solid var\(--grid\)/m)
 }
 
