@@ -53,4 +53,13 @@ async function validatePressedButtonMovesDownAndRightBy2px() {
 }
 
 test('test_pressed_button_moves_down_and_right_by_2px', validatePressedButtonMovesDownAndRightBy2px)
+
+async function validateNoteBoxSitsAboveTheStateAndQuestionsBox() {
+    const page = await buildPage(await buildTempHistoryPath())
+    expect(page.indexOf('id="noteBox"')).toBeGreaterThan(page.indexOf('id="errorLine"'))
+    expect(page.indexOf('id="noteText"')).toBeGreaterThan(page.indexOf('id="noteBox"'))
+    expect(page.indexOf('id="noteText"')).toBeLessThan(page.indexOf('id="stateAndQuestionsBox"'))
+}
+
+test('test_note_box_sits_above_the_state_and_questions_box', validateNoteBoxSitsAboveTheStateAndQuestionsBox)
 test('test_result_box_holds_winners_first_then_toggle_graphs_and_json', validateResultBoxHoldsWinnersFirstThenToggleGraphsAndJson)

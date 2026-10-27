@@ -5,6 +5,7 @@ import { createQuestionsEditor, createResultEditor, createStateEditor } from './
 import { refreshFileView } from './fileView';
 import { initGraphs, renderGraphs } from './graphs';
 import { attachInfoBox } from './infoBox';
+import { saveNote } from './noteActions';
 import { readPageData } from './pageData';
 import { toggleResultJson } from './resultJsonToggle';
 import { attachResizer } from './resizer';
@@ -27,6 +28,7 @@ getButton('expandAllButton').addEventListener('click', setAllGraphsToExpanded);
 getButton('prevVersionButton').addEventListener('click', moveToPreviousVersion);
 getButton('nextVersionButton').addEventListener('click', moveToNextVersion);
 document.addEventListener('keydown', moveOnArrowKey);
+getElement('noteText').addEventListener('change', saveNote);
 getInput('typeSafeKeyEditor').addEventListener('input', updateShowKeyButton);
 getInput('typeSafeKeyEditor').addEventListener('input', refreshSubmitAvailability);
 attachResizer(getElement('columnResizer'), getElement('inputBox'), getElement('inputResultsBox'), 'columns');

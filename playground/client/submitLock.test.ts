@@ -17,19 +17,18 @@ const realFetch = globalThis.fetch
 function installFakeDom() {
     const elements = {
         data: new FakeBox(), graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
-        submitButton: new FakeButton(), prevVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(),
+        submitButton: new FakeButton(), prevVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(), noteText: new FakeInput(),
     }
     elements.data.textContent = JSON.stringify({ versions: [VERSION], hasEnvKey: true })
     function getElementById(id: string) {
         return (elements as Record<string, unknown>)[id] ?? null
     }
-    Object.assign(globalThis, { document: { getElementById }, HTMLButtonElement: FakeButton, HTMLInputElement: FakeInput })
+    Object.assign(globalThis, { document: { getElementById }, HTMLButtonElement: FakeButton, HTMLInputElement: FakeInput, HTMLTextAreaElement: FakeInput })
 }
 
 function removeFakeDom() {
     Reflect.deleteProperty(globalThis, 'document')
-    Reflect.deleteProperty(globalThis, 'HTMLButtonElement')
-    Reflect.deleteProperty(globalThis, 'HTMLInputElement')
+    for (const name of ['HTMLButtonElement', 'HTMLInputElement', 'HTMLTextAreaElement']) Reflect.deleteProperty(globalThis, name)
     globalThis.fetch = realFetch
     pageState.isDirty = false
     pageState.versions = []

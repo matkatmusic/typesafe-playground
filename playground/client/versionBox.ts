@@ -4,6 +4,7 @@ import { getElement } from './dom';
 import { FILL_ANNOTATION, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson } from './editors';
 import { renderGraphs } from './graphs';
 import { attachInfoBox } from './infoBox';
+import { applyNoteBox } from './noteBox';
 import { markPageChanged } from './pageChanged';
 import { getShownVersion, pageState } from './state';
 import { isVersionMovePossible, updateVersionArrows } from './versionArrows';
@@ -28,6 +29,7 @@ export function refreshVersionBox(): void {
 
 export function renderShownVersion(): void {
   const version = getShownVersion();
+  applyNoteBox(version);
   renderStateJson(version.state);
   renderQuestionsJson(version.questions);
   refreshVersionBox();

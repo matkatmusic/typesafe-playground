@@ -2,6 +2,7 @@ import { test, expect, afterEach, mock, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
 import * as editors from './editors'
 import * as graphs from './graphs'
+import * as noteBox from './noteBox'
 import * as winnersDom from './winnersDom'
 import { pageState } from './state'
 import { isVersionMovePossible, updateVersionArrows } from './versionArrows'
@@ -32,6 +33,7 @@ function installRenderStubs() {
     spyOn(editors, 'renderResultJson').mockImplementation(() => {})
     spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
     spyOn(winnersDom, 'renderWinners').mockImplementation(() => {})
+    spyOn(noteBox, 'applyNoteBox').mockImplementation(() => {})
     spyOn(editors, 'getStateEditor').mockReturnValue(buildStubEditor('{}'))
     return spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubEditor('{}'))
 }

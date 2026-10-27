@@ -1,6 +1,7 @@
 import { isRequestAllowed } from './playgroundGuard';
 import { parsePortArgument } from './parsePortArgument';
 import { HISTORY_PATH, initHistory, loadHistory } from './playgroundHistory';
+import { executeNoteRequest } from './playgroundNoteRequests';
 import { createTypeSafeClient, executeRunRequest, type CreateRunClient } from './playgroundRequests';
 import { executeNewRequest, executeOpenRequest, executeSaveRequest } from './playgroundVersionRequests';
 import { buildErrorResponse } from './serverErrors';
@@ -62,6 +63,9 @@ export async function dispatchRequest(request: Request, port: number, historyPat
   const isSavePost = request.method === 'POST' && pathname === '/save';
   if (isSavePost)
     return executeSaveRequest(historyPath);
+  const isNotePost = request.method === 'POST' && pathname === '/note';
+  if (isNotePost)
+    return executeNoteRequest(request, historyPath);
   const isPageGet = request.method === 'GET' && pathname === '/';
   if (isPageGet)
     return new Response(await buildPage(historyPath), { headers: { 'content-type': 'text/html; charset=utf-8' } });
