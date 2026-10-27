@@ -25,4 +25,26 @@ async function validateStateAndQuestionsBoxHoldsTwoRowsAndADragBarInOrder() {
     expect(questionsIndex).toBeLessThan(columnBarIndex)
 }
 
+async function validateEachRowStartsWithItsTitleLabelInsideTheSizedBox() {
+    const page = await buildPage(await buildTempHistoryPath())
+    const stateOpening = '<div id="stateJsonEditor"><span class="other-label">state</span></div>'
+    const questionsOpening = '<div id="questionsJsonEditor"><span class="other-label">questions</span>'
+    expect(page).toContain(stateOpening)
+    expect(page).toContain(questionsOpening)
+    expect(page.indexOf(stateOpening)).toBeLessThan(page.indexOf('id="rowResizer"'))
+    expect(page.indexOf(questionsOpening)).toBeGreaterThan(page.indexOf('id="rowResizer"'))
+}
+
+async function validateTitleLabelColorChangesWithTheTheme() {
+    const page = await buildPage(await buildTempHistoryPath())
+    const lightColor = page.match(/:root \{[^}]*--label-other: (#\w+);/)?.[1]
+    const darkColor = page.match(/:root\[data-theme="dark"\] \{[^}]*--label-other: (#\w+);/)?.[1]
+    expect(lightColor).toBeDefined()
+    expect(darkColor).toBeDefined()
+    expect(lightColor).not.toBe(darkColor)
+    expect(page).toContain('.other-label { flex: none; color: var(--label-other); }')
+}
+
+test('test_each_row_starts_with_its_title_label_inside_the_sized_box', validateEachRowStartsWithItsTitleLabelInsideTheSizedBox)
+test('test_title_label_color_changes_with_the_theme', validateTitleLabelColorChangesWithTheTheme)
 test('test_state_and_questions_box_holds_two_rows_and_a_drag_bar_in_order', validateStateAndQuestionsBoxHoldsTwoRowsAndADragBarInOrder)

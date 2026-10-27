@@ -5,6 +5,7 @@
     --text: #0b0b0b;
     --text-muted: #52514e;
     --grid: #dddcd7;
+    --label-other: #8a6d00;
     --bad: #e34948;
     --tok-string: #0a7a3e;
     --tok-number: #b25000;
@@ -19,6 +20,7 @@
     --text: #f0efec;
     --text-muted: #c3c2b7;
     --grid: #3a3a37;
+    --label-other: #e5c07b;
     --bad: #e66767;
     --tok-string: #6fcf97;
     --tok-number: #f2a65a;
@@ -51,8 +53,9 @@ button:disabled { opacity: 0.5; cursor: default; }
 #inputResultsBox { flex: 1 1 0; min-height: 0; display: flex; }
 #inputBox { flex: 0 0 auto; width: 42%; min-width: 240px; max-width: calc(100% - 252px); min-height: 0; overflow-y: auto; display: flex; flex-direction: column; }
 #stateAndQuestionsBox { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
-#stateJsonEditor { flex: 0 0 auto; height: calc(26vh + 40px); min-height: 80px; max-height: calc(100% - 88px); display: flex; flex-direction: column; }
-#questionsJsonEditor { flex: 1 1 0; min-height: 80px; display: flex; flex-direction: column; }
+#stateJsonEditor { flex: 0 0 auto; height: calc(26vh + 40px); min-height: 80px; max-height: calc(100% - 88px); display: flex; flex-direction: column; gap: 6px; }
+#questionsJsonEditor { flex: 1 1 0; min-height: 80px; display: flex; flex-direction: column; gap: 6px; }
+.other-label { flex: none; color: var(--label-other); }
 .row-resizer { flex: none; height: 8px; border-top: 3px solid transparent; border-bottom: 3px solid transparent; background-color: var(--grid); background-clip: content-box; cursor: row-resize; touch-action: none; }
 .row-resizer:hover { background-color: var(--text-muted); }
 .column-resizer { flex: none; width: 12px; border-left: 5px solid transparent; border-right: 5px solid transparent; background-color: var(--grid); background-clip: content-box; cursor: col-resize; touch-action: none; }
