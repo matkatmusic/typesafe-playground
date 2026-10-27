@@ -45,6 +45,15 @@ async function validateTitleLabelColorChangesWithTheTheme() {
     expect(page).toContain('.other-label { flex: none; color: var(--label-other); }')
 }
 
+async function validateLockGreyCueOnlyMatchesTheLockedContentElement() {
+    const page = await buildPage(await buildTempHistoryPath())
+    const lockRule = page.split('\n').find((line) => line.includes('opacity: 0.5') && line.includes('.cm-editor:has('))
+    expect(lockRule).toBeDefined()
+    expect(lockRule).toContain('.cm-editor:has(> .cm-scroller > .cm-content[contenteditable="false"])')
+    expect(lockRule).not.toContain('has([contenteditable')
+}
+
+test('test_lock_grey_cue_only_matches_the_locked_content_element', validateLockGreyCueOnlyMatchesTheLockedContentElement)
 test('test_each_row_starts_with_its_title_label_inside_the_sized_box', validateEachRowStartsWithItsTitleLabelInsideTheSizedBox)
 test('test_title_label_color_changes_with_the_theme', validateTitleLabelColorChangesWithTheTheme)
 test('test_state_and_questions_box_holds_two_rows_and_a_drag_bar_in_order', validateStateAndQuestionsBoxHoldsTwoRowsAndADragBarInOrder)
