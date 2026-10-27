@@ -1,6 +1,8 @@
-import { autocompletion } from '@codemirror/autocomplete';
+import { acceptCompletion, autocompletion } from '@codemirror/autocomplete';
 import type { Completion, CompletionContext, CompletionResult, CompletionSource } from '@codemirror/autocomplete';
+import { Prec } from '@codemirror/state';
 import type { EditorState, Extension } from '@codemirror/state';
+import { keymap } from '@codemirror/view';
 import { getQuestionsEditor, getStateEditor } from './editors';
 import { listEditorChildNames, listEditorNames, mergeNames } from './propertyNames';
 
@@ -52,5 +54,8 @@ export function buildBacktickSource(listStates: () => EditorState[]): Completion
 }
 
 export function createBacktickKeyNames(): Extension {
-  return autocompletion({ override: [buildBacktickSource(listBothEditorStates)] });
+  return [
+    autocompletion({ override: [buildBacktickSource(listBothEditorStates)] }),
+    Prec.highest(keymap.of([{ key: 'Tab', run: acceptCompletion }])),
+  ];
 }

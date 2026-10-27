@@ -1,9 +1,11 @@
 import { test, expect } from 'bun:test';
-import { CompletionContext } from '@codemirror/autocomplete';
+import { acceptCompletion, CompletionContext } from '@codemirror/autocomplete';
 import type { CompletionResult } from '@codemirror/autocomplete';
+import { indentWithTab } from '@codemirror/commands';
 import { json } from '@codemirror/lang-json';
 import { basicSetup } from 'codemirror';
-import { EditorState } from '@codemirror/state';
+import { EditorState, Prec } from '@codemirror/state';
+import { keymap, type EditorView } from '@codemirror/view';
 import { buildBacktickSource, buildNameOptions, createBacktickKeyNames, listBothEditorStates } from './backtickCompletion';
 
 function validateOptionsInsertNameThenBacktick() {
@@ -94,6 +96,21 @@ function validateExtensionBuildsBeforeEditorsExist() {
   expect(() => listBothEditorStates()).toThrow('state editor is not created yet');
 }
 
+function validateTabAcceptsTheCompletionBeforeIndentAndPlaceholderTab() {
+  const placeholderTab = keymap.of([{ key: 'Tab', run: () => true }]);
+  const extensions = [basicSetup, keymap.of([indentWithTab]), Prec.high(placeholderTab), createBacktickKeyNames()];
+  const state = EditorState.create({ doc: '', extensions: extensions });
+  const tabBindings = [];
+  for (const bindingList of state.facet(keymap))
+    for (const binding of bindingList)
+      if (binding.key === 'Tab')
+        tabBindings.push(binding);
+  expect(tabBindings.length).toBeGreaterThan(2);
+  expect(tabBindings[0].run).toBe(acceptCompletion);
+  expect(acceptCompletion({ state } as EditorView)).toBe(false);
+}
+
+test('test_tab_accepts_the_completion_before_indent_and_placeholder_tab', validateTabAcceptsTheCompletionBeforeIndentAndPlaceholderTab);
 test('test_options_insert_name_then_backtick', validateOptionsInsertNameThenBacktick);
 test('test_backtick_lists_first_editor_names_first_without_duplicates', validateBacktickListsFirstEditorNamesFirstWithoutDuplicates);
 test('test_no_list_without_a_backtick', validateNoListWithoutBacktick);
