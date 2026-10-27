@@ -2,9 +2,10 @@ import { autocompletion } from '@codemirror/autocomplete';
 import type { Completion, CompletionContext, CompletionResult, CompletionSource } from '@codemirror/autocomplete';
 import type { EditorState, Extension } from '@codemirror/state';
 import { getQuestionsEditor, getStateEditor } from './editors';
-import { listEditorNames, mergeNames } from './propertyNames';
+import { listEditorChildNames, listEditorNames, mergeNames } from './propertyNames';
 
 const NAME_TYPING = /^[^`\s]*$/;
+const KEY_PATH_TYPING = /`([^`\s.]+(?:\.[^`\s.]+)*)\.$/;
 
 export function buildNameOptions(names: string[]): Completion[] {
   const options: Completion[] = [];
@@ -17,17 +18,34 @@ export function listBothEditorStates(): EditorState[] {
   return [getStateEditor().state, getQuestionsEditor().state];
 }
 
+export function readKeyPath(context: CompletionContext): string[] | null {
+  const line = context.state.doc.lineAt(context.pos);
+  const typedBefore = line.text.slice(0, context.pos - line.from);
+  const match = KEY_PATH_TYPING.exec(typedBefore);
+  if (match === null)
+    return null;
+  return match[1].split('.');
+}
+
 export function buildBacktickSource(listStates: () => EditorState[]): CompletionSource {
   function findBacktickNames(context: CompletionContext): CompletionResult | null {
     if (context.state.readOnly)
       return null;
     const lastTyped = context.state.sliceDoc(Math.max(0, context.pos - 1), context.pos);
-    if (lastTyped !== '`')
-      return null;
     const states = listStates();
     let names: string[] = [];
+    if (lastTyped === '`') {
+      for (let i = 0; i < states.length; i++)
+        names = mergeNames(names, listEditorNames(states[i]));
+      return { from: context.pos, options: buildNameOptions(names), validFor: NAME_TYPING };
+    }
+    const keyPath = readKeyPath(context);
+    if (keyPath === null)
+      return null;
     for (let i = 0; i < states.length; i++)
-      names = mergeNames(names, listEditorNames(states[i]));
+      names = mergeNames(names, listEditorChildNames(states[i], keyPath));
+    if (names.length === 0)
+      return null;
     return { from: context.pos, options: buildNameOptions(names), validFor: NAME_TYPING };
   }
   return findBacktickNames;

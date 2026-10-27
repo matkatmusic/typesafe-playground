@@ -50,6 +50,36 @@ function validateStatesAreReadWhenTyping() {
   expect(listLabels(source(createContext('`')) as CompletionResult | null)).toEqual(['late']);
 }
 
+const NESTED_STATE_TEXT = '{"message": {"text": 1, "x": {"deep": 2}}, "other": 3}';
+
+function validateDotListsChildKeysOfTheKey() {
+  const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+  const result = source(createContext('`message.')) as CompletionResult | null;
+  expect(listLabels(result)).toEqual(['text', 'x']);
+  expect(result?.from).toBe(9);
+  expect(result?.options[0].apply).toBe('text`');
+}
+
+function validateDotListsChildKeysAtAnyDepth() {
+  const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+  expect(listLabels(source(createContext('`message.x.')) as CompletionResult | null)).toEqual(['deep']);
+}
+
+function validateDotListsNothingWithoutObjectChildren() {
+  const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+  expect(source(createContext('`other.'))).toBe(null);
+  expect(source(createContext('`message.text.'))).toBe(null);
+  expect(source(createContext('`missing.'))).toBe(null);
+}
+
+function validateDotOutsideABacktickKeyListsNothing() {
+  const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+  expect(source(createContext('message.'))).toBe(null);
+  expect(source(createContext('`message `.'))).toBe(null);
+  expect(source(createContext('`.'))).toBe(null);
+  expect(source(createContext('`message..'))).toBe(null);
+}
+
 function validateNoListWhileReadOnly() {
   const lockedState = EditorState.create({ doc: '`', extensions: [json(), EditorState.readOnly.of(true)] });
   const lockedContext = new CompletionContext(lockedState, 1, false);
@@ -68,5 +98,9 @@ test('test_options_insert_name_then_backtick', validateOptionsInsertNameThenBack
 test('test_backtick_lists_first_editor_names_first_without_duplicates', validateBacktickListsFirstEditorNamesFirstWithoutDuplicates);
 test('test_no_list_without_a_backtick', validateNoListWithoutBacktick);
 test('test_states_are_read_when_typing', validateStatesAreReadWhenTyping);
+test('test_dot_lists_child_keys_of_the_key', validateDotListsChildKeysOfTheKey);
+test('test_dot_lists_child_keys_at_any_depth', validateDotListsChildKeysAtAnyDepth);
+test('test_dot_lists_nothing_without_object_children', validateDotListsNothingWithoutObjectChildren);
+test('test_dot_outside_a_backtick_key_lists_nothing', validateDotOutsideABacktickKeyListsNothing);
 test('test_no_list_while_read_only', validateNoListWhileReadOnly);
 test('test_extension_builds_before_editors_exist', validateExtensionBuildsBeforeEditorsExist);
