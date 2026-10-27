@@ -39,7 +39,7 @@ function removeFakeDom() {
 afterEach(removeFakeDom)
 
 function buildStubStateEditor(text: string) {
-    return { state: { doc: { toString: () => text } } } as unknown as EditorView
+    return { state: { doc: { toString: () => text } }, dispatch: () => {} } as unknown as EditorView
 }
 
 function validateRunBodyHoldsCallsTheTrimmedTypedKeyAndTheState() {

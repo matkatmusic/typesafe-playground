@@ -1,6 +1,7 @@
 import { readTypedKey, refreshSubmitAvailability } from './apiKey';
 import { getButton, getElement, getInput } from './dom';
-import { getStateEditor } from './editors';
+import type { EditorView } from '@codemirror/view';
+import { getStateEditor, setEditorLocked } from './editors';
 import { computeJsonParseResult } from './jsonParse';
 import { markPageChanged } from './pageChanged';
 import { getShownVersion, pageState } from './state';
@@ -22,6 +23,15 @@ export function formatRunFailure(status: number, text: string): string {
   return `Run failed: ${status} ${text}`;
 }
 
+export function listLockableEditors(): EditorView[] {
+  return [getStateEditor()];
+}
+
+export function setEditorsLocked(isLocked: boolean): void {
+  for (const editor of listLockableEditors())
+    setEditorLocked(editor, isLocked);
+}
+
 export async function executeSubmit(): Promise<void> {
   const submitButton = getButton('submitButton');
   const errorLine = getElement('errorLine');
@@ -33,16 +43,22 @@ export async function executeSubmit(): Promise<void> {
   }
   submitButton.disabled = true;
   submitButton.textContent = RUNNING_TEXT;
-  const response = await sendRun(buildRunBody(stateResult.value));
-  submitButton.textContent = SUBMIT_TEXT;
-  refreshSubmitAvailability();
-  if (!response.ok) {
-    errorLine.textContent = formatRunFailure(response.status, await response.text());
-    return;
+  setEditorsLocked(true);
+  try {
+    const response = await sendRun(buildRunBody(stateResult.value));
+    submitButton.textContent = SUBMIT_TEXT;
+    refreshSubmitAvailability();
+    if (!response.ok) {
+      errorLine.textContent = formatRunFailure(response.status, await response.text());
+      return;
+    }
+    const result: RunResult = await response.json();
+    pageState.versions[result.version.id - 1] = result.version;
+    pageState.index = result.version.id - 1;
+    markPageChanged('last run');
+    renderShownVersion();
   }
-  const result: RunResult = await response.json();
-  pageState.versions[result.version.id - 1] = result.version;
-  pageState.index = result.version.id - 1;
-  markPageChanged('last run');
-  renderShownVersion();
+  finally {
+    setEditorsLocked(false);
+  }
 }

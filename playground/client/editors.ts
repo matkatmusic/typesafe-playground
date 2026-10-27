@@ -3,7 +3,7 @@ import { indentWithTab } from '@codemirror/commands';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { syntaxHighlighting } from '@codemirror/language';
 import { linter, lintGutter } from '@codemirror/lint';
-import { Annotation, EditorState, type Extension } from '@codemirror/state';
+import { Annotation, Compartment, EditorState, type Extension } from '@codemirror/state';
 import { keymap, type ViewUpdate } from '@codemirror/view';
 import { getElement } from './dom';
 import { jsonHighlight } from './editorHighlight';
@@ -16,6 +16,8 @@ export const EDITOR_THEME_RULES = {
 };
 
 export const FILL_ANNOTATION = Annotation.define<boolean>();
+export const LOCK_COMPARTMENT = new Compartment();
+export const LOCKED_EXTENSIONS: Extension[] = [EditorView.editable.of(false), EditorState.readOnly.of(true)];
 
 let resultEditor: EditorView | null = null;
 let stateEditor: EditorView | null = null;
@@ -40,6 +42,7 @@ export function buildJsonExtensions(): Extension[] {
     linter(jsonParseLinter()),
     lintGutter(),
     keymap.of([indentWithTab]),
+    LOCK_COMPARTMENT.of([]),
   ];
 }
 
@@ -72,6 +75,10 @@ export function getStateEditor(): EditorView {
 
 export function replaceEditorText(editor: EditorView, text: string): void {
   editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: text }, annotations: FILL_ANNOTATION.of(true) });
+}
+
+export function setEditorLocked(editor: EditorView, isLocked: boolean): void {
+  editor.dispatch({ effects: LOCK_COMPARTMENT.reconfigure(isLocked ? LOCKED_EXTENSIONS : []), annotations: FILL_ANNOTATION.of(true) });
 }
 
 export function renderResultJson(value: unknown): void {

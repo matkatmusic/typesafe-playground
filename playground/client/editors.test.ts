@@ -3,9 +3,9 @@ import { jsonParseLinter } from '@codemirror/lang-json'
 import { highlightingFor } from '@codemirror/language'
 import { EditorState } from '@codemirror/state'
 import { tags } from '@lezer/highlight'
-import type { EditorView } from '@codemirror/view'
+import { EditorView } from '@codemirror/view'
 import { jsonHighlight } from './editorHighlight'
-import { buildJsonExtensions, buildResultExtensions, createResultEditor, createStateEditor, EDITOR_THEME_RULES, FILL_ANNOTATION, formatResultJson, getResultEditor, getStateEditor, renderResultJson, renderStateJson } from './editors'
+import { buildJsonExtensions, buildResultExtensions, createResultEditor, createStateEditor, EDITOR_THEME_RULES, FILL_ANNOTATION, formatResultJson, getResultEditor, getStateEditor, renderResultJson, renderStateJson, setEditorLocked } from './editors'
 
 function validateThemeFillsTheBox() {
     expect(EDITOR_THEME_RULES['&'].height).toBe('100%')
@@ -68,6 +68,25 @@ function validateFillTransactionsCarryTheAnnotation() {
     expect(typed.annotation(FILL_ANNOTATION)).toBeUndefined()
 }
 
+function validateLockingTheEditorTogglesReadOnlyAndEditableWithoutMarkingAFill() {
+    const stubEditor = { state: EditorState.create({ doc: '{}', extensions: buildJsonExtensions() }), fillFlags: [] as (boolean | undefined)[] }
+    function applyDispatch(spec: Parameters<EditorState['update']>[0]) {
+        const transaction = stubEditor.state.update(spec)
+        stubEditor.fillFlags.push(transaction.annotation(FILL_ANNOTATION))
+        stubEditor.state = transaction.state
+    }
+    const editor = { dispatch: applyDispatch } as unknown as EditorView
+    setEditorLocked(editor, true)
+    expect(stubEditor.state.readOnly).toBe(true)
+    expect(stubEditor.state.facet(EditorView.editable)).toBe(false)
+    setEditorLocked(editor, false)
+    expect(stubEditor.state.readOnly).toBe(false)
+    expect(stubEditor.state.facet(EditorView.editable)).toBe(true)
+    expect(stubEditor.state.doc.toString()).toBe('{}')
+    expect(stubEditor.fillFlags).toEqual([true, true])
+}
+
+test('test_locking_the_editor_toggles_read_only_and_editable_without_marking_a_fill', validateLockingTheEditorTogglesReadOnlyAndEditableWithoutMarkingAFill)
 test('test_fill_transactions_carry_the_annotation', validateFillTransactionsCarryTheAnnotation)
 test('test_linter_flags_invalid_json_only', validateLinterFlagsInvalidJsonOnly)
 test('test_state_editor_uses_the_json_highlight_style_and_result_editor_does_not', validateStateEditorUsesTheJsonHighlightStyleAndResultEditorDoesNot)
