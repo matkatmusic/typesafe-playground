@@ -53,6 +53,16 @@ async function validateLockGreyCueOnlyMatchesTheLockedContentElement() {
     expect(lockRule).not.toContain('has([contenteditable')
 }
 
+async function validatePlaceholderHighlightDoesNotChangeTheTextBox() {
+    const page = await buildPage(await buildTempHistoryPath())
+    const rule = page.split('\n').find((line) => line.startsWith('#questionsJsonEditor .cm-placeholderValue {'))
+    expect(rule).toBeDefined()
+    expect(rule).toContain('outline: 1px dashed')
+    for (const boxProperty of ['border:', 'padding', 'margin', 'display', 'line-height', 'font-size'])
+        expect(rule).not.toContain(boxProperty)
+}
+
+test('test_placeholder_highlight_does_not_change_the_text_box', validatePlaceholderHighlightDoesNotChangeTheTextBox)
 test('test_lock_grey_cue_only_matches_the_locked_content_element', validateLockGreyCueOnlyMatchesTheLockedContentElement)
 test('test_each_row_starts_with_its_title_label_inside_the_sized_box', validateEachRowStartsWithItsTitleLabelInsideTheSizedBox)
 test('test_title_label_color_changes_with_the_theme', validateTitleLabelColorChangesWithTheTheme)

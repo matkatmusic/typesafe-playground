@@ -74,7 +74,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-selectionBackground, :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-focused .cm-selectionBackground { background: var(--grid); }
 :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-panels { background: var(--panel); color: var(--text); border-color: var(--grid); }
 :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-textfield { background: var(--surface); color: var(--text); border: 1px solid var(--grid); border-radius: 4px; }
-#questionsJsonEditor .cm-placeholderValue { background: var(--placeholder-bg); border: 1px dashed var(--placeholder-border); border-radius: 3px; font-style: italic; }
+#questionsJsonEditor .cm-placeholderValue { background: var(--placeholder-bg); outline: 1px dashed var(--placeholder-border); outline-offset: -1px; border-radius: 3px; font-style: italic; }
 #questionsJsonEditor .cm-placeholderValue, #questionsJsonEditor .cm-placeholderValue span { color: var(--text); }
 #questionsJsonEditor .add-question { position: relative; display: block; padding: 4px 0 4px 6px; }
 #questionsJsonEditor .add-question-btn { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 999px; padding: 3px 12px; font-size: 13px; cursor: pointer; }
