@@ -1,9 +1,8 @@
 import type { Version } from '../playgroundHistory';
-import { renderCostAndTokens } from './costTokens';
-import { renderResultJson, renderStateJson } from './editors';
 import { refreshFileView } from './fileView';
 import { pageState } from './state';
 import { computeUnsavedStep, readUnsavedChoice } from './unsavedDialog';
+import { renderLastVersion } from './versionBox';
 
 const VERSIONS_FILE_TYPES = [{ description: 'Playground versions', accept: { 'application/json': ['.json'] } }];
 const VERSIONS_FILE_NAME = 'playground-versions.json';
@@ -20,10 +19,7 @@ async function replaceVersions(path: string, body: object): Promise<void> {
   const replaced: { versions: Version[] } = await response.json();
   pageState.versions = replaced.versions;
   pageState.isDirty = false;
-  const lastVersion = replaced.versions[replaced.versions.length - 1];
-  renderCostAndTokens(lastVersion);
-  renderStateJson(lastVersion.state);
-  renderResultJson(lastVersion.outputs);
+  renderLastVersion();
 }
 
 export async function executePicker<T>(pick: () => Promise<T>): Promise<T | null> {

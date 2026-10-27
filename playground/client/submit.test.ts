@@ -1,5 +1,6 @@
 import { test, expect, afterEach, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
+import type { Version } from '../playgroundHistory'
 import * as editors from './editors'
 import { pageState } from './state'
 import { buildRunBody, executeSubmit, formatRunFailure, RUNNING_TEXT, SUBMIT_TEXT } from './submit'
@@ -8,12 +9,12 @@ class FakeButton { disabled = false; textContent = SUBMIT_TEXT }
 class FakeInput { value = ''; type = 'password' }
 class FakeBox { textContent = '' }
 
-const VERSION = { id: 1, time: 't', state: {}, questions: {}, calls: 1, outputs: [{ usage: { input_tokens: 1000000, output_tokens: 1 } }] }
+const VERSION = { id: 1, time: 't', state: { a: 1 }, questions: {}, calls: 1, outputs: [{ usage: { input_tokens: 1000000, output_tokens: 1 } }] } as unknown as Version
 const realFetch = globalThis.fetch
 
 function installFakeDom(hasEnvKey: boolean) {
     const elements = {
-        data: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(),
+        data: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(),
         submitButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(),
     }
     elements.data.textContent = JSON.stringify({ versions: [VERSION], hasEnvKey })
@@ -30,6 +31,8 @@ function removeFakeDom() {
     Reflect.deleteProperty(globalThis, 'HTMLInputElement')
     globalThis.fetch = realFetch
     pageState.isDirty = false
+    pageState.versions = []
+    pageState.index = 0
 }
 
 afterEach(removeFakeDom)
@@ -56,7 +59,11 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
         shownValues.push(value)
     }
     const renderSpy = spyOn(editors, 'renderResultJson').mockImplementation(recordShownValue)
+    const renderStateSpy = spyOn(editors, 'renderStateJson').mockImplementation(recordShownValue)
     const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
+    const newVersion = { ...VERSION, id: 2 }
+    pageState.versions = [VERSION]
+    pageState.index = 0
     let seenBody = ''
     let wasDisabledWhileRunning = false
     let textWhileRunning = ''
@@ -64,13 +71,14 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
         wasDisabledWhileRunning = elements.submitButton.disabled
         textWhileRunning = elements.submitButton.textContent
         seenBody = String(init?.body)
-        return Response.json({ outputs: VERSION.outputs, version: VERSION })
+        return Response.json({ outputs: VERSION.outputs, version: newVersion })
     }
     globalThis.fetch = stubFetch as unknown as typeof fetch
     elements.callsPicker.value = '3'
     pageState.isDirty = false
     await executeSubmit()
     renderSpy.mockRestore()
+    renderStateSpy.mockRestore()
     stateSpy.mockRestore()
     expect(JSON.parse(seenBody)).toEqual({ calls: 3, apiKey: '', state: { a: 1 } })
     expect(wasDisabledWhileRunning).toBe(true)
@@ -79,9 +87,13 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     expect(elements.submitButton.textContent).toBe(SUBMIT_TEXT)
     expect(elements.costLabel.textContent).toBe('Cost: $0.042000')
     expect(elements.tokensLabel.textContent).toBe('Tokens: 1000000')
-    expect(shownValues).toEqual([VERSION.outputs])
+    expect(shownValues).toEqual([VERSION.state, VERSION.outputs])
     expect(elements.errorLine.textContent).toBe('')
     expect(pageState.isDirty).toBe(true)
+    expect(pageState.versions.length).toBe(2)
+    expect(pageState.versions[1]).toEqual(newVersion)
+    expect(pageState.index).toBe(1)
+    expect(elements.versionLabel.textContent).toBe('version 2 of 2 · t · 1 call')
 }
 
 async function validateFailedSubmitShowsTheErrorLineAndLeavesTheResultAlone() {

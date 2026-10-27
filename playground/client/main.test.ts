@@ -15,6 +15,8 @@ async function validateMainBundlesForTheBrowser() {
     expect(script.includes('stateJsonEditor')).toBe(true)
     expect(script.includes('submitButton')).toBe(true)
     expect(script.includes('resetButton')).toBe(true)
+    expect(script.includes('prevVersionButton')).toBe(true)
+    expect(script.includes('nextVersionButton')).toBe(true)
     expect(script.includes('/open')).toBe(true)
 }
 

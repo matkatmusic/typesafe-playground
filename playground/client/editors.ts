@@ -3,8 +3,8 @@ import { indentWithTab } from '@codemirror/commands';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { syntaxHighlighting } from '@codemirror/language';
 import { linter, lintGutter } from '@codemirror/lint';
-import { EditorState, type Extension } from '@codemirror/state';
-import { keymap } from '@codemirror/view';
+import { Annotation, EditorState, type Extension } from '@codemirror/state';
+import { keymap, type ViewUpdate } from '@codemirror/view';
 import { getElement } from './dom';
 import { jsonHighlight } from './editorHighlight';
 import { clearStateJsonError } from './stateErrorClear';
@@ -14,6 +14,8 @@ export const EDITOR_THEME_RULES = {
   '.cm-scroller': { overflow: 'auto', fontFamily: 'ui-monospace, Menlo, monospace', fontSize: '13px' },
   '.cm-gutters': { background: 'var(--panel)', color: 'var(--text-muted)', border: 'none' },
 };
+
+export const FILL_ANNOTATION = Annotation.define<boolean>();
 
 let resultEditor: EditorView | null = null;
 let stateEditor: EditorView | null = null;
@@ -56,8 +58,9 @@ export function getResultEditor(): EditorView {
   return resultEditor;
 }
 
-export function createStateEditor(): EditorView {
-  stateEditor = new EditorView({ doc: '', extensions: [buildJsonExtensions(), EditorView.updateListener.of(clearStateJsonError)], parent: getElement('stateJsonEditor') });
+export function createStateEditor(onEditorChange: (update: ViewUpdate) => void): EditorView {
+  const extensions = [buildJsonExtensions(), EditorView.updateListener.of(clearStateJsonError), EditorView.updateListener.of(onEditorChange)];
+  stateEditor = new EditorView({ doc: '', extensions: extensions, parent: getElement('stateJsonEditor') });
   return stateEditor;
 }
 
@@ -68,7 +71,7 @@ export function getStateEditor(): EditorView {
 }
 
 export function replaceEditorText(editor: EditorView, text: string): void {
-  editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: text } });
+  editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: text }, annotations: FILL_ANNOTATION.of(true) });
 }
 
 export function renderResultJson(value: unknown): void {

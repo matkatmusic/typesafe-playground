@@ -5,7 +5,7 @@ import { EditorState } from '@codemirror/state'
 import { tags } from '@lezer/highlight'
 import type { EditorView } from '@codemirror/view'
 import { jsonHighlight } from './editorHighlight'
-import { buildJsonExtensions, buildResultExtensions, createResultEditor, createStateEditor, EDITOR_THEME_RULES, formatResultJson, getResultEditor, getStateEditor, renderResultJson, renderStateJson } from './editors'
+import { buildJsonExtensions, buildResultExtensions, createResultEditor, createStateEditor, EDITOR_THEME_RULES, FILL_ANNOTATION, formatResultJson, getResultEditor, getStateEditor, renderResultJson, renderStateJson } from './editors'
 
 function validateThemeFillsTheBox() {
     expect(EDITOR_THEME_RULES['&'].height).toBe('100%')
@@ -53,11 +53,22 @@ function validateStateEditorStaysWritable() {
 }
 
 function validateStateEditorFunctionsThrowBeforeTheEditorExists() {
-    expect(() => createStateEditor()).toThrow()
+    expect(() => createStateEditor(ignoreUpdate)).toThrow()
     expect(() => getStateEditor()).toThrow('state editor is not created yet')
     expect(() => renderStateJson({})).toThrow('state editor is not created yet')
 }
 
+function ignoreUpdate() {}
+
+function validateFillTransactionsCarryTheAnnotation() {
+    const state = EditorState.create({ doc: '{}' })
+    const fill = state.update({ changes: { from: 0, to: 2, insert: '[]' }, annotations: FILL_ANNOTATION.of(true) })
+    const typed = state.update({ changes: { from: 0, to: 2, insert: '[]' } })
+    expect(fill.annotation(FILL_ANNOTATION)).toBe(true)
+    expect(typed.annotation(FILL_ANNOTATION)).toBeUndefined()
+}
+
+test('test_fill_transactions_carry_the_annotation', validateFillTransactionsCarryTheAnnotation)
 test('test_linter_flags_invalid_json_only', validateLinterFlagsInvalidJsonOnly)
 test('test_state_editor_uses_the_json_highlight_style_and_result_editor_does_not', validateStateEditorUsesTheJsonHighlightStyleAndResultEditorDoesNot)
 test('test_state_editor_stays_writable', validateStateEditorStaysWritable)

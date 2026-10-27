@@ -1,10 +1,10 @@
 import { readTypedKey, refreshSubmitAvailability } from './apiKey';
-import { renderCostAndTokens } from './costTokens';
 import { getButton, getElement, getInput } from './dom';
-import { getStateEditor, renderResultJson } from './editors';
+import { getStateEditor } from './editors';
 import { computeJsonParseResult } from './jsonParse';
 import { pageState } from './state';
 import type { RunBody, RunResult } from './types';
+import { renderShownVersion } from './versionBox';
 
 export const SUBMIT_TEXT = 'Submit (paid)';
 export const RUNNING_TEXT = 'running…';
@@ -40,7 +40,8 @@ export async function executeSubmit(): Promise<void> {
     return;
   }
   const result: RunResult = await response.json();
-  renderCostAndTokens(result.version);
-  renderResultJson(result.outputs);
+  pageState.versions[result.version.id - 1] = result.version;
+  pageState.index = result.version.id - 1;
   pageState.isDirty = true;
+  renderShownVersion();
 }

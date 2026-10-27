@@ -5,7 +5,7 @@ export type UnsavedStep = 'save' | 'continue' | 'stop';
 
 export type PageData = { versions: Version[]; hasEnvKey: boolean };
 
-export type PageState = { versions: Version[]; fileHandle: FileSystemFileHandle | null; isDirty: boolean };
+export type PageState = { versions: Version[]; index: number; fileHandle: FileSystemFileHandle | null; isDirty: boolean };
 
 export type RunBody = { calls: number; apiKey: string; state: unknown };
 
