@@ -10,6 +10,7 @@ async function validateMainBundlesForTheBrowser() {
     const script = await result.outputs[0].text()
     expect(script.includes('lightDarkModeButton')).toBe(true)
     expect(script.includes('columnResizer')).toBe(true)
+    expect(script.includes('rowResizer')).toBe(true)
     expect(script.includes('resultJsonEditor')).toBe(true)
     expect(script.includes('submitButton')).toBe(true)
     expect(script.includes('resetButton')).toBe(true)

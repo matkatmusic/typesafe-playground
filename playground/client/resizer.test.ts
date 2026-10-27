@@ -37,7 +37,7 @@ function validateColumnPointerDragSetsWidth() {
     const handle = makeFakeElement(12, 600)
     const firstBox = makeFakeElement(400, 600)
     const container = makeFakeElement(1000, 600)
-    attachResizer(asElement(handle), asElement(firstBox), asElement(container))
+    attachResizer(asElement(handle), asElement(firstBox), asElement(container), 'columns')
     handle.listeners.pointermove({ clientX: 50, clientY: 0 })
     expect(firstBox.style.width).toBeUndefined()
     handle.listeners.pointerdown({ pointerId: 1, clientX: 100, clientY: 0 })
@@ -50,6 +50,22 @@ function validateColumnPointerDragSetsWidth() {
     expect(firstBox.style.width).toBe('240px')
 }
 
+function validateRowPointerDragSetsHeightAndKeepsEightyPixels() {
+    const handle = makeFakeElement(600, 8)
+    const firstBox = makeFakeElement(600, 200)
+    const container = makeFakeElement(600, 600)
+    attachResizer(asElement(handle), asElement(firstBox), asElement(container), 'rows')
+    handle.listeners.pointerdown({ pointerId: 1, clientX: 0, clientY: 300 })
+    handle.listeners.pointermove({ clientX: 0, clientY: 350 })
+    expect(firstBox.style.height).toBe('250px')
+    expect(firstBox.style.width).toBeUndefined()
+    handle.listeners.pointermove({ clientX: 0, clientY: -900 })
+    expect(firstBox.style.height).toBe('80px')
+    handle.listeners.pointermove({ clientX: 0, clientY: 5000 })
+    expect(firstBox.style.height).toBe('512px')
+}
+
 test('test_column_drag_moves_and_clamps_to_240px', validateColumnDragMovesAndClamps)
 test('test_tiny_container_keeps_the_minimum_size', validateTinyContainerKeepsMinimum)
 test('test_column_pointer_drag_sets_width_and_stops_on_pointer_up', validateColumnPointerDragSetsWidth)
+test('test_row_pointer_drag_sets_height_and_keeps_80px_each_side', validateRowPointerDragSetsHeightAndKeepsEightyPixels)
