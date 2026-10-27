@@ -1,7 +1,10 @@
 import { test, expect } from 'bun:test'
 import { jsonParseLinter } from '@codemirror/lang-json'
+import { highlightingFor } from '@codemirror/language'
 import { EditorState } from '@codemirror/state'
+import { tags } from '@lezer/highlight'
 import type { EditorView } from '@codemirror/view'
+import { jsonHighlight } from './editorHighlight'
 import { buildJsonExtensions, buildResultExtensions, createResultEditor, createStateEditor, EDITOR_THEME_RULES, formatResultJson, getResultEditor, getStateEditor, renderResultJson, renderStateJson } from './editors'
 
 function validateThemeFillsTheBox() {
@@ -36,6 +39,13 @@ function validateLinterFlagsInvalidJsonOnly() {
     expect(lint(buildStubView('{"a":1}')).length).toBe(0)
 }
 
+function validateStateEditorUsesTheJsonHighlightStyleAndResultEditorDoesNot() {
+    const stateEditorState = EditorState.create({ doc: '"a"', extensions: buildJsonExtensions() })
+    expect(highlightingFor(stateEditorState, [tags.string])).toBe(jsonHighlight.style([tags.string]))
+    const resultEditorState = EditorState.create({ doc: '"a"', extensions: buildResultExtensions() })
+    expect(highlightingFor(resultEditorState, [tags.string])).not.toBe(jsonHighlight.style([tags.string]))
+}
+
 function validateStateEditorStaysWritable() {
     const state = EditorState.create({ doc: '', extensions: buildJsonExtensions() })
     expect(state.readOnly).toBe(false)
@@ -49,6 +59,7 @@ function validateStateEditorFunctionsThrowBeforeTheEditorExists() {
 }
 
 test('test_linter_flags_invalid_json_only', validateLinterFlagsInvalidJsonOnly)
+test('test_state_editor_uses_the_json_highlight_style_and_result_editor_does_not', validateStateEditorUsesTheJsonHighlightStyleAndResultEditorDoesNot)
 test('test_state_editor_stays_writable', validateStateEditorStaysWritable)
 test('test_state_editor_functions_throw_before_the_editor_exists', validateStateEditorFunctionsThrowBeforeTheEditorExists)
 test('test_theme_fills_the_result_box', validateThemeFillsTheBox)

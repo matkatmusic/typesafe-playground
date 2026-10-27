@@ -1,10 +1,12 @@
 import { basicSetup, EditorView } from 'codemirror';
 import { indentWithTab } from '@codemirror/commands';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
+import { syntaxHighlighting } from '@codemirror/language';
 import { linter, lintGutter } from '@codemirror/lint';
 import { EditorState, type Extension } from '@codemirror/state';
 import { keymap } from '@codemirror/view';
 import { getElement } from './dom';
+import { jsonHighlight } from './editorHighlight';
 import { clearStateJsonError } from './stateErrorClear';
 
 export const EDITOR_THEME_RULES = {
@@ -31,6 +33,7 @@ export function buildJsonExtensions(): Extension[] {
     basicSetup,
     json(),
     EditorView.lineWrapping,
+    syntaxHighlighting(jsonHighlight),
     EditorView.theme(EDITOR_THEME_RULES),
     linter(jsonParseLinter()),
     lintGutter(),

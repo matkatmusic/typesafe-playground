@@ -6,6 +6,11 @@
     --text-muted: #52514e;
     --grid: #dddcd7;
     --bad: #e34948;
+    --tok-string: #0a7a3e;
+    --tok-number: #b25000;
+    --tok-key: #1f5fbf;
+    --tok-atom: #8a3fb0;
+    --tok-punct: #52514e;
 }
 :root[data-theme="dark"] {
     color-scheme: dark;
@@ -15,6 +20,11 @@
     --text-muted: #c3c2b7;
     --grid: #3a3a37;
     --bad: #e66767;
+    --tok-string: #6fcf97;
+    --tok-number: #f2a65a;
+    --tok-key: #7ab7ff;
+    --tok-atom: #c792ea;
+    --tok-punct: #c3c2b7;
 }
 * { box-sizing: border-box; }
 body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: var(--surface); color: var(--text); font: 15px/1.4 system-ui, sans-serif; overflow: hidden; }
