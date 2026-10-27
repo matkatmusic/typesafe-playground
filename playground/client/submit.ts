@@ -2,6 +2,7 @@ import { readTypedKey, refreshSubmitAvailability } from './apiKey';
 import { getButton, getElement, getInput } from './dom';
 import { getStateEditor } from './editors';
 import { computeJsonParseResult } from './jsonParse';
+import { markPageChanged } from './pageChanged';
 import { pageState } from './state';
 import type { RunBody, RunResult } from './types';
 import { renderShownVersion } from './versionBox';
@@ -42,6 +43,6 @@ export async function executeSubmit(): Promise<void> {
   const result: RunResult = await response.json();
   pageState.versions[result.version.id - 1] = result.version;
   pageState.index = result.version.id - 1;
-  pageState.isDirty = true;
+  markPageChanged();
   renderShownVersion();
 }

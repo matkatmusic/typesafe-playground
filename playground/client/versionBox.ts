@@ -2,6 +2,7 @@ import type { ViewUpdate } from '@codemirror/view';
 import { renderCostAndTokens } from './costTokens';
 import { getElement } from './dom';
 import { FILL_ANNOTATION, getStateEditor, renderResultJson, renderStateJson } from './editors';
+import { markPageChanged } from './pageChanged';
 import { getShownVersion, pageState } from './state';
 import { computeWrappedIndex, createEditedVersion, formatVersionLabel, isStateEdited } from './versionLabel';
 
@@ -51,7 +52,7 @@ export function updateOnEditorChange(update: ViewUpdate): void {
   for (const transaction of update.transactions) {
     const isFill = transaction.annotation(FILL_ANNOTATION) === true;
     if (!isFill)
-      pageState.isDirty = true;
+      markPageChanged();
   }
 }
 

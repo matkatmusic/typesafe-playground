@@ -15,7 +15,7 @@ class StubElement {
 
 function installFakeDom() {
     const elements: Record<string, { textContent: string }> = {
-        versionLabel: { textContent: '' }, costLabel: { textContent: '' }, tokensLabel: { textContent: '' },
+        versionLabel: { textContent: '' }, costLabel: { textContent: '' }, tokensLabel: { textContent: '' }, lastEditedLabel: { textContent: '' },
     }
     Object.assign(globalThis, { document: { getElementById: (id: string) => elements[id] ?? null } })
     return elements
@@ -62,10 +62,12 @@ function validateEditMarksDirtyButFillDoesNot() {
     const fillUpdate = { docChanged: true, transactions: [{ annotation: () => true }] }
     updateOnEditorChange(fillUpdate as never)
     expect(pageState.isDirty).toBe(false)
+    expect(elements.lastEditedLabel.textContent).toBe('')
     const typedUpdate = { docChanged: true, transactions: [{ annotation: () => undefined }] }
     updateOnEditorChange(typedUpdate as never)
     stateSpy.mockRestore()
     expect(pageState.isDirty).toBe(true)
+    expect(elements.lastEditedLabel.textContent.startsWith('last edited: ')).toBe(true)
     expect(elements.versionLabel.textContent).toBe('version 2 of 2 · not run yet · 0 calls')
 }
 

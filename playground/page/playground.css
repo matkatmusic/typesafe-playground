@@ -35,7 +35,7 @@ body { margin: 0; height: 100vh; display: flex; flex-direction: column; backgrou
 #versionLabel { flex: 1 1 auto; min-width: 0; text-align: center; color: var(--text-muted); white-space: nowrap; }
 #headerBox #typeSafeKeyLabel { margin-left: 16px; color: var(--text-muted); }
 #headerBox #typeSafeKeyEditor { width: 260px; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 8px; font: inherit; }
-#headerBox #lightDarkModeButton { margin-left: auto; }
+#headerBox #lastEditedLabel { margin-left: auto; font-weight: 300; color: var(--text-muted); white-space: nowrap; }
 button { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 12px; font-size: 15px; cursor: pointer; transition: transform 60ms; }
 button:active:not(:disabled) { transform: translateY(2px); }
 button:disabled { opacity: 0.5; cursor: default; }

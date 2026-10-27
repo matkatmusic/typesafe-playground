@@ -14,7 +14,7 @@ const realFetch = globalThis.fetch
 
 function installFakeDom(hasEnvKey: boolean) {
     const elements = {
-        data: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(),
+        data: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
         submitButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(),
     }
     elements.data.textContent = JSON.stringify({ versions: [VERSION], hasEnvKey })
@@ -90,6 +90,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     expect(shownValues).toEqual([VERSION.state, VERSION.outputs])
     expect(elements.errorLine.textContent).toBe('')
     expect(pageState.isDirty).toBe(true)
+    expect(elements.lastEditedLabel.textContent.startsWith('last edited: ')).toBe(true)
     expect(pageState.versions.length).toBe(2)
     expect(pageState.versions[1]).toEqual(newVersion)
     expect(pageState.index).toBe(1)

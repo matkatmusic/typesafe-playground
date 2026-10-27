@@ -17,6 +17,7 @@ async function validateMainBundlesForTheBrowser() {
     expect(script.includes('resetButton')).toBe(true)
     expect(script.includes('prevVersionButton')).toBe(true)
     expect(script.includes('nextVersionButton')).toBe(true)
+    expect(script.includes('lastEditedLabel')).toBe(true)
     expect(script.includes('/open')).toBe(true)
 }
 
