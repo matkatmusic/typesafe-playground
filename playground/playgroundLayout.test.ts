@@ -62,4 +62,10 @@ async function validateNoteBoxSitsAboveTheStateAndQuestionsBox() {
 }
 
 test('test_note_box_sits_above_the_state_and_questions_box', validateNoteBoxSitsAboveTheStateAndQuestionsBox)
+async function validateJsonToggleButtonSaysBracesAndShowsAShowResponseTooltip() {
+    const page = await buildPage(await buildTempHistoryPath())
+    expect(page).toContain('<button id="jsonToggleButton" aria-label="show response" title="show response">{ }</button>')
+}
+
+test('test_json_toggle_button_says_braces_and_shows_a_show_response_tooltip', validateJsonToggleButtonSaysBracesAndShowsAShowResponseTooltip)
 test('test_result_box_holds_winners_first_then_toggle_graphs_and_json', validateResultBoxHoldsWinnersFirstThenToggleGraphsAndJson)
