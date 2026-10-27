@@ -5,6 +5,8 @@ import { createGraphBlock } from './graphBlock';
 import { computePlotHeight } from './graphGeometry';
 import { graphState } from './graphState';
 import { listAnswers, readQuestions } from './graphValues';
+import { findPinned, readPinnedData } from './pinned';
+import { pageState } from './state';
 
 export const EMPTY_MESSAGE = 'Submit a run to generate a graph';
 
@@ -26,7 +28,7 @@ export function renderStaleCharts(charts: ChartLayout[], onRendered?: ChartsHook
   for (const chart of charts) {
     const isStale = computePlotHeight(chart.box.clientHeight) !== chart.plotH;
     if (isStale)
-      redrawn.push(renderChart({ block: chart.block as HTMLDivElement, box: chart.box as HTMLDivElement }, chart.name, chart.question, chart.answers));
+      redrawn.push(renderChart({ block: chart.block as HTMLDivElement, box: chart.box as HTMLDivElement }, chart.name, chart.question, chart.answers, chart.pinned));
   }
   const hasRedrawn = redrawn.length > 0;
   if (!hasRedrawn)
@@ -49,13 +51,14 @@ export function renderGraphs(version: Version, container: HTMLElement, onRendere
     blocks.push(graphBlock);
   }
   const charts: ChartLayout[] = [];
+  const pinnedVersion = findPinned(pageState.versions, pageState.pinnedId);
   for (let i = 0; i < names.length; i++) {
     const isDataPresent = isRunDataPresent(version, names[i]);
     const isCollapsed = graphState.collapsedByName[names[i]] === true;
     if (!isDataPresent)
       fillEmptyMessage(blocks[i].box);
     else if (!isCollapsed)
-      charts.push(renderChart(blocks[i], names[i], questions[names[i]], listAnswers(version, names[i])));
+      charts.push(renderChart(blocks[i], names[i], questions[names[i]], listAnswers(version, names[i]), readPinnedData(pinnedVersion, names[i])));
   }
   if (onRendered !== undefined)
     onRendered(charts);

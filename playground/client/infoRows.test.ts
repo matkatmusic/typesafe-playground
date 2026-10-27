@@ -12,13 +12,13 @@ const noulQuestion: Question = { type: 'noul', criteria: { true: 'is yes', false
 const noulAnswers: Answer[] = [{ type: 'noul', noul: 0.8 }, { type: 'noul', noul: 0.3 }];
 
 function validateBlankRowsHaveNoValues() {
-  const rows = buildBarInfoRows({ question, answers, key: '', keys: ['a', 'b'], callIndex: null });
+  const rows = buildBarInfoRows({ question, answers, key: '', keys: ['a', 'b'], callIndex: null, pinned: null });
   expect(rows.length).toBe(4);
   expect(rows[0].parts[0][0]).toBe('');
 }
 
 function validateCallRowsHoldTheCallValues() {
-  const rows = buildBarInfoRows({ question, answers, key: 'a', keys: ['a', 'b'], callIndex: 1 });
+  const rows = buildBarInfoRows({ question, answers, key: 'a', keys: ['a', 'b'], callIndex: 1, pinned: null });
   expect(rows.length).toBe(5);
   expect(rows[0].parts[0][0]).toBe('a');
   expect(rows[1].parts[0][0]).toBe('0.200');
@@ -29,13 +29,13 @@ function validateCallRowsHoldTheCallValues() {
 }
 
 function validateAverageRowsHoldTheAverages() {
-  const rows = buildBarInfoRows({ question, answers, key: 'a', keys: ['a', 'b'], callIndex: -1 });
+  const rows = buildBarInfoRows({ question, answers, key: 'a', keys: ['a', 'b'], callIndex: -1, pinned: null });
   expect(rows[1].parts[0][0]).toBe('0.400');
   expect(rows[1].parts[2][0]).toBe('0.600');
 }
 
 function validateNoulRowsDoNotThrow() {
-  const callRows = buildBarInfoRows({ question: noulQuestion, answers: noulAnswers, key: 'yes', keys: ['yes'], callIndex: 0 });
+  const callRows = buildBarInfoRows({ question: noulQuestion, answers: noulAnswers, key: 'yes', keys: ['yes'], callIndex: 0, pinned: null });
   expect(callRows[0].parts[0][0]).toBe('yes');
   expect(callRows[1].parts.length).toBe(1);
   expect(callRows[1].parts[0][0]).toBe('0.800');
@@ -44,9 +44,9 @@ function validateNoulRowsDoNotThrow() {
   expect(callRows[3].parts[0][0]).toBe('1');
   expect(callRows[3].parts[2][0]).toBe('2');
   expect(callRows[4].parts[0][0]).toBe('is yes');
-  const averageRows = buildBarInfoRows({ question: noulQuestion, answers: noulAnswers, key: 'yes', keys: ['yes'], callIndex: -1 });
+  const averageRows = buildBarInfoRows({ question: noulQuestion, answers: noulAnswers, key: 'yes', keys: ['yes'], callIndex: -1, pinned: null });
   expect(averageRows[1].parts[0][0]).toBe('0.550');
-  const blankRows = buildBarInfoRows({ question: noulQuestion, answers: noulAnswers, key: '', keys: ['yes'], callIndex: null });
+  const blankRows = buildBarInfoRows({ question: noulQuestion, answers: noulAnswers, key: '', keys: ['yes'], callIndex: null, pinned: null });
   expect(blankRows.length).toBe(4);
   expect(blankRows[1].parts.length).toBe(1);
 }
@@ -57,11 +57,29 @@ function validateScoreTopRunsUseTheProbabilities() {
     { type: 'score', score: 0.8, confidence: 0.5, legend: { 0: 'low', 1: 'high' }, probabilities: { 0: 0.2, 1: 0.8 } },
     { type: 'score', score: 0.3, confidence: 0.5, legend: { 0: 'low', 1: 'high' }, probabilities: { 0: 0.7, 1: 0.3 } },
   ];
-  const rows = buildBarInfoRows({ question: scoreQuestion, answers: scoreAnswers, key: '1', keys: ['0', '1'], callIndex: 0 });
+  const rows = buildBarInfoRows({ question: scoreQuestion, answers: scoreAnswers, key: '1', keys: ['0', '1'], callIndex: 0, pinned: null });
   expect(rows[3].parts[0][0]).toBe('1');
   expect(rows[4].parts[0][0]).toBe('high');
 }
 
+function validatePinnedRowHoldsTheMinMaxAndAverageOfThePin() {
+  const request = { question, answers, key: 'a', keys: ['a', 'b'], callIndex: 1, pinned: { id: 4, values: [0.1, 0.3] } };
+  const rows = buildBarInfoRows(request);
+  expect(rows.length).toBe(6);
+  expect(rows[4].label).toBe('Pinned v4:');
+  expect(rows[4].parts[1][0]).toBe('0.100');
+  expect(rows[4].parts[3][0]).toBe('0.300');
+  expect(rows[4].parts[5][0]).toBe('0.200');
+  expect(rows[5].label).toBe('Message:');
+}
+
+function validateBlankRowsKeepNoPinnedRow() {
+  const rows = buildBarInfoRows({ question, answers, key: '', keys: ['a', 'b'], callIndex: null, pinned: { id: 4, values: [] } });
+  expect(rows.length).toBe(4);
+}
+
+test('test_pinned_row_holds_the_min_max_and_average_of_the_pin', validatePinnedRowHoldsTheMinMaxAndAverageOfThePin);
+test('test_blank_bar_info_keeps_no_pinned_row', validateBlankRowsKeepNoPinnedRow);
 test('test_blank_bar_info_has_blank_values', validateBlankRowsHaveNoValues);
 test('test_call_bar_info_holds_score_and_confidence', validateCallRowsHoldTheCallValues);
 test('test_average_bar_info_holds_averages', validateAverageRowsHoldTheAverages);

@@ -6,6 +6,7 @@ import { createBarInfoBox } from './infoDom';
 import { computeHitBar } from './infoGeometry';
 import { attachHover, updateShownInfo } from './infoHover';
 import { buildBarInfoRows } from './infoRows';
+import { readPinnedValues } from './pinned';
 import { readWinningKey } from './infoWinner';
 import { createSvgNode } from './svgDom';
 
@@ -19,7 +20,7 @@ export function attachColumnHits(chart: ChartLayout, tracker: HoverTracker, colu
   for (let callIndex = isAverageShown ? -1 : 0; callIndex < values.length; callIndex++) {
     const bar = computeHitBar(slotX, offset, callIndex, values, plotH, baseline);
     const hit = createSvgNode('rect', { x: bar.x, y: bar.y, width: bar.width, height: bar.height, fill: 'transparent', 'stroke-width': 1 });
-    const request: BarInfoRequest = { question, answers, key, keys, callIndex };
+    const request: BarInfoRequest = { question, answers, key, keys, callIndex, pinned: readPinnedValues(chart.pinned, key) };
     attachHover({ tracker, svg, hit, request, values, slotX, plotH, isAverageShown, baseline });
     svg.appendChild(hit);
     if (firstHit === null)

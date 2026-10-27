@@ -10,6 +10,8 @@ import { initGraphs, renderGraphs } from './graphs';
 import { attachInfoBox } from './infoBox';
 import { saveNote } from './noteActions';
 import { readPageData } from './pageData';
+import { clearPinned, setPinnedToShown } from './pinActions';
+import { applyPinInfo } from './pinInfo';
 import { resetVersionRuns } from './resetRuns';
 import { toggleResultJson } from './resultJsonToggle';
 import { attachResizer } from './resizer';
@@ -34,6 +36,8 @@ getButton('collapseAllButton').addEventListener('click', setAllGraphsToCollapsed
 getButton('expandAllButton').addEventListener('click', setAllGraphsToExpanded);
 getButton('prevVersionButton').addEventListener('click', moveToPreviousVersion);
 getButton('nextVersionButton').addEventListener('click', moveToNextVersion);
+getButton('pinButton').addEventListener('click', setPinnedToShown);
+getButton('unpinButton').addEventListener('click', clearPinned);
 getButton('resetRunsButton').addEventListener('click', resetVersionRuns);
 document.addEventListener('keydown', moveOnArrowKey);
 getElement('noteText').addEventListener('change', saveNote);
@@ -52,6 +56,7 @@ const pageData = readPageData();
 pageState.versions = pageData.versions;
 refreshFileView();
 renderLastVersion();
+applyPinInfo(pageState.pinnedId);
 function renderShownGraphs(): void {
   renderGraphs(getShownVersion(), getElement('graphContainerBox'), attachInfoBox);
 }

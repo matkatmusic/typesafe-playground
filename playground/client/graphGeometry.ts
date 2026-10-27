@@ -12,6 +12,7 @@ export const NOUL_BASELINE = 0.5;
 export const MIN_HIT_H = 3;
 export const MIN_BAR_H = 3;
 export const MIN_SLOT_BARS_WIDTH = 16;
+export const PINNED_PAD = 2;
 
 export function computeY(value: number, plotH: number): number {
   return TOP + plotH * (1 - value);
@@ -69,6 +70,10 @@ export function computeAverageBar(slotX: number, average: number, plotH: number,
     ...computeBarSpan(average, baseline, plotH),
     width: BAR_W - 1,
   };
+}
+
+export function computePinnedBar(bar: BarGeometry): BarGeometry {
+  return { ...bar, x: bar.x - PINNED_PAD, width: bar.width + 2 * PINNED_PAD };
 }
 
 export function computeRangeLine(slotX: number, stat: Summary, plotH: number): RangeLineGeometry {

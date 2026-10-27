@@ -6,6 +6,7 @@ function validatePageStateStartsClean() {
     expect(pageState.fileHandle).toBeNull()
     expect(pageState.versions).toEqual([])
     expect(pageState.index).toBe(0)
+    expect(pageState.pinnedId).toBeNull()
 }
 
 function validateShownVersionFollowsTheIndex() {

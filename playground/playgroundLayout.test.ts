@@ -25,7 +25,7 @@ test('test_input_results_box_holds_input_box_drag_bar_and_result_box_in_order', 
 
 async function validateResultBoxHoldsWinnersFirstThenToggleGraphsAndJson() {
     const page = await buildPage(await buildTempHistoryPath())
-    const itemIds = ['resultBox', 'winnerBox', 'collapseAllButton', 'expandAllButton', 'jsonToggleButton', 'graphContainerBox', 'resultJsonEditor']
+    const itemIds = ['resultBox', 'pinBox', 'pinButton', 'unpinButton', 'pinInfo', 'winnerBox', 'collapseAllButton', 'expandAllButton', 'jsonToggleButton', 'graphContainerBox', 'resultJsonEditor']
     let previousIndex = -1
     for (const itemId of itemIds) {
         const itemIndex = page.indexOf(`id="${itemId}"`)

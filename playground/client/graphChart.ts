@@ -1,9 +1,10 @@
 import type { Question } from '@typesafe-ai/sdk';
-import type { Answer, ChartLayout, GraphBlock } from './graphTypes';
+import type { Answer, ChartLayout, GraphBlock, PinnedData } from './graphTypes';
 import { BOTTOM, computeBaseline, computePlotHeight, computeSlotLeft, computeSlotWidth, computeY, LEFT, NOUL_BASELINE, TICK_COUNT, TOP } from './graphGeometry';
 import { renderOption } from './graphOption';
 import { graphState } from './graphState';
 import { computeSummary, listOptionKeys, listValues } from './graphValues';
+import { readPinnedValues } from './pinned';
 import { createSvgNode } from './svgDom';
 
 function renderAxis(svg: Element, plotRight: number, plotH: number): void {
@@ -34,12 +35,12 @@ export function listSortedKeys(answers: Answer[]): string[] {
   return keys;
 }
 
-export function renderChart(graphBlock: GraphBlock, name: string, question: Question, answers: Answer[]): ChartLayout {
+export function renderChart(graphBlock: GraphBlock, name: string, question: Question, answers: Answer[], pinned: PinnedData | null): ChartLayout {
   const { block, box } = graphBlock;
   const keys = listSortedKeys(answers);
   const isAverageShown = graphState.averageShownByName[name] === true;
   const plotH = computePlotHeight(box.clientHeight);
-  const slot = computeSlotWidth(answers.length, isAverageShown);
+  const slot = computeSlotWidth(Math.max(answers.length, pinned === null ? 0 : pinned.answers.length), isAverageShown);
   const plotRight = LEFT + keys.length * slot;
   const svg = createSvgNode('svg', { width: plotRight + 20, height: TOP + plotH + BOTTOM, role: 'img' });
   const baseline = computeBaseline(question);
@@ -47,8 +48,12 @@ export function renderChart(graphBlock: GraphBlock, name: string, question: Ques
     renderNoulAxis(svg, plotRight, plotH);
   else
     renderAxis(svg, plotRight, plotH);
-  for (let i = 0; i < keys.length; i++)
-    renderOption(svg, listValues(answers, keys[i]), computeSlotLeft(i, slot), plotH, isAverageShown, baseline);
+  for (let i = 0; i < keys.length; i++) {
+    const pinnedValues = readPinnedValues(pinned, keys[i]);
+    if (pinnedValues !== null)
+      renderOption(svg, pinnedValues.values, computeSlotLeft(i, slot), plotH, isAverageShown, baseline, true);
+    renderOption(svg, listValues(answers, keys[i]), computeSlotLeft(i, slot), plotH, isAverageShown, baseline, false);
+  }
   box.replaceChildren(svg);
-  return { name, block, box, svg, question, answers, keys, slot, plotH, isAverageShown, baseline };
+  return { name, block, box, svg, question, answers, keys, slot, plotH, isAverageShown, baseline, pinned };
 }

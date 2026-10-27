@@ -1,5 +1,5 @@
 import { test, expect, afterEach } from 'bun:test'
-import { executePicker, executeUnsavedPrompt, openVersionsFile, resetToSavedFile, sendJson, writeVersionsFile } from './versionActions'
+import { createNewDocument, executePicker, executeUnsavedPrompt, openVersionsFile, resetToSavedFile, sendJson, writeVersionsFile } from './versionActions'
 import { pageState } from './state'
 
 afterEach(removeStubbedWindow)
@@ -91,6 +91,22 @@ async function validateBrokenOpenPickerStillThrows() {
     await expect(openVersionsFile()).rejects.toThrow('denied')
 }
 
+async function validateNewDocumentClearsThePin() {
+    const realFetch = globalThis.fetch
+    globalThis.fetch = (async () => Response.json({ versions: [{ id: 1 }] })) as unknown as typeof fetch
+    pageState.isDirty = false
+    pageState.pinnedId = 3
+    try {
+        await expect(createNewDocument()).rejects.toThrow()
+        expect(pageState.pinnedId).toBeNull()
+    }
+    finally {
+        globalThis.fetch = realFetch
+        pageState.versions = []
+    }
+}
+
+test('test_new_document_clears_the_pin', validateNewDocumentClearsThePin)
 test('test_execute_picker_returns_null_on_abort_and_rethrows_others', validateExecutePickerReturnsNullOnAbortAndRethrowsOthers)
 test('test_cancelled_save_picker_leaves_state_untouched', validateCancelledSavePickerLeavesStateUntouched)
 test('test_broken_save_picker_still_throws', validateBrokenSavePickerStillThrows)

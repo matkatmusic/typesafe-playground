@@ -1,5 +1,6 @@
 import type { Version } from '../playgroundHistory';
 import { refreshFileView } from './fileView';
+import { applyPinInfo } from './pinInfo';
 import { pageState } from './state';
 import { computeUnsavedStep, readUnsavedChoice } from './unsavedDialog';
 import { renderLastVersion } from './versionBox';
@@ -18,8 +19,10 @@ async function replaceVersions(path: string, body: object): Promise<void> {
   const response = await sendJson(path, body);
   const replaced: { versions: Version[] } = await response.json();
   pageState.versions = replaced.versions;
+  pageState.pinnedId = null;
   pageState.isDirty = false;
   renderLastVersion();
+  applyPinInfo(pageState.pinnedId);
 }
 
 export async function executePicker<T>(pick: () => Promise<T>): Promise<T | null> {

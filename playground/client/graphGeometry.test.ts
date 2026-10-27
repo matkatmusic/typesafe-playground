@@ -1,8 +1,8 @@
 import { test, expect } from 'bun:test';
 import type { Question } from '@typesafe-ai/sdk';
 import {
-  BAR_W, BOTTOM, computeAverageBar, computeBarOffset, computeBaseline, computeCallBar, computePlotHeight, computeRangeLine, computeSlotLeft,
-  computeSlotWidth, computeY, LEFT, MIN_BAR_H, MIN_PLOT_H, NOUL_BASELINE, OPTION_GAP, TICK_COUNT, TOP,
+  BAR_W, BOTTOM, computeAverageBar, computeBarOffset, computeBaseline, computeCallBar, computePinnedBar, computePlotHeight, computeRangeLine, computeSlotLeft,
+  computeSlotWidth, computeY, LEFT, MIN_BAR_H, MIN_PLOT_H, NOUL_BASELINE, OPTION_GAP, PINNED_PAD, TICK_COUNT, TOP,
 } from './graphGeometry';
 
 function validateComputeY() {
@@ -63,6 +63,15 @@ function validateScoreBarsKeepTheirHeight() {
   expect(computeCallBar(100, 0, 0, 0.01, 100, 0).height).toBeCloseTo(1);
 }
 
+function validatePinnedBarGrowsSidewaysOnly() {
+  const plain = computeCallBar(100, 0, 0, 0.5, 100, 0);
+  const padded = computePinnedBar(plain);
+  expect(padded.x).toBe(plain.x - PINNED_PAD);
+  expect(padded.width).toBe(plain.width + 2 * PINNED_PAD);
+  expect(padded.y).toBe(plain.y);
+  expect(padded.height).toBe(plain.height);
+}
+
 function validateTicksDrawSixGridLines() {
   expect(TICK_COUNT + 1).toBe(6);
 }
@@ -74,4 +83,5 @@ test('test_bar_geometry', validateBars);
 test('test_noul_bars_start_at_the_middle', validateNoulBarsStartAtTheMiddle);
 test('test_noul_bars_are_at_least_3px_tall', validateNoulBarsAreAtLeast3pxTall);
 test('test_score_bars_keep_their_height', validateScoreBarsKeepTheirHeight);
+test('test_pinned_bar_grows_sideways_only', validatePinnedBarGrowsSidewaysOnly);
 test('test_ticks_draw_six_grid_lines', validateTicksDrawSixGridLines);

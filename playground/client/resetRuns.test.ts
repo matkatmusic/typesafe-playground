@@ -11,6 +11,7 @@ function removeFakeState() {
   Reflect.deleteProperty(globalThis, 'confirm')
   globalThis.fetch = realFetch
   pageState.isDirty = false
+  pageState.pinnedId = null
   pageState.versions = []
   pageState.index = 0
 }
@@ -63,5 +64,22 @@ async function validateConfirmedResetPostsTheIdStoresTheClearedVersionAndMarksTh
   expect(elements.lastEditedLabel.textContent).toContain('last edited: ')
 }
 
+async function validateResetUnpinsOnlyThePinnedVersion() {
+  Object.assign(globalThis, { document: { getElementById: () => ({ textContent: '' }) } })
+  installFakeConfirm(true)
+  async function stubFetch() {
+    return Response.json({ ...buildRanVersion(), calls: 0, outputs: [] })
+  }
+  globalThis.fetch = stubFetch as unknown as typeof fetch
+  pageState.versions = [buildRanVersion()] as never
+  pageState.pinnedId = 9
+  await expect(resetVersionRuns()).rejects.toThrow()
+  expect(pageState.pinnedId).toBe(9)
+  pageState.pinnedId = 4
+  await expect(resetVersionRuns()).rejects.toThrow()
+  expect(pageState.pinnedId).toBeNull()
+}
+
+test('test_reset_unpins_only_the_pinned_version', validateResetUnpinsOnlyThePinnedVersion)
 test('test_declined_confirm_does_not_call_the_server', validateDeclinedConfirmDoesNotCallTheServer)
 test('test_confirmed_reset_posts_the_id_stores_the_cleared_version_and_marks_the_change', validateConfirmedResetPostsTheIdStoresTheClearedVersionAndMarksTheChange)

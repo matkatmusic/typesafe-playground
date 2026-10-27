@@ -47,7 +47,7 @@ function countTopRuns(answers: Answer[], keys: string[], key: string): number {
 }
 
 export function buildBarInfoRows(request: BarInfoRequest): InfoRow[] {
-  const { question, answers, key, keys, callIndex } = request;
+  const { question, answers, key, keys, callIndex, pinned } = request;
   const isBarShown = callIndex !== null;
   let messageText = '';
   let scoreText = '';
@@ -73,6 +73,12 @@ export function buildBarInfoRows(request: BarInfoRequest): InfoRow[] {
   rows.push({ label: 'Range:', parts: listRangeParts(lowText, highText, averageText) });
   if (isBarShown)
     rows.push({ label: 'Top choice in', parts: [[topCountText, VALUE], [' of ', LABEL], [String(answers.length), VALUE], [' runs', LABEL]] });
+  const isPinnedRowShown = isBarShown && pinned !== null;
+  if (isPinnedRowShown) {
+    const pinnedStat = computeSummary(pinned.values);
+    const pinnedParts = listRangeParts(formatThreeDecimals(pinnedStat.low), formatThreeDecimals(pinnedStat.high), formatThreeDecimals(pinnedStat.average));
+    rows.push({ label: `Pinned v${pinned.id}:`, parts: pinnedParts });
+  }
   rows.push({ label: 'Message:', parts: [[messageText, VALUE]] });
   return rows;
 }
