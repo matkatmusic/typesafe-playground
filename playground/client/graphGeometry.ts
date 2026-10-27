@@ -10,6 +10,7 @@ export const MIN_PLOT_H = 40;
 export const TICK_COUNT = 5;
 export const NOUL_BASELINE = 0.5;
 export const MIN_HIT_H = 3;
+export const MIN_BAR_H = 3;
 export const MIN_SLOT_BARS_WIDTH = 16;
 
 export function computeY(value: number, plotH: number): number {
@@ -33,8 +34,25 @@ export function computeBaseline(question: Question): number {
   return question.type === 'noul' ? NOUL_BASELINE : 0;
 }
 
+export function computeRaisedHeight(value: number, baseline: number, height: number): number {
+  if (value > baseline)
+    return height;
+  if (value === baseline)
+    return height / 2;
+  return 0;
+}
+
+export function computeMinHeightSpan(value: number, baseline: number, plotH: number): BarSpan {
+  const height = Math.max(plotH * Math.abs(value - baseline), MIN_BAR_H);
+  const raisedHeight = computeRaisedHeight(value, baseline, height);
+  return { y: computeY(baseline, plotH) - raisedHeight, height: height };
+}
+
 export function computeBarSpan(value: number, baseline: number, plotH: number): BarSpan {
-  return { y: computeY(Math.max(value, baseline), plotH), height: plotH * Math.abs(value - baseline) };
+  const isFromZero = baseline === 0;
+  if (isFromZero)
+    return { y: computeY(Math.max(value, baseline), plotH), height: plotH * Math.abs(value - baseline) };
+  return computeMinHeightSpan(value, baseline, plotH);
 }
 
 export function computeCallBar(slotX: number, offset: number, callIndex: number, value: number, plotH: number, baseline: number): BarGeometry {

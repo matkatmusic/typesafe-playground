@@ -2,7 +2,7 @@ import { test, expect } from 'bun:test';
 import type { Question } from '@typesafe-ai/sdk';
 import {
   BAR_W, BOTTOM, computeAverageBar, computeBarOffset, computeBaseline, computeCallBar, computePlotHeight, computeRangeLine, computeSlotLeft,
-  computeSlotWidth, computeY, LEFT, MIN_PLOT_H, NOUL_BASELINE, OPTION_GAP, TICK_COUNT, TOP,
+  computeSlotWidth, computeY, LEFT, MIN_BAR_H, MIN_PLOT_H, NOUL_BASELINE, OPTION_GAP, TICK_COUNT, TOP,
 } from './graphGeometry';
 
 function validateComputeY() {
@@ -43,8 +43,24 @@ function validateNoulBarsStartAtTheMiddle() {
   expect(down.y).toBeCloseTo(TOP + 50);
   expect(down.height).toBeCloseTo(30);
   const flat = computeAverageBar(100, 0.5, 100, NOUL_BASELINE);
-  expect(flat.y).toBeCloseTo(TOP + 50);
-  expect(flat.height).toBe(0);
+  expect(flat.y).toBeCloseTo(TOP + 50 - MIN_BAR_H / 2);
+  expect(flat.height).toBe(MIN_BAR_H);
+}
+
+function validateNoulBarsAreAtLeast3pxTall() {
+  const slightlyUp = computeCallBar(100, 0, 0, 0.51, 100, NOUL_BASELINE);
+  expect(slightlyUp.height).toBe(MIN_BAR_H);
+  expect(slightlyUp.y).toBeCloseTo(TOP + 50 - MIN_BAR_H);
+  const slightlyDown = computeCallBar(100, 0, 0, 0.49, 100, NOUL_BASELINE);
+  expect(slightlyDown.height).toBe(MIN_BAR_H);
+  expect(slightlyDown.y).toBeCloseTo(TOP + 50);
+  const tallDown = computeCallBar(100, 0, 0, 0.2, 100, NOUL_BASELINE);
+  expect(tallDown.height).toBeCloseTo(30);
+}
+
+function validateScoreBarsKeepTheirHeight() {
+  expect(computeCallBar(100, 0, 0, 0, 100, 0).height).toBe(0);
+  expect(computeCallBar(100, 0, 0, 0.01, 100, 0).height).toBeCloseTo(1);
 }
 
 function validateTicksDrawSixGridLines() {
@@ -56,4 +72,6 @@ test('test_plot_height_keeps_a_minimum', validatePlotHeightHasAFloor);
 test('test_slot_width_and_offsets', validateSlotWidth);
 test('test_bar_geometry', validateBars);
 test('test_noul_bars_start_at_the_middle', validateNoulBarsStartAtTheMiddle);
+test('test_noul_bars_are_at_least_3px_tall', validateNoulBarsAreAtLeast3pxTall);
+test('test_score_bars_keep_their_height', validateScoreBarsKeepTheirHeight);
 test('test_ticks_draw_six_grid_lines', validateTicksDrawSixGridLines);
