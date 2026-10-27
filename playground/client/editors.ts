@@ -5,6 +5,7 @@ import { linter, lintGutter } from '@codemirror/lint';
 import { EditorState, type Extension } from '@codemirror/state';
 import { keymap } from '@codemirror/view';
 import { getElement } from './dom';
+import { clearStateJsonError } from './stateErrorClear';
 
 export const EDITOR_THEME_RULES = {
   '&': { height: '100%', background: 'var(--panel)', color: 'var(--text)', border: '1px solid var(--grid)', borderRadius: '6px' },
@@ -53,7 +54,7 @@ export function getResultEditor(): EditorView {
 }
 
 export function createStateEditor(): EditorView {
-  stateEditor = new EditorView({ doc: '', extensions: buildJsonExtensions(), parent: getElement('stateJsonEditor') });
+  stateEditor = new EditorView({ doc: '', extensions: [buildJsonExtensions(), EditorView.updateListener.of(clearStateJsonError)], parent: getElement('stateJsonEditor') });
   return stateEditor;
 }
 
