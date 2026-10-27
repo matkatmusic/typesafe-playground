@@ -3,6 +3,7 @@ import type { EditorView } from '@codemirror/view'
 import type { Version } from '../playgroundHistory'
 import * as editors from './editors'
 import * as graphs from './graphs'
+import * as winnersDom from './winnersDom'
 import { pageState } from './state'
 import { buildRunBody, executeSubmit, formatRunFailure, RUNNING_TEXT, SUBMIT_TEXT } from './submit'
 
@@ -16,7 +17,7 @@ const realFetch = globalThis.fetch
 
 function installFakeDom(hasEnvKey: boolean) {
     const elements = {
-        data: new FakeBox(), graphContainerBox: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
+        data: new FakeBox(), graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
         submitButton: new FakeButton(), prevVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(),
     }
     elements.data.textContent = JSON.stringify({ versions: [VERSION], hasEnvKey })
@@ -64,6 +65,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     }
     const renderSpy = spyOn(editors, 'renderResultJson').mockImplementation(recordShownValue)
     const renderGraphsSpy = spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
+    const renderWinnersSpy = spyOn(winnersDom, 'renderWinners').mockImplementation(() => {})
     const renderStateSpy = spyOn(editors, 'renderStateJson').mockImplementation(recordShownValue)
     const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
     const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubStateEditor('{}'))
@@ -85,6 +87,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     await executeSubmit()
     renderSpy.mockRestore()
     renderGraphsSpy.mockRestore()
+    renderWinnersSpy.mockRestore()
     renderStateSpy.mockRestore()
     stateSpy.mockRestore()
     questionsSpy.mockRestore()

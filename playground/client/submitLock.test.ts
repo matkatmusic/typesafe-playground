@@ -3,6 +3,7 @@ import type { EditorView } from '@codemirror/view'
 import type { Version } from '../playgroundHistory'
 import * as editors from './editors'
 import * as graphs from './graphs'
+import * as winnersDom from './winnersDom'
 import { pageState } from './state'
 import { executeSubmit, listLockableEditors, SUBMIT_TEXT, setEditorsLocked } from './submit'
 
@@ -15,7 +16,7 @@ const realFetch = globalThis.fetch
 
 function installFakeDom() {
     const elements = {
-        data: new FakeBox(), graphContainerBox: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
+        data: new FakeBox(), graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
         submitButton: new FakeButton(), prevVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(),
     }
     elements.data.textContent = JSON.stringify({ versions: [VERSION], hasEnvKey: true })
@@ -57,6 +58,7 @@ function spyOnLockCalls() {
     const renderQuestionsSpy = spyOn(editors, 'renderQuestionsJson').mockImplementation(() => {})
     const renderResultSpy = spyOn(editors, 'renderResultJson').mockImplementation(() => {})
     const renderGraphsSpy = spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
+    const renderWinnersSpy = spyOn(winnersDom, 'renderWinners').mockImplementation(() => {})
     function restoreSpies() {
         lockSpy.mockRestore()
         stateSpy.mockRestore()
@@ -65,6 +67,7 @@ function spyOnLockCalls() {
         renderQuestionsSpy.mockRestore()
         renderResultSpy.mockRestore()
         renderGraphsSpy.mockRestore()
+        renderWinnersSpy.mockRestore()
     }
     return { lockCalls, lockedEditors, stateEditor, questionsEditor, restoreSpies }
 }

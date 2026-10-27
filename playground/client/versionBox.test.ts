@@ -2,6 +2,7 @@ import { test, expect, afterEach, mock, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
 import * as editors from './editors'
 import * as graphs from './graphs'
+import * as winnersDom from './winnersDom'
 import { pageState } from './state'
 import * as versionArrows from './versionArrows'
 import { computeArrowStep, isTypingTarget, moveByVersions, moveOnArrowKey, renderLastVersion, updateOnEditorChange } from './versionBox'
@@ -20,7 +21,7 @@ class StubElement {
 function installFakeDom() {
     const elements: Record<string, { textContent: string }> = {
         versionLabel: { textContent: '' }, costLabel: { textContent: '' }, tokensLabel: { textContent: '' }, lastEditedLabel: { textContent: '' },
-        graphContainerBox: { textContent: '' },
+        graphContainerBox: { textContent: '' }, winnerBox: { textContent: '' },
     }
     spyOn(versionArrows, 'updateVersionArrows').mockImplementation(() => {})
     Object.assign(globalThis, { document: { getElementById: (id: string) => elements[id] ?? null } })
@@ -109,6 +110,7 @@ function validateMovingWrapsAndRendersThatVersion() {
     spyOn(editors, 'renderStateJson').mockImplementation(recordState)
     spyOn(editors, 'renderResultJson').mockImplementation(recordResult)
     spyOn(graphs, 'renderGraphs').mockImplementation(recordGraphs as never)
+    spyOn(winnersDom, 'renderWinners').mockImplementation(() => {})
     spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
     const renderQuestionsSpy = installQuestionsStub('{}')
     pageState.versions = [makeVersion(1, { a: 1 }), makeVersion(2, { b: 2 })]
@@ -134,6 +136,7 @@ function validateArrowKeyMovesOnlyOutsideTypingTargets() {
     spyOn(editors, 'renderStateJson').mockImplementation(() => {})
     spyOn(editors, 'renderResultJson').mockImplementation(() => {})
     spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
+    spyOn(winnersDom, 'renderWinners').mockImplementation(() => {})
     spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
     installQuestionsStub('{}')
     pageState.versions = [makeVersion(1, { a: 1 }), makeVersion(2, { b: 2 })]
