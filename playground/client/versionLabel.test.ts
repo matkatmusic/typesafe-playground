@@ -2,7 +2,8 @@ import { test, expect } from 'bun:test'
 import type { Version } from '../playgroundHistory'
 import { computeWrappedIndex, createEditedVersion, formatVersionLabel, isStateEdited, NOT_RUN_TIME } from './versionLabel'
 
-const version: Version = { id: 2, time: 'now', state: { a: 1 }, questions: {}, calls: 1, outputs: [] }
+const ISO_TIME = '2026-03-04T05:06:07.000Z'
+const version: Version ={ id: 2, time: 'now', state: { a: 1 }, questions: {}, calls: 1, outputs: [] }
 
 function validateEditDetectionComparesParsedState() {
     expect(isStateEdited(JSON.stringify(version.state, null, 2), version)).toBe(false)
@@ -21,9 +22,10 @@ function validateEditedVersionHasNoRun() {
 }
 
 function validateLabelText() {
-    expect(formatVersionLabel(2, 3, 'now', 1)).toBe('version 2 of 3 · now · 1 call')
+    const localTime = new Date(ISO_TIME).toLocaleString()
+    expect(formatVersionLabel(2, 3, ISO_TIME, 1)).toBe(`version 2 of 3 · ${localTime} · 1 call`)
     expect(formatVersionLabel(4, 4, NOT_RUN_TIME, 0)).toBe('version 4 of 4 · not run yet · 0 calls')
-    expect(formatVersionLabel(1, 1, 'now', 5)).toBe('version 1 of 1 · now · 5 calls')
+    expect(formatVersionLabel(1, 1, ISO_TIME, 5)).toBe(`version 1 of 1 · ${localTime} · 5 calls`)
 }
 
 function validateIndexWrapsBothWays() {

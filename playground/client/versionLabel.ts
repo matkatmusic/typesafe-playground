@@ -10,7 +10,8 @@ export function computeWrappedIndex(index: number, step: number, count: number):
 
 export function formatVersionLabel(shownNumber: number, versionCount: number, time: string, calls: number): string {
   const callWord = calls === 1 ? 'call' : 'calls';
-  return `version ${shownNumber} of ${versionCount}${SEPARATOR}${time}${SEPARATOR}${calls} ${callWord}`;
+  const shownTime = time === NOT_RUN_TIME ? time : new Date(time).toLocaleString();
+  return `version ${shownNumber} of ${versionCount}${SEPARATOR}${shownTime}${SEPARATOR}${calls} ${callWord}`;
 }
 
 export function isStateEdited(stateText: string, version: Version): boolean {

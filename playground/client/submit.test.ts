@@ -9,7 +9,8 @@ class FakeButton { disabled = false; textContent = SUBMIT_TEXT }
 class FakeInput { value = ''; type = 'password' }
 class FakeBox { textContent = '' }
 
-const VERSION = { id: 1, time: 't', state: { a: 1 }, questions: {}, calls: 1, outputs: [{ usage: { input_tokens: 1000000, output_tokens: 1 } }] } as unknown as Version
+const ISO_TIME = '2026-03-04T05:06:07.000Z'
+const VERSION = { id: 1, time: ISO_TIME, state: { a: 1 }, questions: {}, calls: 1, outputs: [{ usage: { input_tokens: 1000000, output_tokens: 1 } }] } as unknown as Version
 const realFetch = globalThis.fetch
 
 function installFakeDom(hasEnvKey: boolean) {
@@ -96,7 +97,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     expect(pageState.versions.length).toBe(2)
     expect(pageState.versions[1]).toEqual(newVersion)
     expect(pageState.index).toBe(1)
-    expect(elements.versionLabel.textContent).toBe('version 2 of 2 · t · 1 call')
+    expect(elements.versionLabel.textContent).toBe(`version 2 of 2 · ${new Date(ISO_TIME).toLocaleString()} · 1 call`)
 }
 
 async function validateFailedSubmitShowsTheErrorLineAndLeavesTheResultAlone() {

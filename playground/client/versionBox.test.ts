@@ -4,6 +4,8 @@ import * as editors from './editors'
 import { pageState } from './state'
 import { computeArrowStep, isTypingTarget, moveByVersions, moveOnArrowKey, renderLastVersion, updateOnEditorChange } from './versionBox'
 
+const ISO_TIME = '2026-03-04T05:06:07.000Z'
+
 class StubElement {
     seenSelector = ''
     constructor(private readonly isInside: boolean) {}
@@ -26,7 +28,7 @@ function buildStubStateEditor(text: string) {
 }
 
 function makeVersion(id: number, state: unknown) {
-    return { id: id, time: `t${id}`, state: state, questions: {}, calls: id, outputs: [] }
+    return { id: id, time: ISO_TIME, state: state, questions: {}, calls: id, outputs: [] }
 }
 
 function removeFakeState() {
@@ -96,7 +98,7 @@ function validateMovingWrapsAndRendersThatVersion() {
     expect(pageState.index).toBe(0)
     expect(shownStates).toEqual([{ a: 1 }])
     expect(shownResults).toEqual([[]])
-    expect(elements.versionLabel.textContent).toBe('version 1 of 2 · t1 · 1 call')
+    expect(elements.versionLabel.textContent).toBe(`version 1 of 2 · ${new Date(ISO_TIME).toLocaleString()} · 1 call`)
     expect(elements.tokensLabel.textContent).toBe('Tokens: 0')
     expect(pageState.isDirty).toBe(false)
     moveByVersions(-1)
