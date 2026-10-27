@@ -8,6 +8,7 @@ import { markPageChanged } from './pageChanged';
 import { getShownVersion, pageState } from './state';
 import { isVersionMovePossible, updateVersionArrows } from './versionArrows';
 import { computeWrappedIndex, createEditedVersion, formatVersionLabel, isJsonTextEdited } from './versionLabel';
+import { renderWinners } from './winnersDom';
 
 const TYPING_TARGET_SELECTOR = 'input, textarea, select, dialog, .cm-editor';
 
@@ -33,6 +34,7 @@ export function renderShownVersion(): void {
   renderCostAndTokens(version);
   renderResultJson(version.outputs);
   renderGraphs(version, getElement('graphContainerBox'), attachInfoBox);
+  renderWinners(version, getElement('winnerBox'));
   updateVersionArrows();
 }
 

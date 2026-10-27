@@ -1,0 +1,82 @@
+import { test, expect, afterEach } from 'bun:test';
+import type { Version } from '../playgroundHistory';
+import type { Answer } from './graphTypes';
+import { createQuestionResultLabel, renderWinners } from './winnersDom';
+
+class FakeElement {
+  id = '';
+  className = '';
+  textContent = '';
+  children: FakeElement[] = [];
+  appendChild(child: FakeElement) { this.children.push(child); }
+  replaceChildren(...nodes: FakeElement[]) { this.children = nodes; }
+}
+
+function installFakeDocument() {
+  Object.assign(globalThis, { document: { createElement: () => new FakeElement() } });
+}
+
+function removeFakeDocument() {
+  Reflect.deleteProperty(globalThis, 'document');
+}
+
+function buildVersion(questions: unknown, outputs: unknown[]): Version {
+  return { id: 1, time: 't', state: {}, questions, calls: outputs.length, outputs } as Version;
+}
+
+const NOUL_QUESTIONS = { q: { type: 'noul', instructions: 'Is it?', criteria: { true: 'yes!', false: 'no!' } } };
+
+function buildNoulOutputs(...noulValues: number[]) {
+  const outputs = [];
+  for (const noul of noulValues)
+    outputs.push({ model: 'm', answers: { q: { type: 'noul', noul } }, usage: { input_tokens: 1, output_tokens: 1 } });
+  return outputs;
+}
+
+function validateLabelHoldsInstructionsThenOneLinePerGroup() {
+  installFakeDocument();
+  const answers: Answer[] = [{ type: 'noul', noul: 0.9 }, { type: 'noul', noul: 0.1 }];
+  const label = createQuestionResultLabel({ type: 'noul', instructions: 'Is it?', criteria: { true: 'yes!', false: 'no!' } }, answers) as unknown as FakeElement;
+  expect(label.children.length).toBe(3);
+  expect(label.children[0].textContent).toBe('Is it?');
+  expect(label.children[0].className).toBe('winner-instructions');
+  expect(label.children[1].textContent).toBe('yes! (1)');
+  expect(label.children[1].className).toBe('winner-line');
+  expect(label.children[2].textContent).toBe('no! (2)');
+}
+
+function validateRenderShowsTitleThenOneLabelPerQuestion() {
+  installFakeDocument();
+  const container = new FakeElement();
+  container.appendChild(new FakeElement());
+  const version = buildVersion(NOUL_QUESTIONS, buildNoulOutputs(0.9, 0.2, 0.8));
+  renderWinners(version, container as unknown as HTMLElement);
+  expect(container.children.length).toBe(2);
+  expect(container.children[0].id).toBe('winnerLabel');
+  expect(container.children[0].textContent).toBe('Winners:');
+  expect(container.children[1].children[1].textContent).toBe('yes! (1,3)');
+  expect(container.children[1].children[2].textContent).toBe('no! (2)');
+}
+
+function validateRenderTwiceKeepsOneTitle() {
+  installFakeDocument();
+  const container = new FakeElement();
+  const version = buildVersion(NOUL_QUESTIONS, buildNoulOutputs(0.9));
+  renderWinners(version, container as unknown as HTMLElement);
+  renderWinners(version, container as unknown as HTMLElement);
+  expect(container.children.length).toBe(2);
+}
+
+function validateRenderSkipsQuestionsWithoutOutputs() {
+  installFakeDocument();
+  const container = new FakeElement();
+  renderWinners(buildVersion(NOUL_QUESTIONS, []), container as unknown as HTMLElement);
+  expect(container.children.length).toBe(1);
+  expect(container.children[0].textContent).toBe('Winners:');
+}
+
+afterEach(removeFakeDocument);
+test('test_label_holds_instructions_then_one_line_per_group', validateLabelHoldsInstructionsThenOneLinePerGroup);
+test('test_render_shows_title_then_one_label_per_question', validateRenderShowsTitleThenOneLabelPerQuestion);
+test('test_render_twice_keeps_one_title', validateRenderTwiceKeepsOneTitle);
+test('test_render_skips_questions_without_outputs', validateRenderSkipsQuestionsWithoutOutputs);
