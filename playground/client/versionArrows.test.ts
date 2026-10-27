@@ -1,6 +1,7 @@
 import { test, expect, afterEach, mock, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
 import * as editors from './editors'
+import * as graphs from './graphs'
 import { pageState } from './state'
 import { isVersionMovePossible, updateVersionArrows } from './versionArrows'
 import { moveOnArrowKey, updateOnEditorChange } from './versionBox'
@@ -9,7 +10,7 @@ const ISO_TIME = '2026-03-04T05:06:07.000Z'
 
 function installFakeDom() {
     const elements: Record<string, { textContent: string, disabled?: boolean }> = {
-        versionLabel: { textContent: '' }, costLabel: { textContent: '' }, tokensLabel: { textContent: '' },
+        versionLabel: { textContent: '' }, costLabel: { textContent: '' }, tokensLabel: { textContent: '' }, graphContainerBox: { textContent: '' },
         prevVersionButton: { textContent: '', disabled: false }, nextVersionButton: { textContent: '', disabled: false },
     }
     Object.assign(globalThis, { document: { getElementById: (id: string) => elements[id] ?? null }, HTMLButtonElement: Object, Element: Object })
@@ -27,7 +28,7 @@ function makeVersion(id: number) {
 function installRenderStubs() {
     spyOn(editors, 'renderStateJson').mockImplementation(() => {})
     spyOn(editors, 'renderQuestionsJson').mockImplementation(() => {})
-    spyOn(editors, 'renderResultJson').mockImplementation(() => {})
+    spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
     spyOn(editors, 'getStateEditor').mockReturnValue(buildStubEditor('{}'))
     return spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubEditor('{}'))
 }

@@ -1,6 +1,7 @@
 import { test, expect, afterEach, mock, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
 import * as editors from './editors'
+import * as graphs from './graphs'
 import { pageState } from './state'
 import * as versionArrows from './versionArrows'
 import { computeArrowStep, isTypingTarget, moveByVersions, moveOnArrowKey, renderLastVersion, updateOnEditorChange } from './versionBox'
@@ -19,6 +20,7 @@ class StubElement {
 function installFakeDom() {
     const elements: Record<string, { textContent: string }> = {
         versionLabel: { textContent: '' }, costLabel: { textContent: '' }, tokensLabel: { textContent: '' }, lastEditedLabel: { textContent: '' },
+        graphContainerBox: { textContent: '' },
     }
     spyOn(versionArrows, 'updateVersionArrows').mockImplementation(() => {})
     Object.assign(globalThis, { document: { getElementById: (id: string) => elements[id] ?? null } })
@@ -97,11 +99,11 @@ function validateMovingWrapsAndRendersThatVersion() {
     function recordState(value: unknown) {
         shownStates.push(value)
     }
-    function recordResult(value: unknown) {
-        shownResults.push(value)
+    function recordGraphs(version: { outputs: unknown[] }) {
+        shownResults.push(version.outputs)
     }
     spyOn(editors, 'renderStateJson').mockImplementation(recordState)
-    spyOn(editors, 'renderResultJson').mockImplementation(recordResult)
+    spyOn(graphs, 'renderGraphs').mockImplementation(recordGraphs as never)
     spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
     const renderQuestionsSpy = installQuestionsStub('{}')
     pageState.versions = [makeVersion(1, { a: 1 }), makeVersion(2, { b: 2 })]
@@ -124,7 +126,7 @@ function validateArrowKeyMovesOnlyOutsideTypingTargets() {
     installFakeDom()
     Object.assign(globalThis, { Element: StubElement })
     spyOn(editors, 'renderStateJson').mockImplementation(() => {})
-    spyOn(editors, 'renderResultJson').mockImplementation(() => {})
+    spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
     spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
     installQuestionsStub('{}')
     pageState.versions = [makeVersion(1, { a: 1 }), makeVersion(2, { b: 2 })]

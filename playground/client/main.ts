@@ -1,10 +1,11 @@
 import { refreshSubmitAvailability, setKeyPlaceholder, setTypedKeyToVisible, updateShowKeyButton } from './apiKey';
 import { getButton, getElement, getInput } from './dom';
-import { createQuestionsEditor, createResultEditor, createStateEditor } from './editors';
+import { createQuestionsEditor, /* createResultEditor, */ createStateEditor } from './editors';
 import { refreshFileView } from './fileView';
+import { initGraphs, renderGraphs } from './graphs';
 import { readPageData } from './pageData';
 import { attachResizer } from './resizer';
-import { pageState } from './state';
+import { getShownVersion, pageState } from './state';
 import { executeSubmit } from './submit';
 import { readThemeName, setTheme, toggleTheme } from './theme';
 import { createNewDocument, openVersionsFile, resetToSavedFile, writeVersionsFile } from './versionActions';
@@ -25,7 +26,7 @@ getInput('typeSafeKeyEditor').addEventListener('input', refreshSubmitAvailabilit
 attachResizer(getElement('columnResizer'), getElement('inputBox'), getElement('inputResultsBox'), 'columns');
 attachResizer(getElement('rowResizer'), getElement('stateJsonEditor'), getElement('stateAndQuestionsBox'), 'rows');
 updateShowKeyButton();
-createResultEditor();
+// createResultEditor();
 createStateEditor(updateOnEditorChange);
 createQuestionsEditor(updateOnEditorChange);
 setKeyPlaceholder(readPageData().hasEnvKey);
@@ -34,5 +35,9 @@ const pageData = readPageData();
 pageState.versions = pageData.versions;
 refreshFileView();
 renderLastVersion();
+function renderShownGraphs(): void {
+  renderGraphs(getShownVersion(), getElement('graphContainerBox'));
+}
+initGraphs(getElement('graphContainerBox'), renderShownGraphs);
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 setTheme(readThemeName(localStorage.getItem('theme'), prefersDark));

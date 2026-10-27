@@ -2,6 +2,7 @@ import { test, expect, afterEach, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
 import type { Version } from '../playgroundHistory'
 import * as editors from './editors'
+import * as graphs from './graphs'
 import { pageState } from './state'
 import { buildRunBody, executeSubmit, formatRunFailure, RUNNING_TEXT, SUBMIT_TEXT } from './submit'
 
@@ -15,7 +16,7 @@ const realFetch = globalThis.fetch
 
 function installFakeDom(hasEnvKey: boolean) {
     const elements = {
-        data: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
+        data: new FakeBox(), graphContainerBox: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
         submitButton: new FakeButton(), prevVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(),
     }
     elements.data.textContent = JSON.stringify({ versions: [VERSION], hasEnvKey })
@@ -61,7 +62,10 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     function recordShownValue(value: unknown) {
         shownValues.push(value)
     }
-    const renderSpy = spyOn(editors, 'renderResultJson').mockImplementation(recordShownValue)
+    function recordGraphs(version: Version) {
+        shownValues.push(version.outputs)
+    }
+    const renderSpy = spyOn(graphs, 'renderGraphs').mockImplementation(recordGraphs)
     const renderStateSpy = spyOn(editors, 'renderStateJson').mockImplementation(recordShownValue)
     const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
     const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubStateEditor('{}'))
@@ -104,7 +108,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
 
 async function validateFailedSubmitShowsTheErrorLineAndLeavesTheResultAlone() {
     const elements = installFakeDom(true)
-    const renderSpy = spyOn(editors, 'renderResultJson')
+    const renderSpy = spyOn(graphs, 'renderGraphs')
     const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{}'))
     const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubStateEditor('{}'))
     pageState.versions = [VERSION]

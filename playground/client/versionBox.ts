@@ -1,7 +1,8 @@
 import type { ViewUpdate } from '@codemirror/view';
 import { renderCostAndTokens } from './costTokens';
 import { getElement } from './dom';
-import { FILL_ANNOTATION, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson } from './editors';
+import { FILL_ANNOTATION, getQuestionsEditor, getStateEditor, renderQuestionsJson, /* renderResultJson, */ renderStateJson } from './editors';
+import { renderGraphs } from './graphs';
 import { markPageChanged } from './pageChanged';
 import { getShownVersion, pageState } from './state';
 import { isVersionMovePossible, updateVersionArrows } from './versionArrows';
@@ -29,7 +30,8 @@ export function renderShownVersion(): void {
   renderQuestionsJson(version.questions);
   refreshVersionBox();
   renderCostAndTokens(version);
-  renderResultJson(version.outputs);
+  // renderResultJson(version.outputs);
+  renderGraphs(version, getElement('graphContainerBox'));
   updateVersionArrows();
 }
 

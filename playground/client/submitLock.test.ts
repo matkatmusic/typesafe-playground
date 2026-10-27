@@ -2,6 +2,7 @@ import { test, expect, afterEach, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
 import type { Version } from '../playgroundHistory'
 import * as editors from './editors'
+import * as graphs from './graphs'
 import { pageState } from './state'
 import { executeSubmit, listLockableEditors, SUBMIT_TEXT, setEditorsLocked } from './submit'
 
@@ -14,7 +15,7 @@ const realFetch = globalThis.fetch
 
 function installFakeDom() {
     const elements = {
-        data: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
+        data: new FakeBox(), graphContainerBox: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
         submitButton: new FakeButton(), prevVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(),
     }
     elements.data.textContent = JSON.stringify({ versions: [VERSION], hasEnvKey: true })
@@ -54,7 +55,7 @@ function spyOnLockCalls() {
     const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(questionsEditor)
     const renderStateSpy = spyOn(editors, 'renderStateJson').mockImplementation(() => {})
     const renderQuestionsSpy = spyOn(editors, 'renderQuestionsJson').mockImplementation(() => {})
-    const renderResultSpy = spyOn(editors, 'renderResultJson').mockImplementation(() => {})
+    const renderResultSpy = spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
     function restoreSpies() {
         lockSpy.mockRestore()
         stateSpy.mockRestore()
