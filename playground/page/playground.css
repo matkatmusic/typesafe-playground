@@ -29,4 +29,12 @@ button:active:not(:disabled) { transform: translateY(2px); }
 #inputBox { flex: 0 0 auto; width: 42%; min-width: 240px; max-width: calc(100% - 252px); min-height: 0; overflow-y: auto; }
 .column-resizer { flex: none; width: 12px; border-left: 5px solid transparent; border-right: 5px solid transparent; background-color: var(--grid); background-clip: content-box; cursor: col-resize; touch-action: none; }
 .column-resizer:hover { background-color: var(--text-muted); }
-#resultBox { flex: 1; min-width: 0; min-height: 0; overflow: hidden; }
+#resultBox { flex: 1; min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+#resultJsonEditor { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+#resultJsonEditor > .cm-editor { flex: 1 1 0; min-height: 0; }
+#resultJsonEditor .cm-activeLineGutter { background: var(--grid); }
+#resultJsonEditor .cm-activeLine { background: transparent; }
+#resultJsonEditor .cm-cursor { border-left-color: var(--text); }
+#resultJsonEditor .cm-selectionBackground, #resultJsonEditor .cm-focused .cm-selectionBackground { background: var(--grid); }
+#resultJsonEditor .cm-panels { background: var(--panel); color: var(--text); border-color: var(--grid); }
+#resultJsonEditor .cm-textfield { background: var(--surface); color: var(--text); border: 1px solid var(--grid); border-radius: 4px; }
