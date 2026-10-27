@@ -100,7 +100,7 @@ async function validateCostTokenSubmitBoxHoldsFourItemsInOrderAndErrorLineFollow
     expect(page.includes('<button id="submitButton">Submit (paid)</button>')).toBe(true)
     expect(page.includes('<label id="callsLabel" for="callsPicker">Calls</label>')).toBe(true)
     expect(page.indexOf('id="callsLabel"')).toBeLessThan(page.indexOf('id="callsPicker"'))
-    expect(page).toContain('#callsSubmitGroup #submitButton { height: 30px; margin-left: -1px; border-radius: 0 6px 6px 0; }')
+    expect(page).toContain('#callsSubmitGroup #submitButton { height: 30px; margin-left: -2px; border-radius: 0 6px 6px 0; }')
 }
 
 test('test_page_get_returns_200_html_with_css_filled_in', validatePageGetReturns200WithHtmlAndNoMarkersLeft)
@@ -129,6 +129,18 @@ async function validateResultBoxHoldsWinnersFirstThenToggleGraphsAndJson() {
     }
 }
 
+async function validateButtonBorderIsStrongInBothThemes() {
+    const page = await buildPage(await buildTempHistoryPath())
+    const lightColor = page.match(/:root \{[^}]*--button-border: (#\w+);/)?.[1]
+    const darkColor = page.match(/:root\[data-theme="dark"\] \{[^}]*--button-border: (#\w+);/)?.[1]
+    expect(lightColor).toBeDefined()
+    expect(darkColor).toBeDefined()
+    expect(lightColor).not.toBe(darkColor)
+    expect(page).toContain('border: 2px solid var(--button-border); border-radius: 6px; padding: 4px 12px;')
+    expect(page).not.toMatch(/button[^{]*\{[^}]*border: 1px solid var\(--grid\)/)
+}
+
+test('test_button_border_is_strong_in_both_themes', validateButtonBorderIsStrongInBothThemes)
 test('test_result_box_holds_winners_first_then_toggle_graphs_and_json', validateResultBoxHoldsWinnersFirstThenToggleGraphsAndJson)
 test('test_page_holds_header_buttons_in_order_and_the_client_script',validatePageHoldsHeaderButtonsInOrderAndTheClientScript)
 test('test_page_data_holds_versions_and_whether_an_env_key_exists', validatePageDataHoldsVersionsAndWhetherAnEnvKeyExists)
