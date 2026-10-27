@@ -3,15 +3,35 @@ import { parsePortArgument } from './parsePortArgument';
 
 export const SERVER_HOSTNAME = '127.0.0.1';
 
+async function buildClientScript(): Promise<string> {
+  const result = await Bun.build({
+    entrypoints: [`${import.meta.dir}/client/main.ts`],
+    target: 'browser',
+    format: 'esm',
+  });
+  if (!result.success) {
+    const logLines: string[] = [];
+    for (const log of result.logs)
+      logLines.push(log.message);
+    throw new Error(`client build failed: ${logLines.join('\n')}`);
+  }
+  return result.outputs[0].text();
+}
+
 export async function buildPage(): Promise<string> {
   const htmlFile = Bun.file(`${import.meta.dir}/page/playground.html`);
   const cssFile = Bun.file(`${import.meta.dir}/page/playground.css`);
   const html = await htmlFile.text();
   const css = await cssFile.text();
+  const script = await buildClientScript();
   function getCss() {
     return css;
   }
-  return html.replace('__PAGE_CSS__', getCss);
+  function getScript() {
+    return script;
+  }
+  const withCss = html.replace('__PAGE_CSS__', getCss);
+  return withCss.replace('__PAGE_SCRIPT__', getScript);
 }
 
 export async function handleRequest(request: Request, port: number): Promise<Response> {

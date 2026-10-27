@@ -1,0 +1,13 @@
+export function getElement(id: string): HTMLElement {
+  const element = document.getElementById(id);
+  if (element === null)
+    throw new Error(`element ${id} is missing`);
+  return element;
+}
+
+export function getButton(id: string): HTMLButtonElement {
+  const element = getElement(id);
+  if (!(element instanceof HTMLButtonElement))
+    throw new Error(`element ${id} is not a button`);
+  return element;
+}
