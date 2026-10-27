@@ -5,8 +5,10 @@ import { syntaxHighlighting } from '@codemirror/language';
 import { linter, lintGutter } from '@codemirror/lint';
 import { Annotation, Compartment, EditorState, type Extension } from '@codemirror/state';
 import { keymap, type ViewUpdate } from '@codemirror/view';
+import { createAddQuestion } from './addQuestion';
 import { getElement } from './dom';
 import { jsonHighlight } from './editorHighlight';
+import { createPlaceholders } from './placeholders';
 import { clearQuestionsJsonError, clearStateJsonError } from './stateErrorClear';
 
 export const EDITOR_THEME_RULES = {
@@ -62,13 +64,13 @@ export function getResultEditor(): EditorView {
   return resultEditor;
 }
 
-function buildInputEditor(parentId: string, clearError: (update: ViewUpdate) => void, onEditorChange: (update: ViewUpdate) => void): EditorView {
-  const extensions = [buildJsonExtensions(), EditorView.updateListener.of(clearError), EditorView.updateListener.of(onEditorChange)];
+function buildInputEditor(parentId: string, clearError: (update: ViewUpdate) => void, onEditorChange: (update: ViewUpdate) => void, extraExtensions: Extension[]): EditorView {
+  const extensions = [buildJsonExtensions(), EditorView.updateListener.of(clearError), EditorView.updateListener.of(onEditorChange), extraExtensions];
   return new EditorView({ doc: '', extensions: extensions, parent: getElement(parentId) });
 }
 
 export function createStateEditor(onEditorChange: (update: ViewUpdate) => void): EditorView {
-  stateEditor = buildInputEditor('stateJsonEditor', clearStateJsonError, onEditorChange);
+  stateEditor = buildInputEditor('stateJsonEditor', clearStateJsonError, onEditorChange, []);
   return stateEditor;
 }
 
@@ -79,7 +81,7 @@ export function getStateEditor(): EditorView {
 }
 
 export function createQuestionsEditor(onEditorChange: (update: ViewUpdate) => void): EditorView {
-  questionsEditor = buildInputEditor('questionsJsonEditor', clearQuestionsJsonError, onEditorChange);
+  questionsEditor = buildInputEditor('questionsJsonEditor', clearQuestionsJsonError, onEditorChange, [createAddQuestion(), createPlaceholders()]);
   return questionsEditor;
 }
 

@@ -12,6 +12,8 @@
     --tok-key: #1f5fbf;
     --tok-atom: #8a3fb0;
     --tok-punct: #52514e;
+    --placeholder-bg: #ffe58f;
+    --placeholder-border: #b08600;
 }
 :root[data-theme="dark"] {
     color-scheme: dark;
@@ -27,6 +29,8 @@
     --tok-key: #7ab7ff;
     --tok-atom: #c792ea;
     --tok-punct: #c3c2b7;
+    --placeholder-bg: #5c4600;
+    --placeholder-border: #e5c07b;
 }
 * { box-sizing: border-box; }
 body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: var(--surface); color: var(--text); font: 15px/1.4 system-ui, sans-serif; overflow: hidden; }
@@ -70,3 +74,13 @@ button:disabled { opacity: 0.5; cursor: default; }
 :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-selectionBackground, :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-focused .cm-selectionBackground { background: var(--grid); }
 :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-panels { background: var(--panel); color: var(--text); border-color: var(--grid); }
 :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-textfield { background: var(--surface); color: var(--text); border: 1px solid var(--grid); border-radius: 4px; }
+#questionsJsonEditor .cm-placeholderValue { background: var(--placeholder-bg); border: 1px dashed var(--placeholder-border); border-radius: 3px; font-style: italic; }
+#questionsJsonEditor .cm-placeholderValue, #questionsJsonEditor .cm-placeholderValue span { color: var(--text); }
+#questionsJsonEditor .add-question { position: relative; display: block; padding: 4px 0 4px 6px; }
+#questionsJsonEditor .add-question-btn { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 999px; padding: 3px 12px; font-size: 13px; cursor: pointer; }
+.add-question-menu { position: fixed; z-index: 1000; min-width: 240px; background: var(--surface); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); padding: 4px; font-family: system-ui, sans-serif; }
+.add-question-menu-header { display: block; padding: 4px 8px; color: var(--text-muted); font-size: 11px; font-variant: small-caps; letter-spacing: 0.08em; }
+.add-question-menu .add-question-item { display: block; width: 100%; text-align: left; background: transparent; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; }
+.add-question-menu .add-question-item:hover { background: var(--panel); }
+.add-question-item-title { display: block; color: var(--text); font-size: 13px; }
+.add-question-item-desc { display: block; color: var(--text-muted); font-size: 12px; }
