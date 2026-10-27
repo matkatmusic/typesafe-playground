@@ -77,6 +77,43 @@ async function validateFirstSubmitAfterNewMakesVersionOneOfOne() {
     expect(saved.versions[0].outputs.length).toBe(1)
 }
 
+async function validateResetRunsClearsOutputsAndCallsOfOneVersionAndKeepsTheRest() {
+    const historyPath = await buildTempHistoryPath()
+    const ranVersion = (id: number) => ({ id, time: 't', state: { a: id }, questions: { q: id }, calls: 2, outputs: [{}, {}], note: 'kept' })
+    await dispatchRequest(buildPostRequest('/open', { versions: [ranVersion(1), ranVersion(2)] }), PORT, historyPath)
+    const response = await dispatchRequest(buildPostRequest('/reset-runs', { id: 2 }), PORT, historyPath)
+    expect(response.status).toBe(200)
+    const cleared = (await response.json()) as Version
+    expect(cleared).toEqual({ id: 2, time: 't', state: { a: 2 }, questions: { q: 2 }, calls: 0, outputs: [], note: 'kept' })
+    const saved = (await (await executeSaveRequest(historyPath)).json()) as { versions: Version[] }
+    expect(saved.versions[1]).toEqual(cleared)
+    expect(saved.versions[0]).toEqual(ranVersion(1) as unknown as Version)
+}
+
+async function validateResetRunsRejectsAnUnknownId() {
+    const historyPath = await buildTempHistoryPath()
+    const response = await dispatchRequest(buildPostRequest('/reset-runs', { id: 999999 }), PORT, historyPath)
+    expect(response.status).toBe(400)
+}
+
+async function validateSubmitAfterResettingTheOnlyVersionFillsItInPlace() {
+    Bun.env.TYPESAFE_API_KEY = 'env-key'
+    const historyPath = await buildTempHistoryPath()
+    const oldRun = { answers: {}, usage: { input_tokens: 1, output_tokens: 1 } }
+    const ranVersion = { id: 1, time: 't', state: { a: 1 }, questions: {}, calls: 1, outputs: [oldRun], note: 'old note' }
+    await dispatchRequest(buildPostRequest('/open', { versions: [ranVersion] }), PORT, historyPath)
+    await dispatchRequest(buildPostRequest('/reset-runs', { id: 1 }), PORT, historyPath)
+    const stubClient = { systemOne: async () => ({ answers: {}, usage: { input_tokens: 5, output_tokens: 1 } }) }
+    const createClient = (() => stubClient) as unknown as CreateRunClient
+    const body = JSON.stringify({ id: 1, calls: 1, state: { typed: 'new' }, questions: {} })
+    await executeRunRequest(new Request(`http://${ALLOWED_HOST}/run`, { method: 'POST', body }), createClient, historyPath)
+    const saved = (await (await executeSaveRequest(historyPath)).json()) as { versions: Version[] }
+    expect(saved.versions.length).toBe(1)
+    expect(saved.versions[0].calls).toBe(1)
+    expect(saved.versions[0].outputs.length).toBe(1)
+    expect(saved.versions[0].state).toEqual({ typed: 'new' })
+}
+
 async function validateOpenRejectsBadVersions() {
     const historyPath = await buildTempHistoryPath()
     const emptyResponse = await dispatchRequest(buildPostRequest('/open', { versions: [] }), PORT, historyPath)
@@ -96,5 +133,8 @@ test('test_is_version_shape_checks_every_field', validateIsVersionShape)
 test('test_open_then_save_round_trips_through_the_temp_file', validateOpenThenSaveRoundTripsThroughTheTempFile)
 test('test_new_writes_a_blank_document', validateNewWritesABlankDocument)
 test('test_first_submit_after_new_makes_version_one_of_one', validateFirstSubmitAfterNewMakesVersionOneOfOne)
+test('test_reset_runs_clears_outputs_and_calls_of_one_version_and_keeps_the_rest', validateResetRunsClearsOutputsAndCallsOfOneVersionAndKeepsTheRest)
+test('test_reset_runs_rejects_an_unknown_id', validateResetRunsRejectsAnUnknownId)
+test('test_submit_after_resetting_the_only_version_fills_it_in_place', validateSubmitAfterResettingTheOnlyVersionFillsItInPlace)
 test('test_open_rejects_bad_versions', validateOpenRejectsBadVersions)
 test('test_page_holds_the_unsaved_dialog_and_an_untitled_title', validatePageHoldsTheUnsavedDialogAndAnUntitledTitle)

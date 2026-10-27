@@ -6,7 +6,7 @@ import { parsePortArgument } from './parsePortArgument';
 import { HISTORY_PATH, initHistory, loadHistory } from './playgroundHistory';
 import { executeNoteRequest } from './playgroundNoteRequests';
 import { createTypeSafeClient, executeRunRequest, type CreateRunClient } from './playgroundRequests';
-import { executeNewRequest, executeOpenRequest, executeSaveRequest } from './playgroundVersionRequests';
+import { executeNewRequest, executeOpenRequest, executeResetRunsRequest, executeSaveRequest } from './playgroundVersionRequests';
 import { buildErrorResponse } from './serverErrors';
 
 export const SERVER_HOSTNAME = '127.0.0.1';
@@ -70,6 +70,9 @@ export async function dispatchRequest(request: Request, port: number, historyPat
   const isNotePost = request.method === 'POST' && pathname === '/note';
   if (isNotePost)
     return executeNoteRequest(request, historyPath);
+  const isResetRunsPost = request.method === 'POST' && pathname === '/reset-runs';
+  if (isResetRunsPost)
+    return executeResetRunsRequest(request, historyPath);
   const isPageGet = request.method === 'GET' && pathname === '/';
   if (isPageGet)
     return new Response(await buildPage(historyPath), { headers: { 'content-type': 'text/html; charset=utf-8' } });

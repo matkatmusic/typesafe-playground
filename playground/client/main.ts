@@ -10,6 +10,7 @@ import { initGraphs, renderGraphs } from './graphs';
 import { attachInfoBox } from './infoBox';
 import { saveNote } from './noteActions';
 import { readPageData } from './pageData';
+import { resetVersionRuns } from './resetRuns';
 import { toggleResultJson } from './resultJsonToggle';
 import { attachResizer } from './resizer';
 import { getShownVersion, pageState } from './state';
@@ -33,6 +34,7 @@ getButton('collapseAllButton').addEventListener('click', setAllGraphsToCollapsed
 getButton('expandAllButton').addEventListener('click', setAllGraphsToExpanded);
 getButton('prevVersionButton').addEventListener('click', moveToPreviousVersion);
 getButton('nextVersionButton').addEventListener('click', moveToNextVersion);
+getButton('resetRunsButton').addEventListener('click', resetVersionRuns);
 document.addEventListener('keydown', moveOnArrowKey);
 getElement('noteText').addEventListener('change', saveNote);
 getInput('typeSafeKeyEditor').addEventListener('input', updateShowKeyButton);

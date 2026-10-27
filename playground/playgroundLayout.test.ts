@@ -57,14 +57,14 @@ test('test_pressed_button_moves_down_and_right_by_2px', validatePressedButtonMov
 
 async function validateNoteBoxSitsInTheVersionRowAfterTheNextButtonWithADivider() {
     const page = await buildPage(await buildTempHistoryPath())
-    const itemIds = ['versionBox', 'prevVersionButton', 'versionLabel', 'nextVersionButton', 'versionNoteDivider', 'noteBox', 'noteText']
+    const itemIds = ['versionBox', 'prevVersionButton', 'versionLabel', 'nextVersionButton', 'versionNoteDivider', 'noteBox', 'noteText', 'resetRunsButton']
     let previousIndex = -1
     for (const itemId of itemIds) {
         const itemIndex = page.indexOf(`id="${itemId}"`)
         expect(itemIndex).toBeGreaterThan(previousIndex)
         previousIndex = itemIndex
     }
-    expect(page.indexOf('id="noteText"')).toBeLessThan(page.indexOf('id="inputResultsBox"'))
+    expect(page.indexOf('id="resetRunsButton"')).toBeLessThan(page.indexOf('id="inputResultsBox"'))
     expect(page).toContain('#versionNoteDivider { flex: none; align-self: stretch; width: 1px; margin: 0 4px; background: var(--grid); }')
 }
 

@@ -1,4 +1,4 @@
-import { buildBlankVersion, loadHistory, writeHistory } from './playgroundHistory';
+import { buildBlankVersion, loadHistory, writeHistory, type Version } from './playgroundHistory';
 
 export function isPlainObject(value: unknown): boolean {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -34,4 +34,21 @@ export async function executeOpenRequest(request: Request, historyPath: string):
 
 export async function executeSaveRequest(historyPath: string): Promise<Response> {
   return Response.json({ versions: await loadHistory(historyPath) });
+}
+
+export async function executeResetRunsRequest(request: Request, historyPath: string): Promise<Response> {
+  const body = (await request.json()) as { id?: unknown };
+  const { id } = body;
+  const history = await loadHistory(historyPath);
+  let foundVersion: Version | undefined;
+  for (const version of history) {
+    if (version.id === id)
+      foundVersion = version;
+  }
+  if (foundVersion === undefined)
+    return new Response('id must be the integer id of an existing version', { status: 400 });
+  foundVersion.outputs = [];
+  foundVersion.calls = 0;
+  await writeHistory(historyPath, history);
+  return Response.json(foundVersion);
 }
