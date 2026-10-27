@@ -1,2 +1,22 @@
+:root {
+    color-scheme: light;
+    --surface: #fcfcfb;
+    --panel: #f3f2ef;
+    --text: #0b0b0b;
+    --text-muted: #52514e;
+    --grid: #dddcd7;
+}
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface: #1a1a19;
+    --panel: #262624;
+    --text: #f0efec;
+    --text-muted: #c3c2b7;
+    --grid: #3a3a37;
+}
 * { box-sizing: border-box; }
-body { margin: 0; font: 15px/1.4 system-ui, sans-serif; }
+body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: var(--surface); color: var(--text); font: 15px/1.4 system-ui, sans-serif; overflow: hidden; }
+#playgroundComponentBox { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+#headerBox, #versionBox, #inputResultsBox { background: var(--panel); border: 1px solid var(--grid); padding: 6px 12px; }
+#headerBox, #versionBox { flex: none; height: 40px; display: flex; align-items: center; }
+#inputResultsBox { flex: 1 1 0; min-height: 0; }
