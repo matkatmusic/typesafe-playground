@@ -13,7 +13,7 @@ function removeFakeState() {
   pageState.index = 0
 }
 
-class FakeButton { disabled = false }
+class FakeButton { disabled = false; textContent = '' }
 
 function installFakeDocument() {
   const pinInfo = { replaceChildren() {}, appendChild() {} }
