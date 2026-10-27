@@ -62,7 +62,13 @@ export function findVersionById(history: Version[], id: unknown): Version | unde
 export function addRunToHistory(history: Version[], shownVersion: Version, outputs: RunOutput[], state: unknown, questions: unknown): Version {
   const lastVersion = history[history.length - 1];
   const isUnchanged = isInputUnchanged(shownVersion, state, questions);
-  if (isUnchanged) {
+  const isOnlyVersionNeverRun = history.length === 1 && shownVersion.calls === 0;
+  if (isOnlyVersionNeverRun) {
+    shownVersion.state = state;
+    shownVersion.questions = questions;
+  }
+  const isAppendingToShown = isUnchanged || isOnlyVersionNeverRun;
+  if (isAppendingToShown) {
     shownVersion.outputs.push(...outputs);
     shownVersion.calls += outputs.length;
     return shownVersion;

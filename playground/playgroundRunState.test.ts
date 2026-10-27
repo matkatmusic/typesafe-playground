@@ -82,16 +82,16 @@ async function validateChangedStateMakesANewVersionAndSameStateAppends() {
     const historyPath = await buildTempHistoryPath()
     const factory = makeStubFactory([])
     const first = (await (await executeRunRequest(makeRunRequest({ a: 1 }), factory, historyPath)).json()) as { version: Version }
-    expect(first.version.id).toBe(2)
-    const second = (await (await executeRunRequest(makeRunRequest({ a: 1 }, 2), factory, historyPath)).json()) as { version: Version }
-    expect(second.version.id).toBe(2)
+    expect(first.version.id).toBe(1)
+    const second = (await (await executeRunRequest(makeRunRequest({ a: 1 }, 1), factory, historyPath)).json()) as { version: Version }
+    expect(second.version.id).toBe(1)
     expect(second.version.calls).toBe(2)
-    const third = (await (await executeRunRequest(makeRunRequest({ a: 2 }, 2), factory, historyPath)).json()) as { version: Version }
-    expect(third.version.id).toBe(3)
+    const third = (await (await executeRunRequest(makeRunRequest({ a: 2 }, 1), factory, historyPath)).json()) as { version: Version }
+    expect(third.version.id).toBe(2)
     const history = await loadHistory(historyPath)
-    expect(history.length).toBe(3)
-    expect(history[0].outputs).toEqual([])
-    expect(history[1].state).toEqual({ a: 1 })
+    expect(history.length).toBe(2)
+    expect(history[0].state).toEqual({ a: 1 })
+    expect(history[1].state).toEqual({ a: 2 })
 }
 
 async function validateUnchangedInputAppendsToTheShownVersionNotTheLast() {

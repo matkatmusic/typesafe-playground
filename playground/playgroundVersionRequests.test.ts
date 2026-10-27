@@ -3,7 +3,8 @@ import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { buildPage, dispatchRequest } from './playground'
 import { initHistory } from './playgroundHistory'
-import { isPlainObject, isVersionShape } from './playgroundVersionRequests'
+import { executeRunRequest, type CreateRunClient } from './playgroundRequests'
+import { executeNewRequest, executeSaveRequest, isPlainObject, isVersionShape } from './playgroundVersionRequests'
 import { HARD_CODED_QUESTIONS, HARD_CODED_STATE } from './typeSafeQuery'
 import type { Version } from './playgroundHistory'
 
@@ -60,6 +61,22 @@ async function validateNewWritesABlankDocument() {
     expect(created.versions[0].outputs).toEqual([])
 }
 
+async function validateFirstSubmitAfterNewMakesVersionOneOfOne() {
+    Bun.env.TYPESAFE_API_KEY = 'env-key'
+    const historyPath = await buildTempHistoryPath()
+    await executeNewRequest(historyPath)
+    const stubClient = { systemOne: async () => ({ answers: {}, usage: { input_tokens: 5, output_tokens: 1 } }) }
+    const createClient = (() => stubClient) as unknown as CreateRunClient
+    const body = JSON.stringify({ id: 1, calls: 1, state: { typed: 'changed' }, questions: HARD_CODED_QUESTIONS })
+    const response = await executeRunRequest(new Request(`http://${ALLOWED_HOST}/run`, { method: 'POST', body }), createClient, historyPath)
+    const result = (await response.json()) as { version: Version }
+    expect(result.version.id).toBe(1)
+    const saved = (await (await executeSaveRequest(historyPath)).json()) as { versions: Version[] }
+    expect(saved.versions.length).toBe(1)
+    expect(saved.versions[0].state).toEqual({ typed: 'changed' })
+    expect(saved.versions[0].outputs.length).toBe(1)
+}
+
 async function validateOpenRejectsBadVersions() {
     const historyPath = await buildTempHistoryPath()
     const emptyResponse = await dispatchRequest(buildPostRequest('/open', { versions: [] }), PORT, historyPath)
@@ -78,5 +95,6 @@ test('test_is_plain_object_rejects_arrays_and_null', validateIsPlainObject)
 test('test_is_version_shape_checks_every_field', validateIsVersionShape)
 test('test_open_then_save_round_trips_through_the_temp_file', validateOpenThenSaveRoundTripsThroughTheTempFile)
 test('test_new_writes_a_blank_document', validateNewWritesABlankDocument)
+test('test_first_submit_after_new_makes_version_one_of_one', validateFirstSubmitAfterNewMakesVersionOneOfOne)
 test('test_open_rejects_bad_versions', validateOpenRejectsBadVersions)
 test('test_page_holds_the_unsaved_dialog_and_an_untitled_title', validatePageHoldsTheUnsavedDialogAndAnUntitledTitle)
