@@ -105,6 +105,24 @@ export const placeholderField =StateField.define<DecorationSet>({
   provide: getFieldDecorations,
 });
 
+export function isAnyPlaceholderSelected(state: EditorState): boolean {
+  const ranges = findPlaceholderRanges(state.doc.toString());
+  for (let i = 0; i < ranges.length; i++) {
+    const isSelected = isPlaceholderSelected(state, ranges[i]);
+    if (isSelected)
+      return true;
+  }
+  return false;
+}
+
+export function readPlaceholderIsSelectedAttributes(state: EditorState): Record<string, string> {
+  const isSelected = isAnyPlaceholderSelected(state);
+  if (isSelected)
+    return { class: 'cm-placeholderIsSelected' };
+  return {};
+}
+
 export function createPlaceholders(): Extension {
-  return placeholderField;
+  const selectedAttributes = EditorView.editorAttributes.compute(['doc', 'selection'], readPlaceholderIsSelectedAttributes);
+  return [placeholderField, selectedAttributes];
 }

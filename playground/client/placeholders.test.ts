@@ -4,8 +4,9 @@ import { json } from '@codemirror/lang-json';
 import { syntaxTree } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
 import type { Transaction } from '@codemirror/state';
+import { EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
-import { buildPlaceholderDecorations, createPlaceholders, findPlaceholderRanges, placeholderField } from './placeholders';
+import { buildPlaceholderDecorations, createPlaceholders, findPlaceholderRanges, isAnyPlaceholderSelected, placeholderField } from './placeholders';
 import { buildInsertPlan } from './questionSnippets';
 
 function buildChoiceInsertText(): string {
@@ -99,7 +100,31 @@ function validateSelectionChangeAloneRebuildsTheDecorations() {
   expect(listDecorationClasses(moved.field(placeholderField))).toEqual(['cm-placeholderValue cm-placeholderSelected']);
 }
 
-test('test_only_a_fully_selected_placeholder_gets_the_selected_class', validateOnlyAFullySelectedPlaceholderGetsTheSelectedClass);
+function listEditorClasses(state: EditorState): string[] {
+  const classes: string[] = [];
+  for (const attributes of state.facet(EditorView.editorAttributes)) {
+    const attributeClass = (attributes as Record<string, string>).class;
+    if (attributeClass !== undefined)
+      classes.push(attributeClass);
+  }
+  return classes;
+}
+
+function validateEditorGetsAClassOnlyWhileAPlaceholderIsSelected() {
+  const doc = '{"a": "instruction", "instructions": "x"}';
+  const range = findPlaceholderRanges(doc)[0];
+  const state = EditorState.create({ doc: doc, extensions: [createPlaceholders()] });
+  expect(isAnyPlaceholderSelected(state)).toBe(false);
+  expect(listEditorClasses(state)).toEqual([]);
+  const plainSelection = state.update({ selection: { anchor: 2, head: 3 } }).state;
+  expect(listEditorClasses(plainSelection)).toEqual([]);
+  const placeholderSelection = state.update({ selection: { anchor: range.from + 1, head: range.to - 1 } }).state;
+  expect(isAnyPlaceholderSelected(placeholderSelection)).toBe(true);
+  expect(listEditorClasses(placeholderSelection)).toEqual(['cm-placeholderIsSelected']);
+}
+
+test('test_editor_gets_a_class_only_while_a_placeholder_is_selected', validateEditorGetsAClassOnlyWhileAPlaceholderIsSelected);
+test('test_only_a_fully_selected_placeholder_gets_the_selected_class',validateOnlyAFullySelectedPlaceholderGetsTheSelectedClass);
 test('test_selection_change_alone_rebuilds_the_decorations', validateSelectionChangeAloneRebuildsTheDecorations);
 test('test_placeholders_stay_found_after_typing_over_one',validatePlaceholdersSurviveTypingOverOne);
 test('test_generated_names_and_defaults_are_found', validateGeneratedNamesAndDefaultsAreFoundButUserTextIsNot);
