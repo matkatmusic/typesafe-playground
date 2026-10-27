@@ -2,6 +2,7 @@ import { readTypedKey, refreshSubmitAvailability } from './apiKey';
 import { renderCostAndTokens } from './costTokens';
 import { getButton, getElement, getInput } from './dom';
 import { renderResultJson } from './editors';
+import { pageState } from './state';
 import type { RunBody, RunResult } from './types';
 
 export const SUBMIT_TEXT = 'Submit (paid)';
@@ -35,4 +36,5 @@ export async function executeSubmit(): Promise<void> {
   const result: RunResult = await response.json();
   renderCostAndTokens(result.version);
   renderResultJson(result.outputs);
+  pageState.isDirty = true;
 }

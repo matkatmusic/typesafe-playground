@@ -1,5 +1,6 @@
 import { test, expect, afterEach, spyOn } from 'bun:test'
 import * as editors from './editors'
+import { pageState } from './state'
 import { buildRunBody, executeSubmit, formatRunFailure, RUNNING_TEXT, SUBMIT_TEXT } from './submit'
 
 class FakeButton { disabled = false; textContent = SUBMIT_TEXT }
@@ -27,6 +28,7 @@ function removeFakeDom() {
     Reflect.deleteProperty(globalThis, 'HTMLButtonElement')
     Reflect.deleteProperty(globalThis, 'HTMLInputElement')
     globalThis.fetch = realFetch
+    pageState.isDirty = false
 }
 
 afterEach(removeFakeDom)
@@ -60,6 +62,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     }
     globalThis.fetch = stubFetch as unknown as typeof fetch
     elements.callsPicker.value = '3'
+    pageState.isDirty = false
     await executeSubmit()
     renderSpy.mockRestore()
     expect(JSON.parse(seenBody)).toEqual({ calls: 3, apiKey: '' })
@@ -71,6 +74,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     expect(elements.tokensLabel.textContent).toBe('Tokens: 1000000')
     expect(shownValues).toEqual([VERSION.outputs])
     expect(elements.errorLine.textContent).toBe('')
+    expect(pageState.isDirty).toBe(true)
 }
 
 async function validateFailedSubmitShowsTheErrorLineAndLeavesTheResultAlone() {
