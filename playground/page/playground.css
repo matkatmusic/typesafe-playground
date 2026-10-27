@@ -71,7 +71,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 #resultBox { flex: 1; min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
 #resultJsonEditor { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
 #resultJsonEditor[hidden] { display: none; }
-#winnerBox { flex: none; height: calc(7em + 18px); padding: 8px; background: var(--panel); border: 1px solid var(--grid); border-radius: 6px; overflow-y: auto; }
+#winnerBox { flex: none; margin-bottom: 6px; height: calc(7em + 18px); padding: 8px; background: var(--panel); border: 1px solid var(--grid); border-radius: 6px; overflow-y: auto; }
 #winnerBox .winner-instructions { color: var(--text); font-weight: 600; overflow-wrap: anywhere; }
 #winnerBox .winner-line { padding-left: 2em; color: var(--text-muted); overflow-wrap: anywhere; }
 #jsonToggleButton { flex: none; align-self: flex-end; padding: 2px 8px; font-size: 13px; font-family: ui-monospace, Menlo, monospace; }

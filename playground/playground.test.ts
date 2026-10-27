@@ -114,6 +114,19 @@ async function validateInputResultsBoxHoldsInputBoxDragBarAndResultBoxInOrder() 
 }
 
 test('test_input_results_box_holds_input_box_drag_bar_and_result_box_in_order', validateInputResultsBoxHoldsInputBoxDragBarAndResultBoxInOrder)
+
+async function validateResultBoxHoldsWinnersFirstThenToggleGraphsAndJson() {
+    const page = await buildPage(await buildTempHistoryPath())
+    const itemIds = ['resultBox', 'winnerBox', 'jsonToggleButton', 'graphContainerBox', 'resultJsonEditor']
+    let previousIndex = -1
+    for (const itemId of itemIds) {
+        const itemIndex = page.indexOf(`id="${itemId}"`)
+        expect(itemIndex).toBeGreaterThan(previousIndex)
+        previousIndex = itemIndex
+    }
+}
+
+test('test_result_box_holds_winners_first_then_toggle_graphs_and_json', validateResultBoxHoldsWinnersFirstThenToggleGraphsAndJson)
 test('test_page_holds_header_buttons_in_order_and_the_client_script',validatePageHoldsHeaderButtonsInOrderAndTheClientScript)
 test('test_page_data_holds_versions_and_whether_an_env_key_exists', validatePageDataHoldsVersionsAndWhetherAnEnvKeyExists)
 test('test_key_editor_is_a_password_input_with_autocomplete_and_spellcheck_off', validateKeyEditorIsAPasswordInputWithAutocompleteAndSpellcheckOff)
