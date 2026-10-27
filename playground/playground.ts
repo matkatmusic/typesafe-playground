@@ -34,7 +34,7 @@ export async function buildPage(): Promise<string> {
   return withCss.replace('__PAGE_SCRIPT__', getScript);
 }
 
-export async function handleRequest(request: Request, port: number): Promise<Response> {
+export async function dispatchRequest(request: Request, port: number): Promise<Response> {
   const isAllowed = isRequestAllowed(request, SERVER_HOSTNAME, port);
   if (!isAllowed)
     return new Response('forbidden', { status: 403 });
@@ -52,7 +52,7 @@ if (import.meta.main) {
     fetch(request): Promise<Response> {
       if (server.port === undefined)
         throw new Error('server has no port');
-      return handleRequest(request, server.port);
+      return dispatchRequest(request, server.port);
     },
   });
   console.log(`http://${SERVER_HOSTNAME}:${server.port}/`);
