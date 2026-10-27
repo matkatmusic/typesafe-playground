@@ -6,6 +6,7 @@ import { linter, lintGutter } from '@codemirror/lint';
 import { Annotation, Compartment, EditorState, type Extension } from '@codemirror/state';
 import { keymap, type ViewUpdate } from '@codemirror/view';
 import { createAddQuestion } from './addQuestion';
+import { createBacktickKeyNames } from './backtickCompletion';
 import { getElement } from './dom';
 import { jsonHighlight } from './editorHighlight';
 import { createPlaceholders } from './placeholders';
@@ -44,6 +45,7 @@ export function buildJsonExtensions(): Extension[] {
     EditorView.theme(EDITOR_THEME_RULES),
     linter(jsonParseLinter()),
     lintGutter(),
+    createBacktickKeyNames(),
     keymap.of([indentWithTab]),
     LOCK_COMPARTMENT.of([]),
   ];

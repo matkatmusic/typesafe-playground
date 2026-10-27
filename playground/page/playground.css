@@ -84,3 +84,14 @@ button:disabled { opacity: 0.5; cursor: default; }
 .add-question-menu .add-question-item:hover { background: var(--panel); }
 .add-question-item-title { display: block; color: var(--text); font-size: 13px; }
 .add-question-item-desc { display: block; color: var(--text-muted); font-size: 12px; }
+
+body .cm-tooltip {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--grid);
+}
+
+body .cm-tooltip.cm-tooltip-autocomplete > ul > li[aria-selected] {
+    background: var(--grid);
+    color: var(--text);
+}
