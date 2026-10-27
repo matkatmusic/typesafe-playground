@@ -10,4 +10,6 @@ bun install
 bun run start
 ```
 
-Then open http://127.0.0.1:4318.
+The server prints its address. Open that address in a browser.
+
+To choose the port yourself, run `bun playground.ts --port 4318`.

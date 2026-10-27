@@ -1,10 +1,11 @@
 import { test, expect } from 'bun:test'
 import { buildPage, handleRequest } from './playground'
 
-const ALLOWED_HOST = '127.0.0.1:4318'
+const PORT = 4318
+const ALLOWED_HOST = `127.0.0.1:${PORT}`
 
 async function validatePageGetReturns200WithHtmlAndNoMarkersLeft() {
-    const response = await handleRequest(new Request(`http://${ALLOWED_HOST}/`, { headers: { host: ALLOWED_HOST } }))
+    const response = await handleRequest(new Request(`http://${ALLOWED_HOST}/`, { headers: { host: ALLOWED_HOST } }), PORT)
     expect(response.status).toBe(200)
     expect(response.headers.get('content-type')).toBe('text/html; charset=utf-8')
     const page = await response.text()
@@ -25,18 +26,18 @@ async function validatePageHoldsThreeBoxesInsidePlaygroundComponentBoxInOrder() 
 }
 
 async function validateUnknownPathReturns404() {
-    const response = await handleRequest(new Request(`http://${ALLOWED_HOST}/nope`, { headers: { host: ALLOWED_HOST } }))
+    const response = await handleRequest(new Request(`http://${ALLOWED_HOST}/nope`, { headers: { host: ALLOWED_HOST } }), PORT)
     expect(response.status).toBe(404)
 }
 
 async function validateBadHostReturns403() {
-    const response = await handleRequest(new Request(`http://${ALLOWED_HOST}/`, { headers: { host: 'evil.example:4318' } }))
+    const response = await handleRequest(new Request(`http://${ALLOWED_HOST}/`, { headers: { host: 'evil.example:4318' } }), PORT)
     expect(response.status).toBe(403)
 }
 
 async function validateBadOriginOnPostReturns403() {
     const headers = { host: ALLOWED_HOST, origin: 'https://evil.example', 'content-type': 'application/json' }
-    const response = await handleRequest(new Request(`http://${ALLOWED_HOST}/`, { method: 'POST', headers }))
+    const response = await handleRequest(new Request(`http://${ALLOWED_HOST}/`, { method: 'POST', headers }), PORT)
     expect(response.status).toBe(403)
 }
 

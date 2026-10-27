@@ -1,7 +1,7 @@
 import { isRequestAllowed } from './playgroundGuard';
+import { parsePortArgument } from './parsePortArgument';
 
 export const SERVER_HOSTNAME = '127.0.0.1';
-export const SERVER_PORT = 4318;
 
 export async function buildPage(): Promise<string> {
   const htmlFile = Bun.file(`${import.meta.dir}/page/playground.html`);
@@ -14,8 +14,8 @@ export async function buildPage(): Promise<string> {
   return html.replace('__PAGE_CSS__', getCss);
 }
 
-export async function handleRequest(request: Request): Promise<Response> {
-  const isAllowed = isRequestAllowed(request, SERVER_HOSTNAME, SERVER_PORT);
+export async function handleRequest(request: Request, port: number): Promise<Response> {
+  const isAllowed = isRequestAllowed(request, SERVER_HOSTNAME, port);
   if (!isAllowed)
     return new Response('forbidden', { status: 403 });
   const { pathname } = new URL(request.url);
@@ -28,8 +28,12 @@ export async function handleRequest(request: Request): Promise<Response> {
 if (import.meta.main) {
   const server = Bun.serve({
     hostname: SERVER_HOSTNAME,
-    port: SERVER_PORT,
-    fetch: handleRequest,
+    port: parsePortArgument(Bun.argv),
+    fetch(request): Promise<Response> {
+      if (server.port === undefined)
+        throw new Error('server has no port');
+      return handleRequest(request, server.port);
+    },
   });
   console.log(`http://${SERVER_HOSTNAME}:${server.port}/`);
 }
