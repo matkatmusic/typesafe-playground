@@ -10,6 +10,7 @@ import { createBacktickKeyNames } from './backtickCompletion';
 import { getElement } from './dom';
 import { jsonHighlight } from './editorHighlight';
 import { createPlaceholders } from './placeholders';
+import { createPlaceholderTab } from './placeholderTab';
 import { clearQuestionsJsonError, clearStateJsonError } from './stateErrorClear';
 
 export const EDITOR_THEME_RULES = {
@@ -83,7 +84,7 @@ export function getStateEditor(): EditorView {
 }
 
 export function createQuestionsEditor(onEditorChange: (update: ViewUpdate) => void): EditorView {
-  questionsEditor = buildInputEditor('questionsJsonEditor', clearQuestionsJsonError, onEditorChange, [createAddQuestion(), createPlaceholders()]);
+  questionsEditor = buildInputEditor('questionsJsonEditor', clearQuestionsJsonError, onEditorChange, [createAddQuestion(), createPlaceholders(), createPlaceholderTab()]);
   return questionsEditor;
 }
 
