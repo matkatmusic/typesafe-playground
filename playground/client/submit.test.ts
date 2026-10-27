@@ -92,7 +92,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     expect(shownValues).toEqual([VERSION.state, VERSION.outputs])
     expect(elements.errorLine.textContent).toBe('')
     expect(pageState.isDirty).toBe(true)
-    expect(elements.lastEditedLabel.textContent.startsWith('last edited: ')).toBe(true)
+    expect(elements.lastEditedLabel.textContent.startsWith('last run: ')).toBe(true)
     expect(pageState.versions.length).toBe(2)
     expect(pageState.versions[1]).toEqual(newVersion)
     expect(pageState.index).toBe(1)
@@ -110,6 +110,7 @@ async function validateFailedSubmitShowsTheErrorLineAndLeavesTheResultAlone() {
     globalThis.fetch = stubFetch as unknown as typeof fetch
     await executeSubmit()
     expect(elements.errorLine.textContent).toBe('Run failed: 500 boom')
+    expect(elements.lastEditedLabel.textContent).toBe('')
     expect(elements.submitButton.disabled).toBe(false)
     expect(elements.submitButton.textContent).toBe(SUBMIT_TEXT)
     expect(renderSpy).not.toHaveBeenCalled()

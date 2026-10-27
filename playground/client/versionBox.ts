@@ -52,7 +52,7 @@ export function updateOnEditorChange(update: ViewUpdate): void {
   for (const transaction of update.transactions) {
     const isFill = transaction.annotation(FILL_ANNOTATION) === true;
     if (!isFill)
-      markPageChanged();
+      markPageChanged('last edited');
   }
 }
 

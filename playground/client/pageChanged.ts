@@ -1,7 +1,7 @@
 import { getElement } from './dom';
 import { pageState } from './state';
 
-export function markPageChanged(): void {
+export function markPageChanged(labelWord: string): void {
   pageState.isDirty = true;
-  getElement('lastEditedLabel').textContent = `last edited: ${new Date().toLocaleString()}`;
+  getElement('lastEditedLabel').textContent = `${labelWord}: ${new Date().toLocaleString()}`;
 }
