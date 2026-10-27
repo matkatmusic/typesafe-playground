@@ -2,6 +2,7 @@ import { isRequestAllowed } from './playgroundGuard';
 import { parsePortArgument } from './parsePortArgument';
 import { HISTORY_PATH, initHistory, loadHistory } from './playgroundHistory';
 import { createTypeSafeClient, executeRunRequest, type CreateRunClient } from './playgroundRequests';
+import { executeNewRequest, executeOpenRequest, executeSaveRequest } from './playgroundVersionRequests';
 import { buildErrorResponse } from './serverErrors';
 
 export const SERVER_HOSTNAME = '127.0.0.1';
@@ -52,6 +53,15 @@ export async function dispatchRequest(request: Request, port: number, historyPat
   const isRunPost = request.method === 'POST' && pathname === '/run';
   if (isRunPost)
     return executeRunRequest(request, createClient, historyPath);
+  const isNewPost = request.method === 'POST' && pathname === '/new';
+  if (isNewPost)
+    return executeNewRequest(historyPath);
+  const isOpenPost = request.method === 'POST' && pathname === '/open';
+  if (isOpenPost)
+    return executeOpenRequest(request, historyPath);
+  const isSavePost = request.method === 'POST' && pathname === '/save';
+  if (isSavePost)
+    return executeSaveRequest(historyPath);
   const isPageGet = request.method === 'GET' && pathname === '/';
   if (isPageGet)
     return new Response(await buildPage(historyPath), { headers: { 'content-type': 'text/html; charset=utf-8' } });

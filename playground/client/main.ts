@@ -2,16 +2,18 @@ import { refreshSubmitAvailability, setKeyPlaceholder, setTypedKeyToVisible, upd
 import { renderCostAndTokens } from './costTokens';
 import { getButton, getElement, getInput } from './dom';
 import { createResultEditor, renderResultJson } from './editors';
-import { triggerNotImplementedError } from './notImplemented';
+import { refreshFileView } from './fileView';
 import { readPageData } from './pageData';
 import { attachResizer } from './resizer';
+import { pageState } from './state';
 import { executeSubmit } from './submit';
 import { readThemeName, setTheme, toggleTheme } from './theme';
+import { createNewDocument, openVersionsFile, resetToSavedFile, writeVersionsFile } from './versionActions';
 
-getButton('newButton').addEventListener('click', triggerNotImplementedError);
-getButton('openButton').addEventListener('click', triggerNotImplementedError);
-getButton('saveButton').addEventListener('click', triggerNotImplementedError);
-getButton('resetButton').addEventListener('click', triggerNotImplementedError);
+getButton('newButton').addEventListener('click', createNewDocument);
+getButton('openButton').addEventListener('click', openVersionsFile);
+getButton('saveButton').addEventListener('click', writeVersionsFile);
+getButton('resetButton').addEventListener('click', resetToSavedFile);
 getButton('showKeyButton').addEventListener('click', setTypedKeyToVisible);
 getButton('lightDarkModeButton').addEventListener('click', toggleTheme);
 getButton('submitButton').addEventListener('click', executeSubmit);
@@ -23,6 +25,8 @@ createResultEditor();
 setKeyPlaceholder(readPageData().hasEnvKey);
 refreshSubmitAvailability();
 const pageData = readPageData();
+pageState.versions = pageData.versions;
+refreshFileView();
 const lastVersion = pageData.versions[pageData.versions.length - 1];
 renderCostAndTokens(lastVersion);
 if (lastVersion.outputs.length > 0)

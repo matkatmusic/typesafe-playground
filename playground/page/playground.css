@@ -28,6 +28,10 @@ body { margin: 0; height: 100vh; display: flex; flex-direction: column; backgrou
 button { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 12px; font-size: 15px; cursor: pointer; transition: transform 60ms; }
 button:active:not(:disabled) { transform: translateY(2px); }
 button:disabled { opacity: 0.5; cursor: default; }
+#unsavedDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; }
+#unsavedDialog form { display: flex; flex-direction: column; gap: 12px; }
+#unsavedDialog p { margin: 0; }
+#unsavedDialogButtons { display: flex; gap: 8px; justify-content: flex-end; }
 #costTokenSubmitBox { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 #costTokenSubmitBox #submitButton { margin-left: auto; }
 #costLabel, #tokensLabel { color: var(--text-muted); }

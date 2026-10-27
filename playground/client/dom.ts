@@ -12,6 +12,13 @@ export function getInput(id: string): HTMLInputElement {
   return element;
 }
 
+export function getDialog(id: string): HTMLDialogElement {
+  const element = getElement(id);
+  if (!(element instanceof HTMLDialogElement))
+    throw new Error(`element ${id} is not a dialog`);
+  return element;
+}
+
 export function getButton(id: string): HTMLButtonElement {
   const element = getElement(id);
   if (!(element instanceof HTMLButtonElement))

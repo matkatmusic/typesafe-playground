@@ -3,10 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Playground</title>
+<title>Playground - Untitled</title>
 <style>__PAGE_CSS__</style>
 </head>
 <body>
+<dialog id="unsavedDialog">
+    <form method="dialog">
+        <p>Save your changes first?</p>
+        <div id="unsavedDialogButtons">
+            <button value="save">Save</button>
+            <button value="discard">Don't Save</button>
+            <button value="cancel">Cancel</button>
+        </div>
+    </form>
+</dialog>
 <div id="playgroundComponentBox">
     <div id="headerBox">
         <button id="newButton">New</button>
