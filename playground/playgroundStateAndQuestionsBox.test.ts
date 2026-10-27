@@ -56,10 +56,14 @@ async function validateLockGreyCueOnlyMatchesTheLockedContentElement() {
 async function validatePlaceholderHighlightDoesNotChangeTheTextBox() {
     const page = await buildPage(await buildTempHistoryPath())
     const rule = page.split('\n').find((line) => line.startsWith('#questionsJsonEditor .cm-placeholderValue {'))
+    const selectedRule = page.split('\n').find((line) => line.startsWith('#questionsJsonEditor .cm-placeholderValue.cm-placeholderSelected {'))
     expect(rule).toBeDefined()
-    expect(rule).toContain('outline: 1px dashed')
-    for (const boxProperty of ['border:', 'padding', 'margin', 'display', 'line-height', 'font-size'])
+    expect(selectedRule).toBeDefined()
+    expect(selectedRule).toContain('outline: 1px dashed')
+    for (const boxProperty of ['border:', 'padding', 'margin', 'display', 'line-height', 'font-size']) {
         expect(rule).not.toContain(boxProperty)
+        expect(selectedRule).not.toContain(boxProperty)
+    }
 }
 
 test('test_placeholder_highlight_does_not_change_the_text_box', validatePlaceholderHighlightDoesNotChangeTheTextBox)

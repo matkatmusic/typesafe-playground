@@ -13,6 +13,7 @@ export interface PlaceholderRange {
 const FIELD_PATTERN = /\$\{(\d+):([^}]*)\}/g;
 const NAME_PATTERN = /^new_(noul|score|choice)_\d+$/;
 const placeholderMark = Decoration.mark({ class: 'cm-placeholderValue' });
+const selectedPlaceholderMark = Decoration.mark({ class: 'cm-placeholderValue cm-placeholderSelected' });
 
 export function listPlaceholderTexts(): string[] {
   const types: QuestionType[] = ['noul', 'score', 'choice'];
@@ -67,16 +68,29 @@ export function findPlaceholderRanges(text: string): PlaceholderRange[] {
   return ranges;
 }
 
-function buildPlaceholderDecorations(state: EditorState): DecorationSet {
+function isPlaceholderSelected(state: EditorState, range: PlaceholderRange): boolean {
+  const { from, to } = state.selection.main;
+  const isSelectionEmpty = from === to;
+  if (isSelectionEmpty)
+    return false;
+  const coversInnerText = from <= range.from + 1 && to >= range.to - 1;
+  return coversInnerText;
+}
+
+export function buildPlaceholderDecorations(state: EditorState): DecorationSet {
   const ranges = findPlaceholderRanges(state.doc.toString());
   const marks = [];
-  for (let i = 0; i < ranges.length; i++)
-    marks.push(placeholderMark.range(ranges[i].from, ranges[i].to));
+  for (let i = 0; i < ranges.length; i++) {
+    const isSelected = isPlaceholderSelected(state, ranges[i]);
+    const mark = isSelected ? selectedPlaceholderMark : placeholderMark;
+    marks.push(mark.range(ranges[i].from, ranges[i].to));
+  }
   return Decoration.set(marks);
 }
 
 function updatePlaceholderDecorations(value: DecorationSet, transaction: Transaction): DecorationSet {
-  if (!transaction.docChanged)
+  const hasChanged = transaction.docChanged || transaction.selection !== undefined;
+  if (!hasChanged)
     return value;
   return buildPlaceholderDecorations(transaction.state);
 }
@@ -85,7 +99,7 @@ function getFieldDecorations(field: StateField<DecorationSet>): Extension {
   return EditorView.decorations.from(field);
 }
 
-const placeholderField = StateField.define<DecorationSet>({
+export const placeholderField =StateField.define<DecorationSet>({
   create: buildPlaceholderDecorations,
   update: updatePlaceholderDecorations,
   provide: getFieldDecorations,
