@@ -67,5 +67,13 @@ async function validateJsonToggleButtonSaysBracesAndShowsAShowResponseTooltip() 
     expect(page).toContain('<button id="jsonToggleButton" aria-label="show response" title="show response">{ }</button>')
 }
 
+async function validateJsonToggleButtonStretchesToTheHeightOfCollapseAndExpand() {
+    const page = await buildPage(await buildTempHistoryPath())
+    const rule = page.split('\n').find((line) => line.startsWith('#jsonToggleButton {'))
+    expect(rule).toContain('align-self: stretch')
+    expect(rule).not.toContain('height:')
+}
+
+test('test_json_toggle_button_stretches_to_the_height_of_collapse_and_expand', validateJsonToggleButtonStretchesToTheHeightOfCollapseAndExpand)
 test('test_json_toggle_button_says_braces_and_shows_a_show_response_tooltip', validateJsonToggleButtonSaysBracesAndShowsAShowResponseTooltip)
 test('test_result_box_holds_winners_first_then_toggle_graphs_and_json', validateResultBoxHoldsWinnersFirstThenToggleGraphsAndJson)
