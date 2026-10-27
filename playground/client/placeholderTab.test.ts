@@ -42,6 +42,20 @@ function validateShiftTabWalksBackFromTheLastPlaceholder() {
   expect(seen).toEqual(['description', 'description', 'instruction', 'new_noul_1']);
 }
 
+function validateTabAndShiftTabSkipEditedPlaceholders() {
+  const editedDoc = DOC.replace('new_noul_1', 'new_noul_5').replace('"instruction"', '"my own text"');
+  const harness = buildHarness(0);
+  harness.state = EditorState.create({ doc: editedDoc, selection: { anchor: 0 }, extensions: [json()] });
+  const forward: string[] = [];
+  while (selectNextPlaceholder(harness as never))
+    forward.push(readSelectedText(harness));
+  expect(forward).toEqual(['description', 'description']);
+  const backward: string[] = [];
+  while (selectPreviousPlaceholder(harness as never))
+    backward.push(readSelectedText(harness));
+  expect(backward).toEqual(['description']);
+}
+
 function validateTabAtTheLastPlaceholderFallsThroughToIndent() {
   const harness = buildHarness(DOC.lastIndexOf('description'));
   harness.state = harness.state.update({ selection: { anchor: DOC.lastIndexOf('description'), head: DOC.lastIndexOf('description') + 11 } }).state;
@@ -57,5 +71,6 @@ function validateTabKeyBindingComesBeforeIndent() {
 
 test('test_tab_walks_forward_through_every_placeholder_even_without_a_snippet_session', validateTabWalksForwardThroughEveryPlaceholderEvenWithoutASnippetSession);
 test('test_shift_tab_walks_back_from_the_last_placeholder', validateShiftTabWalksBackFromTheLastPlaceholder);
+test('test_tab_and_shift_tab_skip_edited_placeholders', validateTabAndShiftTabSkipEditedPlaceholders);
 test('test_tab_at_the_last_placeholder_falls_through_to_indent', validateTabAtTheLastPlaceholderFallsThroughToIndent);
 test('test_tab_key_binding_comes_before_indent', validateTabKeyBindingComesBeforeIndent);

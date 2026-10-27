@@ -52,11 +52,17 @@ function validatePlaceholdersSurviveTypingOverOne() {
 }
 
 function validateGeneratedNamesAndDefaultsAreFoundButUserTextIsNot() {
-  const text = '{"new_noul_7": {"instructions": "instruction", "x": "mine"}}';
+  const text = '{"new_noul_1": {"instructions": "instruction", "x": "mine"}}';
   const found = findPlaceholderRanges(text);
   expect(found.length).toBe(2);
-  expect(text.slice(found[0].from, found[0].to)).toBe('"new_noul_7"');
+  expect(text.slice(found[0].from, found[0].to)).toBe('"new_noul_1"');
   expect(text.slice(found[1].from, found[1].to)).toBe('"instruction"');
+}
+
+function validateEditedNamesAreRegularText() {
+  expect(listRangeTexts('{"new_noul_7": {"x": "instruction"}}')).toEqual(['instruction']);
+  expect(listRangeTexts('{"new_noul_0": 1, "new_noul_01": 2, "my_name": 3}')).toEqual([]);
+  expect(listRangeTexts('{"new_noul_1": {}, "new_noul_2": {}, "new_score_2": {}}')).toEqual(['new_noul_1', 'new_noul_2']);
 }
 
 function validateEscapedQuoteDoesNotEndTheString() {
@@ -128,4 +134,5 @@ test('test_only_a_fully_selected_placeholder_gets_the_selected_class',validateOn
 test('test_selection_change_alone_rebuilds_the_decorations', validateSelectionChangeAloneRebuildsTheDecorations);
 test('test_placeholders_stay_found_after_typing_over_one',validatePlaceholdersSurviveTypingOverOne);
 test('test_generated_names_and_defaults_are_found', validateGeneratedNamesAndDefaultsAreFoundButUserTextIsNot);
+test('test_edited_names_are_regular_text', validateEditedNamesAreRegularText);
 test('test_escaped_quote_does_not_end_the_string', validateEscapedQuoteDoesNotEndTheString);

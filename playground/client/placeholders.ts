@@ -11,7 +11,7 @@ export interface PlaceholderRange {
 }
 
 const FIELD_PATTERN = /\$\{(\d+):([^}]*)\}/g;
-const NAME_PATTERN = /^new_(noul|score|choice)_\d+$/;
+const NAME_PATTERN = /^new_(noul|score|choice)_([1-9]\d*)$/;
 const placeholderMark = Decoration.mark({ class: 'cm-placeholderValue' });
 const selectedPlaceholderMark = Decoration.mark({ class: 'cm-placeholderValue cm-placeholderSelected' });
 
@@ -36,6 +36,19 @@ export function listPlaceholderTexts(): string[] {
 
 const PLACEHOLDER_TEXTS = listPlaceholderTexts();
 
+export function isDefaultGeneratedName(text: string, inner: string): boolean {
+  const match = NAME_PATTERN.exec(inner);
+  if (match === null)
+    return false;
+  const number = Number(match[2]);
+  for (let lower = 1; lower < number; lower++) {
+    const isLowerNameUsed = text.includes('"new_' + match[1] + '_' + lower + '"');
+    if (!isLowerNameUsed)
+      return false;
+  }
+  return true;
+}
+
 export function findPlaceholderRanges(text: string): PlaceholderRange[] {
   const ranges: PlaceholderRange[] = [];
   let i = 0;
@@ -58,7 +71,7 @@ export function findPlaceholderRanges(text: string): PlaceholderRange[] {
       break;
     const inner = text.slice(start + 1, i);
     let isPlaceholder = PLACEHOLDER_TEXTS.includes(inner);
-    const isGeneratedName = NAME_PATTERN.test(inner);
+    const isGeneratedName = isDefaultGeneratedName(text, inner);
     if (isGeneratedName)
       isPlaceholder = true;
     if (isPlaceholder)
