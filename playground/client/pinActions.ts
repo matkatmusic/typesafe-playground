@@ -10,6 +10,9 @@ function renderPin(): void {
 }
 
 export function setPinnedToShown(): void {
+  const isAlreadyPinned = pageState.pinnedId !== null;
+  if (isAlreadyPinned)
+    return;
   pageState.pinnedId = getShownVersion().id;
   renderPin();
 }
