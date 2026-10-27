@@ -55,14 +55,20 @@ async function validatePressedButtonMovesDownAndRightBy2px() {
 
 test('test_pressed_button_moves_down_and_right_by_2px', validatePressedButtonMovesDownAndRightBy2px)
 
-async function validateNoteBoxSitsAboveTheStateAndQuestionsBox() {
+async function validateNoteBoxSitsInTheVersionRowAfterTheNextButtonWithADivider() {
     const page = await buildPage(await buildTempHistoryPath())
-    expect(page.indexOf('id="noteBox"')).toBeGreaterThan(page.indexOf('id="errorLine"'))
-    expect(page.indexOf('id="noteText"')).toBeGreaterThan(page.indexOf('id="noteBox"'))
-    expect(page.indexOf('id="noteText"')).toBeLessThan(page.indexOf('id="stateAndQuestionsBox"'))
+    const itemIds = ['versionBox', 'prevVersionButton', 'versionLabel', 'nextVersionButton', 'versionNoteDivider', 'noteBox', 'noteText']
+    let previousIndex = -1
+    for (const itemId of itemIds) {
+        const itemIndex = page.indexOf(`id="${itemId}"`)
+        expect(itemIndex).toBeGreaterThan(previousIndex)
+        previousIndex = itemIndex
+    }
+    expect(page.indexOf('id="noteText"')).toBeLessThan(page.indexOf('id="inputResultsBox"'))
+    expect(page).toContain('#versionNoteDivider { flex: none; align-self: stretch; width: 1px; margin: 0 4px; background: var(--grid); }')
 }
 
-test('test_note_box_sits_above_the_state_and_questions_box', validateNoteBoxSitsAboveTheStateAndQuestionsBox)
+test('test_note_box_sits_in_the_version_row_after_the_next_button_with_a_divider', validateNoteBoxSitsInTheVersionRowAfterTheNextButtonWithADivider)
 async function validateJsonToggleButtonSaysBracesAndShowsAShowResponseTooltip() {
     const page = await buildPage(await buildTempHistoryPath())
     expect(page).toContain('<button id="jsonToggleButton" aria-label="show response" title="show response">{ }</button>')

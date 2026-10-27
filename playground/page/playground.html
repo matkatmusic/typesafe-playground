@@ -33,6 +33,8 @@
         <button id="prevVersionButton" aria-label="previous version">&lt;</button>
         <span id="versionLabel"></span>
         <button id="nextVersionButton" aria-label="next version">&gt;</button>
+        <div id="versionNoteDivider"></div>
+        <div id="noteBox"><label for="noteText">Note:</label><textarea id="noteText" rows="1" wrap="soft" disabled placeholder="Submit a run to add a note"></textarea></div>
     </div>
     <div id="inputResultsBox">
         <div id="inputBox">
@@ -46,7 +48,6 @@
                 </div>
             </div>
             <div id="errorLine"></div>
-            <div id="noteBox"><label for="noteText">Note</label><textarea id="noteText" rows="1" wrap="soft" disabled placeholder="Submit a run to add a note"></textarea></div>
             <div id="stateAndQuestionsBox">
                 <div id="stateJsonEditor"><div id="stateTitleRow"><span class="other-label">state</span><button class="format-json-button" id="stateFormatJsonButton">Format JSON</button></div></div>
                 <div class="row-resizer" id="rowResizer"></div>
