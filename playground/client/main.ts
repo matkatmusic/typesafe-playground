@@ -1,5 +1,6 @@
 import { refreshSubmitAvailability, setKeyPlaceholder, setTypedKeyToVisible, updateShowKeyButton } from './apiKey';
 import { getButton, getElement, getInput } from './dom';
+import { setAllGraphsToCollapsed, setAllGraphsToExpanded } from './collapseActions';
 import { createQuestionsEditor, createResultEditor, createStateEditor } from './editors';
 import { refreshFileView } from './fileView';
 import { initGraphs, renderGraphs } from './graphs';
@@ -21,6 +22,8 @@ getButton('showKeyButton').addEventListener('click', setTypedKeyToVisible);
 getButton('lightDarkModeButton').addEventListener('click', toggleTheme);
 getButton('submitButton').addEventListener('click', executeSubmit);
 getButton('jsonToggleButton').addEventListener('click', toggleResultJson);
+getButton('collapseAllButton').addEventListener('click', setAllGraphsToCollapsed);
+getButton('expandAllButton').addEventListener('click', setAllGraphsToExpanded);
 getButton('prevVersionButton').addEventListener('click', moveToPreviousVersion);
 getButton('nextVersionButton').addEventListener('click', moveToNextVersion);
 document.addEventListener('keydown', moveOnArrowKey);
