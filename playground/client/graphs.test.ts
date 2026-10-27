@@ -2,7 +2,7 @@ import { test, expect, afterEach } from 'bun:test';
 import type { Version } from '../playgroundHistory';
 import type { ChartLayout } from './graphTypes';
 import { graphState } from './graphState';
-import { EMPTY_MESSAGE, isRunDataPresent, renderGraphs } from './graphs';
+import { EMPTY_MESSAGE, isRunDataPresent, renderGraphs, renderStaleCharts } from './graphs';
 
 class FakeElement {
   name = '';
@@ -104,7 +104,25 @@ function validateTogglingAverageRendersAgain() {
   expect(drawn[1][0].isAverageShown).toBe(true);
 }
 
+function validateChartsTallerBlocksAreDrawnAgainAfterTheInfoBox() {
+  installFakeDocument();
+  const container = new FakeElement();
+  const drawn: ChartLayout[][] = [];
+  function growBoxOnFirstDraw(charts: ChartLayout[]) {
+    drawn.push(charts);
+    if (drawn.length === 1)
+      (charts[0].box as unknown as FakeElement).clientHeight = 400;
+  }
+  renderGraphs(twoQuestions, container as unknown as HTMLElement, growBoxOnFirstDraw);
+  expect(drawn.length).toBe(2);
+  expect(drawn[0][0].plotH).toBe(156);
+  expect(drawn[1][0].plotH).toBe(356);
+  renderStaleCharts(drawn[1], growBoxOnFirstDraw);
+  expect(drawn.length).toBe(2);
+}
+
 afterEach(removeFakeDocument);
+test('test_charts_in_taller_blocks_are_drawn_again_after_the_info_box', validateChartsTallerBlocksAreDrawnAgainAfterTheInfoBox);
 test('test_run_data_is_present_only_with_an_output_for_the_name', validateRunDataPresence);
 test('test_empty_message_text', validateEmptyMessageText);
 test('test_render_graphs_draws_charts_and_empty_messages', validateBlocksChartsAndEmptyMessages);

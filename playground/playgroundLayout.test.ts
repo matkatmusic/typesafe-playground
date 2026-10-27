@@ -90,6 +90,24 @@ async function validateReplaceReferencesToggleIsAnUncheckedCheckboxInTheButtonRo
 }
 
 test('test_replace_references_toggle_is_an_unchecked_checkbox_in_the_button_row', validateReplaceReferencesToggleIsAnUncheckedCheckboxInTheButtonRow)
+async function validateGraphsScrollWithAStyledScrollbarAndInfoBoxSitsInTheBlockFlow() {
+    const page = await buildPage(await buildTempHistoryPath())
+    const lines = page.split('\n')
+    const containerRule = lines.find((line) => line.startsWith('#graphContainerBox {'))
+    expect(containerRule).toContain('overflow-y: auto')
+    expect(containerRule).toContain('scrollbar-gutter: stable')
+    expect(page).toContain('#graphContainerBox::-webkit-scrollbar { width: 10px; }')
+    expect(page).toContain('#graphContainerBox::-webkit-scrollbar-track { background: var(--grid);')
+    expect(page).toContain('#graphContainerBox::-webkit-scrollbar-thumb { background: var(--text-muted);')
+    const blockRule = lines.find((line) => line.startsWith('.graph-block {'))
+    expect(blockRule).toContain('display: grid')
+    expect(blockRule).not.toContain('min-height: 0')
+    const infoRule = lines.find((line) => line.startsWith('.bar-info {'))
+    expect(infoRule).toContain('grid-column: 2')
+    expect(infoRule).not.toContain('position: absolute')
+}
+
+test('test_graphs_scroll_with_a_styled_scrollbar_and_info_box_sits_in_the_block_flow', validateGraphsScrollWithAStyledScrollbarAndInfoBoxSitsInTheBlockFlow)
 test('test_json_toggle_button_stretches_to_the_height_of_collapse_and_expand', validateJsonToggleButtonStretchesToTheHeightOfCollapseAndExpand)
 test('test_json_toggle_button_says_braces_and_shows_a_show_response_tooltip', validateJsonToggleButtonSaysBracesAndShowsAShowResponseTooltip)
 test('test_result_box_holds_winners_first_then_toggle_graphs_and_json', validateResultBoxHoldsWinnersFirstThenToggleGraphsAndJson)

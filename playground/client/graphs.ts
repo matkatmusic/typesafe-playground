@@ -2,6 +2,7 @@ import type { Version } from '../playgroundHistory';
 import type { ChartLayout, ChartsHook, GraphBlock, RenderCallback } from './graphTypes';
 import { renderChart } from './graphChart';
 import { createGraphBlock } from './graphBlock';
+import { computePlotHeight } from './graphGeometry';
 import { graphState } from './graphState';
 import { listAnswers, readQuestions } from './graphValues';
 
@@ -17,6 +18,21 @@ export function isRunDataPresent(version: Version, name: string): boolean {
 function fillEmptyMessage(box: HTMLElement): void {
   box.classList.add('empty');
   box.textContent = EMPTY_MESSAGE;
+}
+
+// The InfoBox can make a block taller after the chart was measured, so draw those charts again.
+export function renderStaleCharts(charts: ChartLayout[], onRendered?: ChartsHook): void {
+  const redrawn: ChartLayout[] = [];
+  for (const chart of charts) {
+    const isStale = computePlotHeight(chart.box.clientHeight) !== chart.plotH;
+    if (isStale)
+      redrawn.push(renderChart({ block: chart.block as HTMLDivElement, box: chart.box as HTMLDivElement }, chart.name, chart.question, chart.answers));
+  }
+  const hasRedrawn = redrawn.length > 0;
+  if (!hasRedrawn)
+    return;
+  if (onRendered !== undefined)
+    onRendered(redrawn);
 }
 
 export function renderGraphs(version: Version, container: HTMLElement, onRendered?: ChartsHook): void {
@@ -43,6 +59,7 @@ export function renderGraphs(version: Version, container: HTMLElement, onRendere
   }
   if (onRendered !== undefined)
     onRendered(charts);
+  renderStaleCharts(charts, onRendered);
 }
 
 export function initGraphs(container: HTMLElement, renderShownGraphs: RenderCallback): void {
