@@ -14,7 +14,7 @@ function drawOption(isAverageShown: boolean) {
   Object.assign(globalThis, { document: { createElementNS: createFakeNode } });
   const nodes: ReturnType<typeof createFakeNode>[] = [];
   const svg = { appendChild(child: ReturnType<typeof createFakeNode>) { nodes.push(child); } };
-  renderOption(svg as unknown as Element, [0.2, 0.6], 100, 100, isAverageShown);
+  renderOption(svg as unknown as Element, [0.2, 0.6], 100, 100, isAverageShown, 0);
   return nodes;
 }
 

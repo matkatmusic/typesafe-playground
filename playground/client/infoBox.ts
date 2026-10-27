@@ -10,17 +10,17 @@ import { readWinningKey } from './infoWinner';
 import { createSvgNode } from './svgDom';
 
 export function attachColumnHits(chart: ChartLayout, tracker: HoverTracker, columnIndex: number): ColumnHit {
-  const { svg, question, answers, keys, plotH, isAverageShown } = chart;
+  const { svg, question, answers, keys, plotH, isAverageShown, baseline } = chart;
   const key = keys[columnIndex];
   const slotX = computeSlotLeft(columnIndex, chart.slot);
   const values = listValues(answers, key);
   const offset = computeBarOffset(isAverageShown);
   let firstHit: ColumnHit | null = null;
   for (let callIndex = isAverageShown ? -1 : 0; callIndex < values.length; callIndex++) {
-    const bar = computeHitBar(slotX, offset, callIndex, values, plotH);
+    const bar = computeHitBar(slotX, offset, callIndex, values, plotH, baseline);
     const hit = createSvgNode('rect', { x: bar.x, y: bar.y, width: bar.width, height: bar.height, fill: 'transparent', 'stroke-width': 1 });
     const request: BarInfoRequest = { question, answers, key, keys, callIndex };
-    attachHover({ tracker, svg, hit, request, values, slotX, plotH, isAverageShown });
+    attachHover({ tracker, svg, hit, request, values, slotX, plotH, isAverageShown, baseline });
     svg.appendChild(hit);
     if (firstHit === null)
       firstHit = { hit, request };

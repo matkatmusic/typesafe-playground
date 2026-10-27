@@ -11,16 +11,16 @@ function createRotatedLabel(point: LabelPoint, text: string): SVGElement {
   return createSvgNode('text', { x: point.x, y: point.y, transform: transform, style: LABEL_STYLE }, text);
 }
 
-export function renderValueLabels(svg: Element, values: number[], slotX: number, plotH: number, isAverageShown: boolean): void {
+export function renderValueLabels(svg: Element, values: number[], slotX: number, plotH: number, isAverageShown: boolean, baseline: number): void {
   const group = createSvgNode('g', { class: 'value-labels', 'pointer-events': 'none' });
   const offset = computeBarOffset(isAverageShown);
   if (isAverageShown) {
     const stat = computeSummary(values);
-    const averagePoint = computeAverageLabelPoint(slotX, stat.average, plotH);
+    const averagePoint = computeAverageLabelPoint(slotX, stat.average, plotH, baseline);
     group.appendChild(createRotatedLabel(averagePoint, stat.average.toFixed(3)));
   }
   for (let k = 0; k < values.length; k++) {
-    const callPoint = computeCallLabelPoint(slotX, offset, k, values[k], plotH);
+    const callPoint = computeCallLabelPoint(slotX, offset, k, values[k], plotH, baseline);
     group.appendChild(createRotatedLabel(callPoint, values[k].toFixed(3)));
   }
   svg.appendChild(group);

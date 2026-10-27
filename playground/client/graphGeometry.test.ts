@@ -1,7 +1,8 @@
 import { test, expect } from 'bun:test';
+import type { Question } from '@typesafe-ai/sdk';
 import {
-  BAR_W, BOTTOM, computeAverageBar, computeBarOffset, computeCallBar, computePlotHeight, computeRangeLine, computeSlotLeft,
-  computeSlotWidth, computeY, LEFT, MIN_PLOT_H, OPTION_GAP, TICK_COUNT, TOP,
+  BAR_W, BOTTOM, computeAverageBar, computeBarOffset, computeBaseline, computeCallBar, computePlotHeight, computeRangeLine, computeSlotLeft,
+  computeSlotWidth, computeY, LEFT, MIN_PLOT_H, NOUL_BASELINE, OPTION_GAP, TICK_COUNT, TOP,
 } from './graphGeometry';
 
 function validateComputeY() {
@@ -24,12 +25,26 @@ function validateSlotWidth() {
 }
 
 function validateBars() {
-  const callBar = computeCallBar(100, BAR_W, 2, 0.5, 100);
+  const callBar = computeCallBar(100, BAR_W, 2, 0.5, 100, 0);
   expect(callBar).toEqual({ x: 100 + BAR_W + 2 * BAR_W, y: TOP + 50, width: BAR_W - 1, height: 50 });
-  const averageBar = computeAverageBar(100, 0.25, 100);
+  const averageBar = computeAverageBar(100, 0.25, 100, 0);
   expect(averageBar).toEqual({ x: 100, y: TOP + 75, width: BAR_W - 1, height: 25 });
   const rangeLine = computeRangeLine(100, { low: 0.2, high: 0.6, average: 0.4 }, 100);
   expect(rangeLine).toEqual({ x: 100 + (BAR_W - 1) / 2, y1: TOP + 40, y2: TOP + 80 });
+}
+
+function validateNoulBarsStartAtTheMiddle() {
+  expect(computeBaseline({ type: 'noul' })).toBe(NOUL_BASELINE);
+  expect(computeBaseline({ type: 'score', criteria: ['a', 'b'] } as Question)).toBe(0);
+  const up = computeCallBar(100, 0, 0, 0.9, 100, NOUL_BASELINE);
+  expect(up.y).toBeCloseTo(TOP + 10);
+  expect(up.height).toBeCloseTo(40);
+  const down = computeCallBar(100, 0, 0, 0.2, 100, NOUL_BASELINE);
+  expect(down.y).toBeCloseTo(TOP + 50);
+  expect(down.height).toBeCloseTo(30);
+  const flat = computeAverageBar(100, 0.5, 100, NOUL_BASELINE);
+  expect(flat.y).toBeCloseTo(TOP + 50);
+  expect(flat.height).toBe(0);
 }
 
 function validateTicksDrawSixGridLines() {
@@ -40,4 +55,5 @@ test('test_compute_y_maps_value_to_height', validateComputeY);
 test('test_plot_height_keeps_a_minimum', validatePlotHeightHasAFloor);
 test('test_slot_width_and_offsets', validateSlotWidth);
 test('test_bar_geometry', validateBars);
+test('test_noul_bars_start_at_the_middle', validateNoulBarsStartAtTheMiddle);
 test('test_ticks_draw_six_grid_lines', validateTicksDrawSixGridLines);

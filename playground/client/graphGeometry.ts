@@ -1,4 +1,5 @@
-import type { BarGeometry, RangeLineGeometry, Summary } from './graphTypes';
+import type { Question } from '@typesafe-ai/sdk';
+import type { BarGeometry, BarSpan, RangeLineGeometry, Summary } from './graphTypes';
 
 export const BAR_W = 8;
 export const OPTION_GAP = 14;
@@ -7,6 +8,8 @@ export const TOP = 30;
 export const BOTTOM = 14;
 export const MIN_PLOT_H = 40;
 export const TICK_COUNT = 5;
+export const NOUL_BASELINE = 0.5;
+export const MIN_HIT_H = 3;
 export const MIN_SLOT_BARS_WIDTH = 16;
 
 export function computeY(value: number, plotH: number): number {
@@ -26,21 +29,27 @@ export function computeBarOffset(isAverageShown: boolean): number {
   return isAverageShown ? BAR_W : 0;
 }
 
-export function computeCallBar(slotX: number, offset: number, callIndex: number, value: number, plotH: number): BarGeometry {
+export function computeBaseline(question: Question): number {
+  return question.type === 'noul' ? NOUL_BASELINE : 0;
+}
+
+export function computeBarSpan(value: number, baseline: number, plotH: number): BarSpan {
+  return { y: computeY(Math.max(value, baseline), plotH), height: plotH * Math.abs(value - baseline) };
+}
+
+export function computeCallBar(slotX: number, offset: number, callIndex: number, value: number, plotH: number, baseline: number): BarGeometry {
   return {
     x: slotX + offset + callIndex * BAR_W,
-    y: computeY(value, plotH),
+    ...computeBarSpan(value, baseline, plotH),
     width: BAR_W - 1,
-    height: plotH * value,
   };
 }
 
-export function computeAverageBar(slotX: number, average: number, plotH: number): BarGeometry {
+export function computeAverageBar(slotX: number, average: number, plotH: number, baseline: number): BarGeometry {
   return {
     x: slotX,
-    y: computeY(average, plotH),
+    ...computeBarSpan(average, baseline, plotH),
     width: BAR_W - 1,
-    height: plotH * average,
   };
 }
 

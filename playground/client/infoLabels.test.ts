@@ -17,7 +17,7 @@ function drawLabels(isAverageShown: boolean): FakeNode {
   Object.assign(globalThis, { document: { createElementNS: createFakeNode } });
   const appended: FakeNode[] = [];
   const svg = { appendChild(child: FakeNode) { appended.push(child); } };
-  renderValueLabels(svg as unknown as Element, [0.2, 0.6], 100, 100, isAverageShown);
+  renderValueLabels(svg as unknown as Element, [0.2, 0.6], 100, 100, isAverageShown, 0);
   return appended[0];
 }
 
