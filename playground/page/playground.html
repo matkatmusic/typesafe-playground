@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Playground - Untitled</title>
+<style>__PAGE_CSS__</style>
+</head>
+<body>
+<dialog id="unsavedDialog">
+    <form method="dialog">
+        <p>Save your changes first?</p>
+        <div id="unsavedDialogButtons">
+            <button value="save">Save</button>
+            <button value="discard">Don't Save</button>
+            <button value="cancel">Cancel</button>
+        </div>
+    </form>
+</dialog>
+<div id="playgroundComponentBox">
+    <div id="headerBox">
+        <button id="newButton">New</button>
+        <button id="openButton">Open</button>
+        <button id="saveButton">Save</button>
+        <button id="resetButton">Reset</button>
+        <label id="typeSafeKeyLabel" for="typeSafeKeyEditor">TypeSafe API key</label>
+        <input id="typeSafeKeyEditor" type="password" autocomplete="off" spellcheck="false" placeholder="TypeSafe API key">
+        <button id="showKeyButton">Show</button>
+        <span id="lastEditedLabel"></span>
+        <button id="lightDarkModeButton">light</button>
+    </div>
+    <div id="versionBox">
+        <button id="prevVersionButton" aria-label="previous version">&lt;</button>
+        <span id="versionLabel"></span>
+        <button id="nextVersionButton" aria-label="next version">&gt;</button>
+        <div id="versionNoteDivider"></div>
+        <div id="noteBox"><label for="noteText">Note:</label><textarea id="noteText" rows="1" wrap="soft" disabled placeholder="Submit a run to add a note"></textarea></div>
+        <button id="resetRunsButton">Reset this version's runs</button>
+    </div>
+    <div id="inputResultsBox">
+        <div id="inputBox">
+            <div id="costTokenSubmitBox">
+                <span id="costLabel">Cost: $0.000000</span>
+                <span id="tokensLabel">Tokens: 0</span>
+                <div id="callsSubmitGroup">
+                    <label id="callsLabel" for="callsPicker">Calls</label>
+                    <input id="callsPicker" type="number" min="1" max="10" step="1" value="1" title="Calls per submit">
+                    <button id="submitButton">Submit (paid)</button>
+                </div>
+            </div>
+            <div id="errorLine"></div>
+            <div id="stateAndQuestionsBox">
+                <div id="stateJsonEditor"><div id="stateTitleRow"><span class="other-label">state</span><button class="format-json-button" id="stateFormatJsonButton">Format JSON</button></div></div>
+                <div class="row-resizer" id="rowResizer"></div>
+                <div id="questionsJsonEditor"><div id="questionsTitleRow"><span class="other-label">questions</span><div id="questionsAddQuestion"></div><button class="format-json-button" id="questionsFormatJsonButton">Format JSON</button></div></div>
+            </div>
+        </div>
+        <div class="column-resizer" id="columnResizer"></div>
+        <div id="resultBox">
+            <div id="pinBox">
+                <button id="pinButton">Pin</button>
+                <button id="unpinButton">Unpin</button>
+                <span id="pinInfo"></span>
+            </div>
+            <div id="winnerBox"></div>
+            <div id="graphButtonRow">
+                <label id="replaceReferencesToggle"><input type="checkbox" id="replaceReferencesCheckbox"> replace references</label>
+                <button id="collapseAllButton">Collapse all</button>
+                <button id="expandAllButton">Expand all</button>
+                <button id="jsonToggleButton" aria-label="show response" title="show response">{ }</button>
+            </div>
+            <div id="graphContainerBox"></div>
+            <div id="resultJsonEditor" hidden></div>
+        </div>
+    </div>
+</div>
+<script type="application/json" id="data">__DATA_JSON__</script>
+<script type="module">__PAGE_SCRIPT__</script>
+</body>
+</html>
