@@ -55,7 +55,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 #unsavedDialog form { display: flex; flex-direction: column; gap: 12px; }
 #unsavedDialog p { margin: 0; }
 #unsavedDialogButtons { display: flex; gap: 8px; justify-content: flex-end; }
-#costTokenSubmitBox { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+#costTokenSubmitBox { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--grid); }
 #callsSubmitGroup { margin-left: auto; display: flex; align-items: center; }
 #callsLabel { margin-right: 6px; color: var(--text-muted); }
 #costLabel, #tokensLabel { color: var(--text-muted); }

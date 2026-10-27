@@ -100,6 +100,7 @@ async function validateCostTokenSubmitBoxHoldsFourItemsInOrderAndErrorLineFollow
     expect(page.includes('<button id="submitButton">Submit (paid)</button>')).toBe(true)
     expect(page.includes('<label id="callsLabel" for="callsPicker">Calls</label>')).toBe(true)
     expect(page.indexOf('id="callsLabel"')).toBeLessThan(page.indexOf('id="callsPicker"'))
+    expect(page).toContain('gap: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--grid); }')
     expect(page).toContain('#callsSubmitGroup #submitButton { height: 30px; margin-left: 2px; border-radius: 6px; }')
     expect(page).toContain('border: 1px solid var(--button-border); border-radius: 6px; padding: 4px 8px; font: inherit; }')
 }
