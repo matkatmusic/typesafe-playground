@@ -16,6 +16,7 @@ async function validateMainBundlesForTheBrowser() {
     expect(script.includes('graphContainerBox')).toBe(true)
     expect(script.includes('collapseAllButton')).toBe(true)
     expect(script.includes('expandAllButton')).toBe(true)
+    expect(script.includes('replaceReferencesCheckbox')).toBe(true)
     expect(script.includes('stateJsonEditor')).toBe(true)
     expect(script.includes('questionsJsonEditor')).toBe(true)
     expect(script.includes('submitButton')).toBe(true)

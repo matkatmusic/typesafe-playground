@@ -81,6 +81,15 @@ async function validateJsonToggleButtonStretchesToTheHeightOfCollapseAndExpand()
     expect(rule).not.toContain('height:')
 }
 
+async function validateReplaceReferencesToggleIsAnUncheckedCheckboxInTheButtonRow() {
+    const page = await buildPage(await buildTempHistoryPath())
+    const toggle = '<label id="replaceReferencesToggle"><input type="checkbox" id="replaceReferencesCheckbox"> replace references</label>'
+    expect(page).toContain(toggle)
+    expect(page.indexOf(toggle)).toBeGreaterThan(page.indexOf('id="graphButtonRow"'))
+    expect(page.indexOf(toggle)).toBeLessThan(page.indexOf('id="collapseAllButton"'))
+}
+
+test('test_replace_references_toggle_is_an_unchecked_checkbox_in_the_button_row', validateReplaceReferencesToggleIsAnUncheckedCheckboxInTheButtonRow)
 test('test_json_toggle_button_stretches_to_the_height_of_collapse_and_expand', validateJsonToggleButtonStretchesToTheHeightOfCollapseAndExpand)
 test('test_json_toggle_button_says_braces_and_shows_a_show_response_tooltip', validateJsonToggleButtonSaysBracesAndShowsAShowResponseTooltip)
 test('test_result_box_holds_winners_first_then_toggle_graphs_and_json', validateResultBoxHoldsWinnersFirstThenToggleGraphsAndJson)

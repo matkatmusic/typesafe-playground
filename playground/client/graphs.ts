@@ -28,7 +28,7 @@ export function renderGraphs(version: Version, container: HTMLElement, onRendere
   const names = Object.keys(questions);
   const blocks: GraphBlock[] = [];
   for (let i = 0; i < names.length; i++) {
-    const graphBlock = createGraphBlock(i + 1, names[i], questions[names[i]], renderAgain);
+    const graphBlock = createGraphBlock(i + 1, names[i], questions[names[i]], renderAgain, version);
     container.appendChild(graphBlock.block);
     blocks.push(graphBlock);
   }

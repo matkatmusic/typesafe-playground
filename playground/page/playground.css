@@ -87,6 +87,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 #winnerBox .winner-instructions { color: var(--text); font-weight: 600; overflow-wrap: anywhere; }
 #winnerBox .winner-line { padding-left: 2em; color: var(--text-muted); overflow-wrap: anywhere; }
 #graphButtonRow { flex: none; display: flex; gap: 6px; align-items: center; justify-content: flex-end; }
+#replaceReferencesToggle { flex: none; margin-right: 6px; color: var(--text-muted); }
 #jsonToggleButton { flex: none; align-self: stretch; padding: 2px 8px; font-size: 13px; font-family: ui-monospace, Menlo, monospace; }
 :root { --score: #2a78d6; --confidence: #eb6834; --good: #008300; }
 :root[data-theme="dark"] { --score: #3987e5; --confidence: #d95926; --good: #3fb950; }

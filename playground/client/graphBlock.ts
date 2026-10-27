@@ -1,7 +1,9 @@
 import type { Question } from '@typesafe-ai/sdk';
+import type { Version } from '../playgroundHistory';
 import type { GraphBlock, RenderCallback } from './graphTypes';
 import { graphState } from './graphState';
 import { formatValueText } from './graphValues';
+import { replaceReferences } from './references';
 
 export function formatGraphTitle(questionNumber: number, name: string, question: Question): string {
   return 'Q' + questionNumber + ' ' + name + ' · ' + formatValueText(question.instructions);
@@ -39,8 +41,9 @@ export function createCollapseButton(name: string, onChange: RenderCallback): HT
   return button;
 }
 
-export function createGraphBlock(questionNumber: number, name: string, question: Question, onChange: RenderCallback): GraphBlock {
-  const titleText = formatGraphTitle(questionNumber, name, question);
+export function createGraphBlock(questionNumber: number, name: string, question: Question, onChange: RenderCallback, version: Version): GraphBlock {
+  const formattedTitle = formatGraphTitle(questionNumber, name, question);
+  const titleText = graphState.isReferencesReplaced ? replaceReferences(formattedTitle, version.state, version.questions) : formattedTitle;
   const block = document.createElement('div');
   block.className = 'graph-block';
   if (graphState.collapsedByName[name] === true)
