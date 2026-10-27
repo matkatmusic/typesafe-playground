@@ -3,6 +3,7 @@ import { getButton, getElement, getInput } from './dom';
 import { createQuestionsEditor, createResultEditor, createStateEditor } from './editors';
 import { refreshFileView } from './fileView';
 import { initGraphs, renderGraphs } from './graphs';
+import { attachInfoBox } from './infoBox';
 import { readPageData } from './pageData';
 import { toggleResultJson } from './resultJsonToggle';
 import { attachResizer } from './resizer';
@@ -38,7 +39,7 @@ pageState.versions = pageData.versions;
 refreshFileView();
 renderLastVersion();
 function renderShownGraphs(): void {
-  renderGraphs(getShownVersion(), getElement('graphContainerBox'));
+  renderGraphs(getShownVersion(), getElement('graphContainerBox'), attachInfoBox);
 }
 initGraphs(getElement('graphContainerBox'), renderShownGraphs);
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;

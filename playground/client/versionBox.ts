@@ -3,6 +3,7 @@ import { renderCostAndTokens } from './costTokens';
 import { getElement } from './dom';
 import { FILL_ANNOTATION, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson } from './editors';
 import { renderGraphs } from './graphs';
+import { attachInfoBox } from './infoBox';
 import { markPageChanged } from './pageChanged';
 import { getShownVersion, pageState } from './state';
 import { isVersionMovePossible, updateVersionArrows } from './versionArrows';
@@ -31,7 +32,7 @@ export function renderShownVersion(): void {
   refreshVersionBox();
   renderCostAndTokens(version);
   renderResultJson(version.outputs);
-  renderGraphs(version, getElement('graphContainerBox'));
+  renderGraphs(version, getElement('graphContainerBox'), attachInfoBox);
   updateVersionArrows();
 }
 
