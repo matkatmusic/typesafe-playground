@@ -29,7 +29,7 @@ function makeStubFactory(calls: Call[]): CreateRunClient {
 }
 
 function makeRunRequest(body: unknown): Request {
-    return new Request('http://127.0.0.1:4399/run', { method: 'POST', body: JSON.stringify({ id: 1, state: {}, ...(body as object) }) })
+    return new Request('http://127.0.0.1:4399/run', { method: 'POST', body: JSON.stringify({ id: 1, state: {}, questions: HARD_CODED_QUESTIONS, ...(body as object) }) })
 }
 
 function validateTypedKeyBeatsEnvKey() {
@@ -98,12 +98,15 @@ async function validateBadIdReturns400WithoutCallingTheClient() {
     expect((await loadHistory(historyPath)).length).toBe(1)
 }
 
-async function validateClientReceivesTheTypedStateAndHardCodedQuestionsOncePerCall() {
+async function validateClientReceivesTheTypedStateAndQuestionsOncePerCall() {
     Bun.env.TYPESAFE_API_KEY = 'env-key'
     const calls: Call[] = []
-    await executeRunRequest(makeRunRequest({ calls: 3 }), makeStubFactory(calls), await buildTempHistoryPath())
+    const typedState = { text: 'typed' }
+    const typedQuestions = { other: HARD_CODED_QUESTIONS.requestsAction }
+    await executeRunRequest(makeRunRequest({ calls: 3, state: typedState, questions: typedQuestions }), makeStubFactory(calls), await buildTempHistoryPath())
     expect(calls.length).toBe(3)
-    expect(calls[0].request).toEqual({ state: {}, questions: HARD_CODED_QUESTIONS })
+    for (const call of calls)
+        expect(call.request).toEqual({ state: typedState, questions: typedQuestions })
 }
 
 async function validateRunAppendsToTheLastVersionAndRespondsWithOutputsAndVersion() {
@@ -136,6 +139,6 @@ test('test_run_uses_env_key_when_nothing_is_typed', validateEnvKeyIsUsedWhenNoth
 test('test_run_with_no_key_returns_400_and_makes_no_call', validateNoKeyReturns400WithoutCallingTheClient)
 test('test_run_with_bad_calls_returns_400_and_makes_no_call', validateBadCallsReturn400WithoutCallingTheClient)
 test('test_run_with_a_bad_id_returns_400_and_makes_no_call', validateBadIdReturns400WithoutCallingTheClient)
-test('test_run_sends_the_typed_state_and_hard_coded_questions_once_per_call', validateClientReceivesTheTypedStateAndHardCodedQuestionsOncePerCall)
+test('test_run_sends_the_typed_state_and_questions_once_per_call', validateClientReceivesTheTypedStateAndQuestionsOncePerCall)
 test('test_run_appends_to_the_last_version_and_responds_with_outputs_and_version', validateRunAppendsToTheLastVersionAndRespondsWithOutputsAndVersion)
 test('test_run_remembers_typed_key_for_error_scrubbing', validateTypedKeyIsHiddenInLaterErrorMessages)

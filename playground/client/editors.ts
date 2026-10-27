@@ -7,7 +7,7 @@ import { Annotation, Compartment, EditorState, type Extension } from '@codemirro
 import { keymap, type ViewUpdate } from '@codemirror/view';
 import { getElement } from './dom';
 import { jsonHighlight } from './editorHighlight';
-import { clearStateJsonError } from './stateErrorClear';
+import { clearQuestionsJsonError, clearStateJsonError } from './stateErrorClear';
 
 export const EDITOR_THEME_RULES = {
   '&': { height: '100%', background: 'var(--panel)', color: 'var(--text)', border: '1px solid var(--grid)', borderRadius: '6px' },
@@ -21,6 +21,7 @@ export const LOCKED_EXTENSIONS: Extension[] = [EditorView.editable.of(false), Ed
 
 let resultEditor: EditorView | null = null;
 let stateEditor: EditorView | null = null;
+let questionsEditor: EditorView | null = null;
 
 export function buildResultExtensions(): Extension[] {
   return [
@@ -61,9 +62,13 @@ export function getResultEditor(): EditorView {
   return resultEditor;
 }
 
+function buildInputEditor(parentId: string, clearError: (update: ViewUpdate) => void, onEditorChange: (update: ViewUpdate) => void): EditorView {
+  const extensions = [buildJsonExtensions(), EditorView.updateListener.of(clearError), EditorView.updateListener.of(onEditorChange)];
+  return new EditorView({ doc: '', extensions: extensions, parent: getElement(parentId) });
+}
+
 export function createStateEditor(onEditorChange: (update: ViewUpdate) => void): EditorView {
-  const extensions = [buildJsonExtensions(), EditorView.updateListener.of(clearStateJsonError), EditorView.updateListener.of(onEditorChange)];
-  stateEditor = new EditorView({ doc: '', extensions: extensions, parent: getElement('stateJsonEditor') });
+  stateEditor = buildInputEditor('stateJsonEditor', clearStateJsonError, onEditorChange);
   return stateEditor;
 }
 
@@ -71,6 +76,17 @@ export function getStateEditor(): EditorView {
   if (stateEditor === null)
     throw new Error('state editor is not created yet');
   return stateEditor;
+}
+
+export function createQuestionsEditor(onEditorChange: (update: ViewUpdate) => void): EditorView {
+  questionsEditor = buildInputEditor('questionsJsonEditor', clearQuestionsJsonError, onEditorChange);
+  return questionsEditor;
+}
+
+export function getQuestionsEditor(): EditorView {
+  if (questionsEditor === null)
+    throw new Error('questions editor is not created yet');
+  return questionsEditor;
 }
 
 export function replaceEditorText(editor: EditorView, text: string): void {
@@ -87,4 +103,8 @@ export function renderResultJson(value: unknown): void {
 
 export function renderStateJson(value: unknown): void {
   replaceEditorText(getStateEditor(), formatResultJson(value));
+}
+
+export function renderQuestionsJson(value: unknown): void {
+  replaceEditorText(getQuestionsEditor(), formatResultJson(value));
 }

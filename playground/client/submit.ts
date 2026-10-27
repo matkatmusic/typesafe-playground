@@ -1,7 +1,7 @@
 import { readTypedKey, refreshSubmitAvailability } from './apiKey';
 import { getButton, getElement, getInput } from './dom';
 import type { EditorView } from '@codemirror/view';
-import { getStateEditor, setEditorLocked } from './editors';
+import { getQuestionsEditor, getStateEditor, setEditorLocked } from './editors';
 import { computeJsonParseResult } from './jsonParse';
 import { markPageChanged } from './pageChanged';
 import { getShownVersion, pageState } from './state';
@@ -11,8 +11,8 @@ import { renderShownVersion } from './versionBox';
 export const SUBMIT_TEXT = 'Submit (paid)';
 export const RUNNING_TEXT = 'running…';
 
-export function buildRunBody(state: unknown): RunBody {
-  return { id: getShownVersion().id, calls: Number(getInput('callsPicker').value), apiKey: readTypedKey(), state: state };
+export function buildRunBody(state: unknown, questions: unknown): RunBody {
+  return { id: getShownVersion().id, calls: Number(getInput('callsPicker').value), apiKey: readTypedKey(), state: state, questions: questions };
 }
 
 export function sendRun(runBody: RunBody): Promise<Response> {
@@ -24,7 +24,7 @@ export function formatRunFailure(status: number, text: string): string {
 }
 
 export function listLockableEditors(): EditorView[] {
-  return [getStateEditor()];
+  return [getStateEditor(), getQuestionsEditor()];
 }
 
 export function setEditorsLocked(isLocked: boolean): void {
@@ -41,11 +41,16 @@ export async function executeSubmit(): Promise<void> {
     errorLine.textContent = stateResult.errorMessage;
     return;
   }
+  const questionsResult = computeJsonParseResult('questions', getQuestionsEditor().state.doc.toString());
+  if (!questionsResult.isValid) {
+    errorLine.textContent = questionsResult.errorMessage;
+    return;
+  }
   submitButton.disabled = true;
   submitButton.textContent = RUNNING_TEXT;
   setEditorsLocked(true);
   try {
-    const response = await sendRun(buildRunBody(stateResult.value));
+    const response = await sendRun(buildRunBody(stateResult.value, questionsResult.value));
     submitButton.textContent = SUBMIT_TEXT;
     refreshSubmitAvailability();
     if (!response.ok) {

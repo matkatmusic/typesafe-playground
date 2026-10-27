@@ -62,11 +62,11 @@ button:disabled { opacity: 0.5; cursor: default; }
 .column-resizer:hover { background-color: var(--text-muted); }
 #resultBox { flex: 1; min-width: 0; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
 #resultJsonEditor { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
-:is(#resultJsonEditor, #stateJsonEditor) > .cm-editor { flex: 1 1 0; min-height: 0; }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) > .cm-editor { flex: 1 1 0; min-height: 0; }
 :is(#stateJsonEditor, #questionsJsonEditor) .cm-editor:has([contenteditable="false"]) { opacity: 0.5; }
-:is(#resultJsonEditor, #stateJsonEditor) .cm-activeLineGutter { background: var(--grid); }
-:is(#resultJsonEditor, #stateJsonEditor) .cm-activeLine { background: transparent; }
-:is(#resultJsonEditor, #stateJsonEditor) .cm-cursor { border-left-color: var(--text); }
-:is(#resultJsonEditor, #stateJsonEditor) .cm-selectionBackground, :is(#resultJsonEditor, #stateJsonEditor) .cm-focused .cm-selectionBackground { background: var(--grid); }
-:is(#resultJsonEditor, #stateJsonEditor) .cm-panels { background: var(--panel); color: var(--text); border-color: var(--grid); }
-:is(#resultJsonEditor, #stateJsonEditor) .cm-textfield { background: var(--surface); color: var(--text); border: 1px solid var(--grid); border-radius: 4px; }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-activeLineGutter { background: var(--grid); }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-activeLine { background: transparent; }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-cursor { border-left-color: var(--text); }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-selectionBackground, :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-focused .cm-selectionBackground { background: var(--grid); }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-panels { background: var(--panel); color: var(--text); border-color: var(--grid); }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-textfield { background: var(--surface); color: var(--text); border: 1px solid var(--grid); border-radius: 4px; }

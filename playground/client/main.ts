@@ -1,6 +1,6 @@
 import { refreshSubmitAvailability, setKeyPlaceholder, setTypedKeyToVisible, updateShowKeyButton } from './apiKey';
 import { getButton, getElement, getInput } from './dom';
-import { createResultEditor, createStateEditor } from './editors';
+import { createQuestionsEditor, createResultEditor, createStateEditor } from './editors';
 import { refreshFileView } from './fileView';
 import { readPageData } from './pageData';
 import { attachResizer } from './resizer';
@@ -27,6 +27,7 @@ attachResizer(getElement('rowResizer'), getElement('stateJsonEditor'), getElemen
 updateShowKeyButton();
 createResultEditor();
 createStateEditor(updateOnEditorChange);
+createQuestionsEditor(updateOnEditorChange);
 setKeyPlaceholder(readPageData().hasEnvKey);
 refreshSubmitAvailability();
 const pageData = readPageData();

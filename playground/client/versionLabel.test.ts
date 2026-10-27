@@ -1,15 +1,16 @@
 import { test, expect } from 'bun:test'
 import type { Version } from '../playgroundHistory'
-import { computeWrappedIndex, createEditedVersion, formatVersionLabel, isStateEdited, NOT_RUN_TIME } from './versionLabel'
+import { computeWrappedIndex, createEditedVersion, formatVersionLabel, isJsonTextEdited, NOT_RUN_TIME } from './versionLabel'
 
 const ISO_TIME = '2026-03-04T05:06:07.000Z'
 const version: Version ={ id: 2, time: 'now', state: { a: 1 }, questions: {}, calls: 1, outputs: [] }
 
-function validateEditDetectionComparesParsedState() {
-    expect(isStateEdited(JSON.stringify(version.state, null, 2), version)).toBe(false)
-    expect(isStateEdited('{ "a":   1 }', version)).toBe(false)
-    expect(isStateEdited('{"a":2}', version)).toBe(true)
-    expect(isStateEdited('{"a":', version)).toBe(true)
+function validateEditDetectionComparesParsedJson() {
+    expect(isJsonTextEdited(JSON.stringify(version.state, null, 2), version.state)).toBe(false)
+    expect(isJsonTextEdited('{ "a":   1 }', version.state)).toBe(false)
+    expect(isJsonTextEdited('{"a":2}', version.state)).toBe(true)
+    expect(isJsonTextEdited('{"a":', version.state)).toBe(true)
+    expect(isJsonTextEdited('[]', {})).toBe(true)
 }
 
 function validateEditedVersionHasNoRun() {
@@ -36,7 +37,7 @@ function validateIndexWrapsBothWays() {
     expect(computeWrappedIndex(0, -1, 1)).toBe(0)
 }
 
-test('test_edit_detection_compares_parsed_state', validateEditDetectionComparesParsedState)
+test('test_edit_detection_compares_parsed_json', validateEditDetectionComparesParsedJson)
 test('test_edited_version_has_no_run', validateEditedVersionHasNoRun)
 test('test_label_text', validateLabelText)
 test('test_index_wraps_both_ways', validateIndexWrapsBothWays)

@@ -13,6 +13,7 @@ async function validateMainBundlesForTheBrowser() {
     expect(script.includes('rowResizer')).toBe(true)
     expect(script.includes('resultJsonEditor')).toBe(true)
     expect(script.includes('stateJsonEditor')).toBe(true)
+    expect(script.includes('questionsJsonEditor')).toBe(true)
     expect(script.includes('submitButton')).toBe(true)
     expect(script.includes('resetButton')).toBe(true)
     expect(script.includes('prevVersionButton')).toBe(true)

@@ -36,26 +36,34 @@ function removeFakeDom() {
 
 afterEach(removeFakeDom)
 
-function buildStubStateEditor() {
-    return { state: { doc: { toString: () => '{"a":1}' } } } as unknown as EditorView
+function buildStubEditor(text: string) {
+    return { state: { doc: { toString: () => text } } } as unknown as EditorView
 }
 
 function spyOnLockCalls() {
     const lockCalls: boolean[] = []
-    function recordLock(_editor: EditorView, isLocked: boolean) {
+    const lockedEditors: EditorView[] = []
+    function recordLock(editor: EditorView, isLocked: boolean) {
         lockCalls.push(isLocked)
+        lockedEditors.push(editor)
     }
+    const stateEditor = buildStubEditor('{"a":1}')
+    const questionsEditor = buildStubEditor('{"q":1}')
     const lockSpy = spyOn(editors, 'setEditorLocked').mockImplementation(recordLock)
-    const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor())
+    const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(stateEditor)
+    const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(questionsEditor)
     const renderStateSpy = spyOn(editors, 'renderStateJson').mockImplementation(() => {})
+    const renderQuestionsSpy = spyOn(editors, 'renderQuestionsJson').mockImplementation(() => {})
     const renderResultSpy = spyOn(editors, 'renderResultJson').mockImplementation(() => {})
     function restoreSpies() {
         lockSpy.mockRestore()
         stateSpy.mockRestore()
+        questionsSpy.mockRestore()
         renderStateSpy.mockRestore()
+        renderQuestionsSpy.mockRestore()
         renderResultSpy.mockRestore()
     }
-    return { lockCalls, restoreSpies }
+    return { lockCalls, lockedEditors, stateEditor, questionsEditor, restoreSpies }
 }
 
 async function validateEditorsAreLockedWhileTheRunIsInFlightAndUnlockedAfterSuccess() {
@@ -70,8 +78,8 @@ async function validateEditorsAreLockedWhileTheRunIsInFlightAndUnlockedAfterSucc
     globalThis.fetch = stubFetch as unknown as typeof fetch
     await executeSubmit()
     restoreSpies()
-    expect(locksWhileRunning).toEqual([true])
-    expect(lockCalls).toEqual([true, false])
+    expect(locksWhileRunning).toEqual([true, true])
+    expect(lockCalls).toEqual([true, true, false, false])
 }
 
 async function validateEditorsAreUnlockedAfterAnErrorResponse() {
@@ -84,7 +92,7 @@ async function validateEditorsAreUnlockedAfterAnErrorResponse() {
     globalThis.fetch = stubFetch as unknown as typeof fetch
     await executeSubmit()
     restoreSpies()
-    expect(lockCalls).toEqual([true, false])
+    expect(lockCalls).toEqual([true, true, false, false])
 }
 
 async function validateEditorsAreUnlockedAfterAThrownFetchErrorAndTheErrorStillThrows() {
@@ -98,15 +106,16 @@ async function validateEditorsAreUnlockedAfterAThrownFetchErrorAndTheErrorStillT
     const submitPromise = executeSubmit()
     await expect(submitPromise).rejects.toThrow('network down')
     restoreSpies()
-    expect(lockCalls).toEqual([true, false])
+    expect(lockCalls).toEqual([true, true, false, false])
 }
 
-function validateLockableEditorsHoldTheStateEditorAndLockingReachesEachOne() {
-    const { lockCalls, restoreSpies } = spyOnLockCalls()
-    expect(listLockableEditors().length).toBe(1)
+function validateLockableEditorsHoldTheStateAndQuestionsEditorsAndLockingReachesEachOne() {
+    const { lockCalls, lockedEditors, stateEditor, questionsEditor, restoreSpies } = spyOnLockCalls()
+    expect(listLockableEditors()).toEqual([stateEditor, questionsEditor])
     setEditorsLocked(true)
     restoreSpies()
-    expect(lockCalls).toEqual([true])
+    expect(lockCalls).toEqual([true, true])
+    expect(lockedEditors).toEqual([stateEditor, questionsEditor])
 }
 
 async function validateInvalidStateNeverLocksTheEditors() {
@@ -123,4 +132,4 @@ test('test_invalid_state_never_locks_the_editors', validateInvalidStateNeverLock
 test('test_editors_are_locked_while_the_run_is_in_flight_and_unlocked_after_success', validateEditorsAreLockedWhileTheRunIsInFlightAndUnlockedAfterSuccess)
 test('test_editors_are_unlocked_after_an_error_response', validateEditorsAreUnlockedAfterAnErrorResponse)
 test('test_editors_are_unlocked_after_a_thrown_fetch_error_and_the_error_still_throws', validateEditorsAreUnlockedAfterAThrownFetchErrorAndTheErrorStillThrows)
-test('test_lockable_editors_hold_the_state_editor_and_locking_reaches_each_one', validateLockableEditorsHoldTheStateEditorAndLockingReachesEachOne)
+test('test_lockable_editors_hold_the_state_and_questions_editors_and_locking_reaches_each_one', validateLockableEditorsHoldTheStateAndQuestionsEditorsAndLockingReachesEachOne)

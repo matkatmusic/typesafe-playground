@@ -14,11 +14,11 @@ export function formatVersionLabel(shownNumber: number, versionCount: number, ti
   return `version ${shownNumber} of ${versionCount}${SEPARATOR}${shownTime}${SEPARATOR}${calls} ${callWord}`;
 }
 
-export function isStateEdited(stateText: string, version: Version): boolean {
-  const stateResult = computeJsonParseResult('state', stateText);
-  if (!stateResult.isValid)
+export function isJsonTextEdited(text: string, savedValue: unknown): boolean {
+  const parseResult = computeJsonParseResult('json', text);
+  if (!parseResult.isValid)
     return true;
-  return JSON.stringify(stateResult.value) !== JSON.stringify(version.state);
+  return JSON.stringify(parseResult.value) !== JSON.stringify(savedValue);
 }
 
 export function createEditedVersion(shownVersion: Version, versionCount: number): Version {

@@ -1,10 +1,10 @@
 import type { ViewUpdate } from '@codemirror/view';
 import { renderCostAndTokens } from './costTokens';
 import { getElement } from './dom';
-import { FILL_ANNOTATION, getStateEditor, renderResultJson, renderStateJson } from './editors';
+import { FILL_ANNOTATION, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson } from './editors';
 import { markPageChanged } from './pageChanged';
 import { getShownVersion, pageState } from './state';
-import { computeWrappedIndex, createEditedVersion, formatVersionLabel, isStateEdited } from './versionLabel';
+import { computeWrappedIndex, createEditedVersion, formatVersionLabel, isJsonTextEdited } from './versionLabel';
 
 const TYPING_TARGET_SELECTOR = 'input, textarea, select, dialog, .cm-editor';
 
@@ -12,7 +12,10 @@ export function refreshVersionBox(): void {
   const { versions, index } = pageState;
   const shownVersion = getShownVersion();
   const stateText = getStateEditor().state.doc.toString();
-  const isEdited = isStateEdited(stateText, shownVersion);
+  const questionsText = getQuestionsEditor().state.doc.toString();
+  const isStateEdited = isJsonTextEdited(stateText, shownVersion.state);
+  const isQuestionsEdited = isJsonTextEdited(questionsText, shownVersion.questions);
+  const isEdited = isStateEdited || isQuestionsEdited;
   const version = isEdited ? createEditedVersion(shownVersion, versions.length) : shownVersion;
   const shownNumber = isEdited ? versions.length + 1 : index + 1;
   const versionCount = isEdited ? versions.length + 1 : versions.length;
@@ -22,6 +25,7 @@ export function refreshVersionBox(): void {
 export function renderShownVersion(): void {
   const version = getShownVersion();
   renderStateJson(version.state);
+  renderQuestionsJson(version.questions);
   refreshVersionBox();
   renderCostAndTokens(version);
   renderResultJson(version.outputs);

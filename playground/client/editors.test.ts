@@ -5,7 +5,7 @@ import { EditorState } from '@codemirror/state'
 import { tags } from '@lezer/highlight'
 import { EditorView } from '@codemirror/view'
 import { jsonHighlight } from './editorHighlight'
-import { buildJsonExtensions, buildResultExtensions, createResultEditor, createStateEditor, EDITOR_THEME_RULES, FILL_ANNOTATION, formatResultJson, getResultEditor, getStateEditor, renderResultJson, renderStateJson, setEditorLocked } from './editors'
+import { buildJsonExtensions, buildResultExtensions, createQuestionsEditor, createResultEditor, createStateEditor, EDITOR_THEME_RULES, FILL_ANNOTATION, formatResultJson, getQuestionsEditor, getResultEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson, setEditorLocked } from './editors'
 
 function validateThemeFillsTheBox() {
     expect(EDITOR_THEME_RULES['&'].height).toBe('100%')
@@ -58,6 +58,12 @@ function validateStateEditorFunctionsThrowBeforeTheEditorExists() {
     expect(() => renderStateJson({})).toThrow('state editor is not created yet')
 }
 
+function validateQuestionsEditorFunctionsThrowBeforeTheEditorExists() {
+    expect(() => createQuestionsEditor(ignoreUpdate)).toThrow()
+    expect(() => getQuestionsEditor()).toThrow('questions editor is not created yet')
+    expect(() => renderQuestionsJson({})).toThrow('questions editor is not created yet')
+}
+
 function ignoreUpdate() {}
 
 function validateFillTransactionsCarryTheAnnotation() {
@@ -92,6 +98,7 @@ test('test_linter_flags_invalid_json_only', validateLinterFlagsInvalidJsonOnly)
 test('test_state_editor_uses_the_json_highlight_style_and_result_editor_does_not', validateStateEditorUsesTheJsonHighlightStyleAndResultEditorDoesNot)
 test('test_state_editor_stays_writable', validateStateEditorStaysWritable)
 test('test_state_editor_functions_throw_before_the_editor_exists', validateStateEditorFunctionsThrowBeforeTheEditorExists)
+test('test_questions_editor_functions_throw_before_the_editor_exists', validateQuestionsEditorFunctionsThrowBeforeTheEditorExists)
 test('test_theme_fills_the_result_box', validateThemeFillsTheBox)
 test('test_result_json_is_pretty_printed_with_two_spaces', validateResultJsonIsPrettyPrintedWithTwoSpaces)
 test('test_result_state_is_read_only_but_accepts_programmatic_text', validateResultStateIsReadOnlyButAcceptsProgrammaticText)

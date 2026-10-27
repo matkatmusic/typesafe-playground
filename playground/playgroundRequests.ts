@@ -2,7 +2,6 @@ import { TypeSafeClient, type Questions, type EntryType, type JsonValue } from '
 import { loadHistory, writeHistory, type RunOutput, type Version } from './playgroundHistory';
 import { isPlainObject } from './playgroundVersionRequests';
 import { setLastTypedKey } from './serverErrors';
-import { HARD_CODED_QUESTIONS } from './typeSafeQuery';
 
 export const MISSING_KEY_MESSAGE = 'Add a TypeSafe API key';
 export const MIN_CALLS = 1;
@@ -34,21 +33,21 @@ export function isCallsInRange(calls: unknown): calls is number {
   return calls <= MAX_CALLS;
 }
 
-export async function collectOutputs(client: RunClient, calls: number, state: Record<string, JsonValue>): Promise<RunOutput[]> {
+export async function collectOutputs(client: RunClient, calls: number, state: Record<string, JsonValue>, questions: Questions): Promise<RunOutput[]> {
   const outputs: RunOutput[] = [];
   for (let i = 0; i < calls; i++)
-    outputs.push(await client.systemOne({ state: state, questions: HARD_CODED_QUESTIONS }));
+    outputs.push(await client.systemOne({ state: state, questions: questions }));
   return outputs;
 }
 
-export function isInputUnchanged(version: Version, state: unknown): boolean {
+export function isInputUnchanged(version: Version, state: unknown, questions: unknown): boolean {
   const versionStateText = JSON.stringify(version.state);
   const stateText = JSON.stringify(state);
   const isStateSame = versionStateText === stateText;
   if (!isStateSame)
     return false;
   const versionQuestionsText = JSON.stringify(version.questions);
-  const questionsText = JSON.stringify(HARD_CODED_QUESTIONS);
+  const questionsText = JSON.stringify(questions);
   return versionQuestionsText === questionsText;
 }
 
@@ -60,21 +59,21 @@ export function findVersionById(history: Version[], id: unknown): Version | unde
   return undefined;
 }
 
-export function addRunToHistory(history: Version[], shownVersion: Version, outputs: RunOutput[], state: unknown): Version {
+export function addRunToHistory(history: Version[], shownVersion: Version, outputs: RunOutput[], state: unknown, questions: unknown): Version {
   const lastVersion = history[history.length - 1];
-  const isUnchanged = isInputUnchanged(shownVersion, state);
+  const isUnchanged = isInputUnchanged(shownVersion, state, questions);
   if (isUnchanged) {
     shownVersion.outputs.push(...outputs);
     shownVersion.calls += outputs.length;
     return shownVersion;
   }
-  const version: Version = { id: lastVersion.id + 1, time: new Date().toISOString(), state: state, questions: HARD_CODED_QUESTIONS, calls: outputs.length, outputs };
+  const version: Version = { id: lastVersion.id + 1, time: new Date().toISOString(), state: state, questions: questions, calls: outputs.length, outputs };
   history.push(version);
   return version;
 }
 
 export async function executeRunRequest(request: Request, createClient: CreateRunClient, historyPath: string): Promise<Response> {
-  const body = (await request.json()) as { id?: unknown; calls?: unknown; apiKey?: unknown; state?: unknown };
+  const body = (await request.json()) as { id?: unknown; calls?: unknown; apiKey?: unknown; state?: unknown; questions?: unknown };
   const typedKey = typeof body.apiKey === 'string' ? body.apiKey.trim() : '';
   setLastTypedKey(typedKey);
   const calls = body.calls;
@@ -85,6 +84,10 @@ export async function executeRunRequest(request: Request, createClient: CreateRu
   if (!isStateObject)
     return new Response('state must be a JSON object', { status: 400 });
   const state = body.state as Record<string, JsonValue>;
+  const isQuestionsObject = isPlainObject(body.questions);
+  if (!isQuestionsObject)
+    return new Response('questions must be a JSON object', { status: 400 });
+  const questions = body.questions as Questions;
   const history = await loadHistory(historyPath);
   const shownVersion = findVersionById(history, body.id);
   if (shownVersion === undefined)
@@ -93,8 +96,8 @@ export async function executeRunRequest(request: Request, createClient: CreateRu
   const apiKey = selectApiKey(typedKey, envKey);
   if (apiKey === '')
     return new Response(MISSING_KEY_MESSAGE, { status: 400 });
-  const outputs = await collectOutputs(createClient(apiKey), calls, state);
-  const version = addRunToHistory(history, shownVersion, outputs, state);
+  const outputs = await collectOutputs(createClient(apiKey), calls, state, questions);
+  const version = addRunToHistory(history, shownVersion, outputs, state, questions);
   await writeHistory(historyPath, history);
   return Response.json({ outputs, version });
 }

@@ -3,15 +3,24 @@ import { getElement } from './dom';
 import { computeJsonParseResult } from './jsonParse';
 
 export const STATE_ERROR_PREFIX = 'state is not valid JSON';
+export const QUESTIONS_ERROR_PREFIX = 'questions is not valid JSON';
 
-export function clearStateJsonError(update: ViewUpdate): void {
+function clearJsonErrorWhenFixed(label: string, update: ViewUpdate): void {
   if (!update.docChanged)
     return;
   const errorLine = getElement('errorLine');
-  const isStateError = (errorLine.textContent ?? '').startsWith(STATE_ERROR_PREFIX);
-  if (!isStateError)
+  const isOwnError = (errorLine.textContent ?? '').startsWith(`${label} is not valid JSON`);
+  if (!isOwnError)
     return;
-  const stateResult = computeJsonParseResult('state', update.state.doc.toString());
-  if (stateResult.isValid)
+  const parseResult = computeJsonParseResult(label, update.state.doc.toString());
+  if (parseResult.isValid)
     errorLine.textContent = '';
+}
+
+export function clearStateJsonError(update: ViewUpdate): void {
+  clearJsonErrorWhenFixed('state', update);
+}
+
+export function clearQuestionsJsonError(update: ViewUpdate): void {
+  clearJsonErrorWhenFixed('questions', update);
 }

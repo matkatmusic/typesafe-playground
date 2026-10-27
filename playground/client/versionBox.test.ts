@@ -1,4 +1,4 @@
-import { test, expect, afterEach, spyOn } from 'bun:test'
+import { test, expect, afterEach, mock, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
 import * as editors from './editors'
 import { pageState } from './state'
@@ -31,7 +31,13 @@ function makeVersion(id: number, state: unknown) {
     return { id: id, time: ISO_TIME, state: state, questions: {}, calls: id, outputs: [] }
 }
 
+function installQuestionsStub(questionsText: string) {
+    spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubStateEditor(questionsText))
+    return spyOn(editors, 'renderQuestionsJson').mockImplementation(() => {})
+}
+
 function removeFakeState() {
+    mock.restore()
     Reflect.deleteProperty(globalThis, 'document')
     Reflect.deleteProperty(globalThis, 'Element')
     pageState.versions = []
@@ -60,16 +66,25 @@ function validateTypingTargetsAreSkipped() {
 function validateEditMarksDirtyButFillDoesNot() {
     const elements = installFakeDom()
     pageState.versions = [makeVersion(1, { a: 1 })]
-    const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":2}'))
+    installQuestionsStub('{}')
+    spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":2}'))
     const fillUpdate = { docChanged: true, transactions: [{ annotation: () => true }] }
     updateOnEditorChange(fillUpdate as never)
     expect(pageState.isDirty).toBe(false)
     expect(elements.lastEditedLabel.textContent).toBe('')
     const typedUpdate = { docChanged: true, transactions: [{ annotation: () => undefined }] }
     updateOnEditorChange(typedUpdate as never)
-    stateSpy.mockRestore()
     expect(pageState.isDirty).toBe(true)
     expect(elements.lastEditedLabel.textContent.startsWith('last edited: ')).toBe(true)
+    expect(elements.versionLabel.textContent).toBe('version 2 of 2 · not run yet · 0 calls')
+}
+
+function validateQuestionsOnlyChangeShowsTheNextVersionAsNotRunYet() {
+    const elements = installFakeDom()
+    pageState.versions = [makeVersion(1, { a: 1 })]
+    spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
+    installQuestionsStub('{"q":1}')
+    updateOnEditorChange({ docChanged: true, transactions: [] } as never)
     expect(elements.versionLabel.textContent).toBe('version 2 of 2 · not run yet · 0 calls')
 }
 
@@ -89,14 +104,16 @@ function validateMovingWrapsAndRendersThatVersion() {
     function recordResult(value: unknown) {
         shownResults.push(value)
     }
-    const stateSpy = spyOn(editors, 'renderStateJson').mockImplementation(recordState)
-    const resultSpy = spyOn(editors, 'renderResultJson').mockImplementation(recordResult)
-    const editorSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
+    spyOn(editors, 'renderStateJson').mockImplementation(recordState)
+    spyOn(editors, 'renderResultJson').mockImplementation(recordResult)
+    spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
+    const renderQuestionsSpy = installQuestionsStub('{}')
     pageState.versions = [makeVersion(1, { a: 1 }), makeVersion(2, { b: 2 })]
     pageState.index = 1
     moveByVersions(1)
     expect(pageState.index).toBe(0)
     expect(shownStates).toEqual([{ a: 1 }])
+    expect(renderQuestionsSpy.mock.calls).toEqual([[{}]])
     expect(shownResults).toEqual([[]])
     expect(elements.versionLabel.textContent).toBe(`version 1 of 2 · ${new Date(ISO_TIME).toLocaleString()} · 1 call`)
     expect(elements.tokensLabel.textContent).toBe('Tokens: 0')
@@ -105,17 +122,15 @@ function validateMovingWrapsAndRendersThatVersion() {
     expect(pageState.index).toBe(1)
     renderLastVersion()
     expect(pageState.index).toBe(1)
-    stateSpy.mockRestore()
-    resultSpy.mockRestore()
-    editorSpy.mockRestore()
 }
 
 function validateArrowKeyMovesOnlyOutsideTypingTargets() {
     installFakeDom()
     Object.assign(globalThis, { Element: StubElement })
-    const stateSpy = spyOn(editors, 'renderStateJson').mockImplementation(() => {})
-    const resultSpy = spyOn(editors, 'renderResultJson').mockImplementation(() => {})
-    const editorSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
+    spyOn(editors, 'renderStateJson').mockImplementation(() => {})
+    spyOn(editors, 'renderResultJson').mockImplementation(() => {})
+    spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
+    installQuestionsStub('{}')
     pageState.versions = [makeVersion(1, { a: 1 }), makeVersion(2, { b: 2 })]
     pageState.index = 0
     moveOnArrowKey({ key: 'ArrowRight', target: new StubElement(true) } as unknown as KeyboardEvent)
@@ -124,14 +139,12 @@ function validateArrowKeyMovesOnlyOutsideTypingTargets() {
     expect(pageState.index).toBe(0)
     moveOnArrowKey({ key: 'ArrowRight', target: new StubElement(false) } as unknown as KeyboardEvent)
     expect(pageState.index).toBe(1)
-    stateSpy.mockRestore()
-    resultSpy.mockRestore()
-    editorSpy.mockRestore()
 }
 
 test('test_arrow_keys_map_to_steps', validateArrowKeysMapToSteps)
 test('test_typing_targets_are_skipped', validateTypingTargetsAreSkipped)
 test('test_edit_marks_dirty_but_fill_does_not', validateEditMarksDirtyButFillDoesNot)
-test('test_update_without_doc_change_does_nothing', validateUpdateWithoutDocChangeDoesNothing)
+test('test_questions_only_change_shows_the_next_version_as_not_run_yet', validateQuestionsOnlyChangeShowsTheNextVersionAsNotRunYet)
+test('test_update_without_doc_change_does_nothing',validateUpdateWithoutDocChangeDoesNothing)
 test('test_moving_wraps_and_renders_that_version', validateMovingWrapsAndRendersThatVersion)
 test('test_arrow_key_moves_only_outside_typing_targets', validateArrowKeyMovesOnlyOutsideTypingTargets)
