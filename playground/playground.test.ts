@@ -141,6 +141,13 @@ async function validateButtonBorderIsStrongInBothThemes() {
 }
 
 test('test_button_border_is_strong_in_both_themes', validateButtonBorderIsStrongInBothThemes)
+
+async function validatePressedButtonMovesDownAndRightBy2px() {
+    const page = await buildPage(await buildTempHistoryPath())
+    expect(page).toContain('button:active:not(:disabled) { transform: translate(2px, 2px); }')
+}
+
+test('test_pressed_button_moves_down_and_right_by_2px', validatePressedButtonMovesDownAndRightBy2px)
 test('test_result_box_holds_winners_first_then_toggle_graphs_and_json', validateResultBoxHoldsWinnersFirstThenToggleGraphsAndJson)
 test('test_page_holds_header_buttons_in_order_and_the_client_script',validatePageHoldsHeaderButtonsInOrderAndTheClientScript)
 test('test_page_data_holds_versions_and_whether_an_env_key_exists', validatePageDataHoldsVersionsAndWhetherAnEnvKeyExists)
