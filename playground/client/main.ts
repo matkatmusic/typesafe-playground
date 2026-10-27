@@ -1,7 +1,7 @@
 import { refreshSubmitAvailability, setKeyPlaceholder, setTypedKeyToVisible, updateShowKeyButton } from './apiKey';
 import { renderCostAndTokens } from './costTokens';
 import { getButton, getElement, getInput } from './dom';
-import { createResultEditor, renderResultJson } from './editors';
+import { createResultEditor, createStateEditor, renderResultJson, renderStateJson } from './editors';
 import { refreshFileView } from './fileView';
 import { readPageData } from './pageData';
 import { attachResizer } from './resizer';
@@ -23,6 +23,7 @@ attachResizer(getElement('columnResizer'), getElement('inputBox'), getElement('i
 attachResizer(getElement('rowResizer'), getElement('stateJsonEditor'), getElement('stateAndQuestionsBox'), 'rows');
 updateShowKeyButton();
 createResultEditor();
+createStateEditor();
 setKeyPlaceholder(readPageData().hasEnvKey);
 refreshSubmitAvailability();
 const pageData = readPageData();
@@ -30,6 +31,7 @@ pageState.versions = pageData.versions;
 refreshFileView();
 const lastVersion = pageData.versions[pageData.versions.length - 1];
 renderCostAndTokens(lastVersion);
+renderStateJson(lastVersion.state);
 if (lastVersion.outputs.length > 0)
   renderResultJson(lastVersion.outputs);
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;

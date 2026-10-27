@@ -29,7 +29,7 @@ function makeStubFactory(calls: Call[]): CreateRunClient {
 }
 
 function makeRunRequest(body: unknown): Request {
-    return new Request('http://127.0.0.1:4399/run', { method: 'POST', body: JSON.stringify(body) })
+    return new Request('http://127.0.0.1:4399/run', { method: 'POST', body: JSON.stringify({ state: {}, ...(body as object) }) })
 }
 
 function validateTypedKeyBeatsEnvKey() {
@@ -84,23 +84,23 @@ async function validateBadCallsReturn400WithoutCallingTheClient() {
     expect(calls.length).toBe(0)
 }
 
-async function validateClientReceivesTheHardCodedQueryOncePerCall() {
+async function validateClientReceivesTheTypedStateAndHardCodedQuestionsOncePerCall() {
     Bun.env.TYPESAFE_API_KEY = 'env-key'
     const calls: Call[] = []
     await executeRunRequest(makeRunRequest({ calls: 3 }), makeStubFactory(calls), await buildTempHistoryPath())
     expect(calls.length).toBe(3)
-    expect(calls[0].request).toEqual({ state: HARD_CODED_STATE, questions: HARD_CODED_QUESTIONS })
+    expect(calls[0].request).toEqual({ state: {}, questions: HARD_CODED_QUESTIONS })
 }
 
 async function validateRunAppendsToTheLastVersionAndRespondsWithOutputsAndVersion() {
     Bun.env.TYPESAFE_API_KEY = 'env-key'
     const historyPath = await buildTempHistoryPath()
     const factory = makeStubFactory([])
-    const first = (await (await executeRunRequest(makeRunRequest({ calls: 2 }), factory, historyPath)).json()) as RunResult
+    const first = (await (await executeRunRequest(makeRunRequest({ calls: 2, state: HARD_CODED_STATE }), factory, historyPath)).json()) as RunResult
     expect(first.outputs).toEqual([OUTPUT, OUTPUT])
     expect(first.version.id).toBe(1)
     expect(first.version.calls).toBe(2)
-    const second = (await (await executeRunRequest(makeRunRequest({ calls: 3 }), factory, historyPath)).json()) as RunResult
+    const second = (await (await executeRunRequest(makeRunRequest({ calls: 3, state: HARD_CODED_STATE }), factory, historyPath)).json()) as RunResult
     expect(second.outputs.length).toBe(3)
     expect(second.version.calls).toBe(5)
     expect(second.version.outputs.length).toBe(5)
@@ -121,6 +121,6 @@ test('test_run_uses_typed_key_over_env_key', validateTypedKeyIsUsedOverEnvKey)
 test('test_run_uses_env_key_when_nothing_is_typed', validateEnvKeyIsUsedWhenNothingIsTyped)
 test('test_run_with_no_key_returns_400_and_makes_no_call', validateNoKeyReturns400WithoutCallingTheClient)
 test('test_run_with_bad_calls_returns_400_and_makes_no_call', validateBadCallsReturn400WithoutCallingTheClient)
-test('test_run_sends_the_hard_coded_query_once_per_call', validateClientReceivesTheHardCodedQueryOncePerCall)
+test('test_run_sends_the_typed_state_and_hard_coded_questions_once_per_call', validateClientReceivesTheTypedStateAndHardCodedQuestionsOncePerCall)
 test('test_run_appends_to_the_last_version_and_responds_with_outputs_and_version', validateRunAppendsToTheLastVersionAndRespondsWithOutputsAndVersion)
 test('test_run_remembers_typed_key_for_error_scrubbing', validateTypedKeyIsHiddenInLaterErrorMessages)

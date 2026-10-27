@@ -1,6 +1,6 @@
 import type { Version } from '../playgroundHistory';
 import { renderCostAndTokens } from './costTokens';
-import { renderResultJson } from './editors';
+import { renderResultJson, renderStateJson } from './editors';
 import { refreshFileView } from './fileView';
 import { pageState } from './state';
 import { computeUnsavedStep, readUnsavedChoice } from './unsavedDialog';
@@ -22,6 +22,7 @@ async function replaceVersions(path: string, body: object): Promise<void> {
   pageState.isDirty = false;
   const lastVersion = replaced.versions[replaced.versions.length - 1];
   renderCostAndTokens(lastVersion);
+  renderStateJson(lastVersion.state);
   renderResultJson(lastVersion.outputs);
 }
 

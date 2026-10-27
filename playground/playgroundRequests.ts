@@ -1,7 +1,8 @@
-import { TypeSafeClient, type Questions, type EntryType } from '@typesafe-ai/sdk';
-import { loadHistory, writeHistory, type RunOutput } from './playgroundHistory';
+import { TypeSafeClient, type Questions, type EntryType, type JsonValue } from '@typesafe-ai/sdk';
+import { loadHistory, writeHistory, type RunOutput, type Version } from './playgroundHistory';
+import { isPlainObject } from './playgroundVersionRequests';
 import { setLastTypedKey } from './serverErrors';
-import { HARD_CODED_QUESTIONS, HARD_CODED_STATE } from './typeSafeQuery';
+import { HARD_CODED_QUESTIONS } from './typeSafeQuery';
 
 export const MISSING_KEY_MESSAGE = 'Add a TypeSafe API key';
 export const MIN_CALLS = 1;
@@ -33,30 +34,56 @@ export function isCallsInRange(calls: unknown): calls is number {
   return calls <= MAX_CALLS;
 }
 
-export async function collectOutputs(client: RunClient, calls: number): Promise<RunOutput[]> {
+export async function collectOutputs(client: RunClient, calls: number, state: Record<string, JsonValue>): Promise<RunOutput[]> {
   const outputs: RunOutput[] = [];
   for (let i = 0; i < calls; i++)
-    outputs.push(await client.systemOne({ state: HARD_CODED_STATE, questions: HARD_CODED_QUESTIONS }));
+    outputs.push(await client.systemOne({ state: state, questions: HARD_CODED_QUESTIONS }));
   return outputs;
 }
 
+export function isInputUnchanged(version: Version, state: unknown): boolean {
+  const versionStateText = JSON.stringify(version.state);
+  const stateText = JSON.stringify(state);
+  const isStateSame = versionStateText === stateText;
+  if (!isStateSame)
+    return false;
+  const versionQuestionsText = JSON.stringify(version.questions);
+  const questionsText = JSON.stringify(HARD_CODED_QUESTIONS);
+  return versionQuestionsText === questionsText;
+}
+
+export function addRunToHistory(history: Version[], outputs: RunOutput[], state: unknown): Version {
+  const lastVersion = history[history.length - 1];
+  const isUnchanged = isInputUnchanged(lastVersion, state);
+  if (isUnchanged) {
+    lastVersion.outputs.push(...outputs);
+    lastVersion.calls += outputs.length;
+    return lastVersion;
+  }
+  const version: Version = { id: lastVersion.id + 1, time: new Date().toISOString(), state: state, questions: HARD_CODED_QUESTIONS, calls: outputs.length, outputs };
+  history.push(version);
+  return version;
+}
+
 export async function executeRunRequest(request: Request, createClient: CreateRunClient, historyPath: string): Promise<Response> {
-  const body = (await request.json()) as { calls?: unknown; apiKey?: unknown };
+  const body = (await request.json()) as { calls?: unknown; apiKey?: unknown; state?: unknown };
   const typedKey = typeof body.apiKey === 'string' ? body.apiKey.trim() : '';
   setLastTypedKey(typedKey);
   const calls = body.calls;
   const isCallsValid = isCallsInRange(calls);
   if (!isCallsValid)
     return new Response(`calls must be an integer from ${MIN_CALLS} to ${MAX_CALLS}`, { status: 400 });
+  const isStateObject = isPlainObject(body.state);
+  if (!isStateObject)
+    return new Response('state must be a JSON object', { status: 400 });
+  const state = body.state as Record<string, JsonValue>;
   const envKey = (Bun.env.TYPESAFE_API_KEY ?? '').trim();
   const apiKey = selectApiKey(typedKey, envKey);
   if (apiKey === '')
     return new Response(MISSING_KEY_MESSAGE, { status: 400 });
   const history = await loadHistory(historyPath);
-  const version = history[history.length - 1];
-  const outputs = await collectOutputs(createClient(apiKey), calls);
-  version.outputs.push(...outputs);
-  version.calls += outputs.length;
+  const outputs = await collectOutputs(createClient(apiKey), calls, state);
+  const version = addRunToHistory(history, outputs, state);
   await writeHistory(historyPath, history);
   return Response.json({ outputs, version });
 }

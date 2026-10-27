@@ -7,7 +7,7 @@ export type PageData = { versions: Version[]; hasEnvKey: boolean };
 
 export type PageState = { versions: Version[]; fileHandle: FileSystemFileHandle | null; isDirty: boolean };
 
-export type RunBody = { calls: number; apiKey: string };
+export type RunBody = { calls: number; apiKey: string; state: unknown };
 
 export type RunResult = { outputs: RunOutput[]; version: Version };
 

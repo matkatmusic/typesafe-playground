@@ -1,6 +1,9 @@
 import { basicSetup, EditorView } from 'codemirror';
-import { json } from '@codemirror/lang-json';
+import { indentWithTab } from '@codemirror/commands';
+import { json, jsonParseLinter } from '@codemirror/lang-json';
+import { linter, lintGutter } from '@codemirror/lint';
 import { EditorState, type Extension } from '@codemirror/state';
+import { keymap } from '@codemirror/view';
 import { getElement } from './dom';
 
 export const EDITOR_THEME_RULES = {
@@ -10,6 +13,7 @@ export const EDITOR_THEME_RULES = {
 };
 
 let resultEditor: EditorView | null = null;
+let stateEditor: EditorView | null = null;
 
 export function buildResultExtensions(): Extension[] {
   return [
@@ -18,6 +22,18 @@ export function buildResultExtensions(): Extension[] {
     EditorView.lineWrapping,
     EditorView.theme(EDITOR_THEME_RULES),
     EditorState.readOnly.of(true),
+  ];
+}
+
+export function buildJsonExtensions(): Extension[] {
+  return [
+    basicSetup,
+    json(),
+    EditorView.lineWrapping,
+    EditorView.theme(EDITOR_THEME_RULES),
+    linter(jsonParseLinter()),
+    lintGutter(),
+    keymap.of([indentWithTab]),
   ];
 }
 
@@ -36,10 +52,25 @@ export function getResultEditor(): EditorView {
   return resultEditor;
 }
 
+export function createStateEditor(): EditorView {
+  stateEditor = new EditorView({ doc: '', extensions: buildJsonExtensions(), parent: getElement('stateJsonEditor') });
+  return stateEditor;
+}
+
+export function getStateEditor(): EditorView {
+  if (stateEditor === null)
+    throw new Error('state editor is not created yet');
+  return stateEditor;
+}
+
 export function replaceEditorText(editor: EditorView, text: string): void {
   editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: text } });
 }
 
 export function renderResultJson(value: unknown): void {
   replaceEditorText(getResultEditor(), formatResultJson(value));
+}
+
+export function renderStateJson(value: unknown): void {
+  replaceEditorText(getStateEditor(), formatResultJson(value));
 }
