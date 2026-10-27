@@ -1,9 +1,12 @@
-export function listAllowedHosts(hostname: string, port: number): string[] {
-  return [`${hostname}:${port}`, `localhost:${port}`];
+export function listAllowedHosts(hostname: string, port: number, lanAddresses: string[] = []): string[] {
+  const hosts = [`${hostname}:${port}`, `localhost:${port}`];
+  for (const address of lanAddresses)
+    hosts.push(`${address}:${port}`);
+  return hosts;
 }
 
-export function isRequestAllowed(request: Request, hostname: string, port: number): boolean {
-  const allowedHosts = listAllowedHosts(hostname, port);
+export function isRequestAllowed(request: Request, hostname: string, port: number, lanAddresses: string[] = []): boolean {
+  const allowedHosts = listAllowedHosts(hostname, port, lanAddresses);
   const host = request.headers.get('host');
   const isHostAllowed = host !== null && allowedHosts.includes(host);
   if (!isHostAllowed)

@@ -1,3 +1,6 @@
+import { networkInterfaces } from 'node:os';
+import { formatServerUrls, listLanAddresses } from './lanAddresses';
+import { isLanArgument } from './parseLanArgument';
 import { isRequestAllowed } from './playgroundGuard';
 import { parsePortArgument } from './parsePortArgument';
 import { HISTORY_PATH, initHistory, loadHistory } from './playgroundHistory';
@@ -7,6 +10,7 @@ import { executeNewRequest, executeOpenRequest, executeSaveRequest } from './pla
 import { buildErrorResponse } from './serverErrors';
 
 export const SERVER_HOSTNAME = '127.0.0.1';
+const LAN_HOSTNAME = '0.0.0.0';
 
 async function buildClientScript(): Promise<string> {
   const result = await Bun.build({
@@ -46,8 +50,8 @@ export async function buildPage(historyPath: string): Promise<string> {
   return withScript.replace('__DATA_JSON__', getSafeJson);
 }
 
-export async function dispatchRequest(request: Request, port: number, historyPath: string, createClient: CreateRunClient = createTypeSafeClient): Promise<Response> {
-  const isAllowed = isRequestAllowed(request, SERVER_HOSTNAME, port);
+export async function dispatchRequest(request: Request, port: number, historyPath: string, createClient: CreateRunClient = createTypeSafeClient, lanAddresses: string[] = []): Promise<Response> {
+  const isAllowed = isRequestAllowed(request, SERVER_HOSTNAME, port, lanAddresses);
   if (!isAllowed)
     return new Response('forbidden', { status: 403 });
   const { pathname } = new URL(request.url);
@@ -74,15 +78,20 @@ export async function dispatchRequest(request: Request, port: number, historyPat
 
 if (import.meta.main) {
   await initHistory(HISTORY_PATH);
+  const isLan = isLanArgument(Bun.argv);
+  const lanAddresses = isLan ? listLanAddresses(networkInterfaces()) : [];
   const server = Bun.serve({
-    hostname: SERVER_HOSTNAME,
+    hostname: isLan ? LAN_HOSTNAME : SERVER_HOSTNAME,
     port: parsePortArgument(Bun.argv),
     fetch(request): Promise<Response> {
       if (server.port === undefined)
         throw new Error('server has no port');
-      return dispatchRequest(request, server.port, HISTORY_PATH);
+      return dispatchRequest(request, server.port, HISTORY_PATH, createTypeSafeClient, lanAddresses);
     },
     error: buildErrorResponse,
   });
-  console.log(`http://${SERVER_HOSTNAME}:${server.port}/`);
+  if (server.port === undefined)
+    throw new Error('server has no port');
+  for (const url of formatServerUrls(SERVER_HOSTNAME, server.port, lanAddresses))
+    console.log(url);
 }
