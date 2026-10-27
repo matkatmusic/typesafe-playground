@@ -94,7 +94,19 @@ async function validateRunPostUsesTheStubClient() {
 
 test('test_page_get_returns_200_html_with_css_filled_in', validatePageGetReturns200WithHtmlAndNoMarkersLeft)
 test('test_page_holds_header_version_and_input_results_boxes_in_order', validatePageHoldsThreeBoxesInsidePlaygroundComponentBoxInOrder)
-test('test_page_holds_header_buttons_in_order_and_the_client_script', validatePageHoldsHeaderButtonsInOrderAndTheClientScript)
+async function validateInputResultsBoxHoldsInputBoxDragBarAndResultBoxInOrder() {
+    const page = await buildPage()
+    const parentIndex = page.indexOf('id="inputResultsBox"')
+    const inputIndex = page.indexOf('id="inputBox"')
+    const barIndex = page.indexOf('id="columnResizer"')
+    const resultIndex = page.indexOf('id="resultBox"')
+    expect(inputIndex).toBeGreaterThan(parentIndex)
+    expect(barIndex).toBeGreaterThan(inputIndex)
+    expect(resultIndex).toBeGreaterThan(barIndex)
+}
+
+test('test_input_results_box_holds_input_box_drag_bar_and_result_box_in_order', validateInputResultsBoxHoldsInputBoxDragBarAndResultBoxInOrder)
+test('test_page_holds_header_buttons_in_order_and_the_client_script',validatePageHoldsHeaderButtonsInOrderAndTheClientScript)
 test('test_page_data_reports_whether_an_env_key_exists', validatePageDataReportsWhetherAnEnvKeyExists)
 test('test_key_editor_is_a_password_input_with_autocomplete_and_spellcheck_off', validateKeyEditorIsAPasswordInputWithAutocompleteAndSpellcheckOff)
 test('test_run_post_uses_the_stub_client', validateRunPostUsesTheStubClient)
