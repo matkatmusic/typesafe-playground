@@ -5,6 +5,7 @@
     --text: #0b0b0b;
     --text-muted: #52514e;
     --grid: #dddcd7;
+    --bad: #e34948;
 }
 :root[data-theme="dark"] {
     color-scheme: dark;
@@ -13,6 +14,7 @@
     --text: #f0efec;
     --text-muted: #c3c2b7;
     --grid: #3a3a37;
+    --bad: #e66767;
 }
 * { box-sizing: border-box; }
 body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: var(--surface); color: var(--text); font: 15px/1.4 system-ui, sans-serif; overflow: hidden; }
@@ -25,6 +27,12 @@ body { margin: 0; height: 100vh; display: flex; flex-direction: column; backgrou
 #headerBox #lightDarkModeButton { margin-left: auto; }
 button { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 12px; font-size: 15px; cursor: pointer; transition: transform 60ms; }
 button:active:not(:disabled) { transform: translateY(2px); }
+button:disabled { opacity: 0.5; cursor: default; }
+#costTokenSubmitBox { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+#costTokenSubmitBox #submitButton { margin-left: auto; }
+#costLabel, #tokensLabel { color: var(--text-muted); }
+#callsPicker { width: 64px; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 8px; font: inherit; }
+#errorLine { min-height: 1.4em; color: var(--bad); font-weight: 600; overflow-wrap: anywhere; }
 #inputResultsBox { flex: 1 1 0; min-height: 0; display: flex; }
 #inputBox { flex: 0 0 auto; width: 42%; min-width: 240px; max-width: calc(100% - 252px); min-height: 0; overflow-y: auto; }
 .column-resizer { flex: none; width: 12px; border-left: 5px solid transparent; border-right: 5px solid transparent; background-color: var(--grid); background-clip: content-box; cursor: col-resize; touch-action: none; }

@@ -20,7 +20,15 @@
     </div>
     <div id="versionBox">versionBox</div>
     <div id="inputResultsBox">
-        <div id="inputBox">inputBox</div>
+        <div id="inputBox">
+            <div id="costTokenSubmitBox">
+                <span id="costLabel">Cost: $0.000000</span>
+                <span id="tokensLabel">Tokens: 0</span>
+                <input id="callsPicker" type="number" min="1" max="10" step="1" value="1" aria-label="Calls" title="Calls per submit">
+                <button id="submitButton">Submit (paid)</button>
+            </div>
+            <div id="errorLine"></div>
+        </div>
         <div class="column-resizer" id="columnResizer"></div>
         <div id="resultBox">
             <div id="resultJsonEditor"></div>

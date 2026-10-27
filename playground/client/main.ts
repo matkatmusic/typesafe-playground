@@ -1,9 +1,11 @@
-import { setKeyPlaceholder, setTypedKeyToVisible, updateShowKeyButton } from './apiKey';
+import { refreshSubmitAvailability, setKeyPlaceholder, setTypedKeyToVisible, updateShowKeyButton } from './apiKey';
+import { renderCostAndTokens } from './costTokens';
 import { getButton, getElement, getInput } from './dom';
-import { createResultEditor } from './editors';
+import { createResultEditor, renderResultJson } from './editors';
 import { triggerNotImplementedError } from './notImplemented';
 import { readPageData } from './pageData';
 import { attachResizer } from './resizer';
+import { executeSubmit } from './submit';
 import { readThemeName, setTheme, toggleTheme } from './theme';
 
 getButton('newButton').addEventListener('click', triggerNotImplementedError);
@@ -12,10 +14,18 @@ getButton('saveButton').addEventListener('click', triggerNotImplementedError);
 getButton('resetButton').addEventListener('click', triggerNotImplementedError);
 getButton('showKeyButton').addEventListener('click', setTypedKeyToVisible);
 getButton('lightDarkModeButton').addEventListener('click', toggleTheme);
+getButton('submitButton').addEventListener('click', executeSubmit);
 getInput('typeSafeKeyEditor').addEventListener('input', updateShowKeyButton);
+getInput('typeSafeKeyEditor').addEventListener('input', refreshSubmitAvailability);
 attachResizer(getElement('columnResizer'), getElement('inputBox'), getElement('inputResultsBox'));
 updateShowKeyButton();
 createResultEditor();
 setKeyPlaceholder(readPageData().hasEnvKey);
+refreshSubmitAvailability();
+const pageData = readPageData();
+const lastVersion = pageData.versions[pageData.versions.length - 1];
+renderCostAndTokens(lastVersion);
+if (lastVersion.outputs.length > 0)
+  renderResultJson(lastVersion.outputs);
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 setTheme(readThemeName(localStorage.getItem('theme'), prefersDark));

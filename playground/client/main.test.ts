@@ -11,6 +11,7 @@ async function validateMainBundlesForTheBrowser() {
     expect(script.includes('lightDarkModeButton')).toBe(true)
     expect(script.includes('columnResizer')).toBe(true)
     expect(script.includes('resultJsonEditor')).toBe(true)
+    expect(script.includes('submitButton')).toBe(true)
 }
 
 test('test_main_bundles_for_the_browser', validateMainBundlesForTheBrowser)

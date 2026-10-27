@@ -1,7 +1,9 @@
-import { getButton, getInput } from './dom';
+import { getButton, getElement, getInput } from './dom';
+import { readPageData } from './pageData';
 
 export const ENV_KEY_PLACEHOLDER = 'Using key from .env';
 export const TYPED_KEY_PLACEHOLDER = 'TypeSafe API key';
+export const SUBMIT_KEY_MESSAGE = 'Add a TypeSafe API key to submit runs';
 const SHOW_KEY_MS = 10 * 1000;
 let hideTimerId: number | undefined;
 
@@ -28,6 +30,22 @@ export function updateShowKeyButton(): void {
   getButton('showKeyButton').hidden = isHidden;
   if (isHidden)
     hideTypedKey();
+}
+
+export function isKeyMissing(hasEnvKey: boolean, typedKey: string): boolean {
+  if (hasEnvKey)
+    return false;
+  return typedKey.trim() === '';
+}
+
+export function readTypedKey(): string {
+  return getInput('typeSafeKeyEditor').value.trim();
+}
+
+export function refreshSubmitAvailability(): void {
+  const isMissing = isKeyMissing(readPageData().hasEnvKey, readTypedKey());
+  getButton('submitButton').disabled = isMissing;
+  getElement('errorLine').textContent = isMissing ? SUBMIT_KEY_MESSAGE : '';
 }
 
 export function setTypedKeyToVisible(): void {
