@@ -1,4 +1,5 @@
 import type { Version } from '../playgroundHistory';
+import { appendEditedVersion } from './appendEditedVersion';
 import { refreshFileView } from './fileView';
 import { applyPinInfo } from './pinInfo';
 import { pageState } from './state';
@@ -48,6 +49,9 @@ function saveVersionsPicker(): Promise<FileSystemFileHandle> {
 export async function writeVersionsFile(): Promise<boolean> {
   const handle = pageState.fileHandle ?? (await executePicker(saveVersionsPicker));
   if (handle === null)
+    return false;
+  const isEditedVersionAppended = await appendEditedVersion();
+  if (!isEditedVersionAppended)
     return false;
   const response = await sendJson('/save', {});
   const saved: { versions: Version[] } = await response.json();
