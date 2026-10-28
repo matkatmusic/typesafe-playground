@@ -61,7 +61,7 @@ createResultEditor();
 createStateEditor(updateOnEditorChange);
 createQuestionsEditor(updateOnEditorChange);
 createHeaderAddQuestion();
-getElement('stateTitleRow').children[0].after(createNotesButton('stateNotesButton', 'State notes'));
+getElement('stateTitleRow').children[0].after(createNotesButton('stateNotesButton', 'State notes', 'state'));
 setKeyPlaceholder(readPageData().hasEnvKey);
 refreshSubmitAvailability();
 const pageData = readPageData();

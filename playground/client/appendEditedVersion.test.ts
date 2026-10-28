@@ -6,6 +6,7 @@ import * as editors from './editors'
 import * as graphs from './graphs'
 import * as noteBox from './noteBox'
 import * as pinButtons from './pinButtons'
+import * as saveVersionNote from './saveVersionNote'
 import { pageState } from './state'
 import * as versionArrows from './versionArrows'
 import * as versionBox from './versionBox'
@@ -107,6 +108,16 @@ async function validateUneditedTextSendsNothing() {
   expect(pageState.versions.length).toBe(1)
 }
 
-test('test_edited_text_appends_one_unrun_version_with_the_parsed_text', validateEditedTextAppendsOneUnrunVersionWithTheParsedText)
+async function validateAppendedVersionGetsTheInheritedStateNote() {
+  installPage('{"a": 2}', '{"q": 1}')
+  installOpenFetch()
+  const saveSpy = spyOn(saveVersionNote, 'saveInheritedNote').mockResolvedValue(undefined)
+  pageState.versions = [{ ...buildVersion(1), stateNote: 'base note' }]
+  await appendEditedVersion()
+  expect(saveSpy).toHaveBeenCalledWith('state', 'base note', false, pageState.versions[1])
+}
+
+test('test_appended_version_gets_the_inherited_state_note', validateAppendedVersionGetsTheInheritedStateNote)
+test('test_edited_text_appends_one_unrun_version_with_the_parsed_text',validateEditedTextAppendsOneUnrunVersionWithTheParsedText)
 test('test_invalid_json_sends_nothing_and_shows_the_error', validateInvalidJsonSendsNothingAndShowsTheError)
 test('test_unedited_text_sends_nothing', validateUneditedTextSendsNothing)

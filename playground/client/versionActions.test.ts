@@ -96,9 +96,11 @@ async function validateNewDocumentClearsThePin() {
     globalThis.fetch = (async () => Response.json({ versions: [{ id: 1 }] })) as unknown as typeof fetch
     pageState.isDirty = false
     pageState.pinnedId = 3
+    pageState.pendingNotes = { state: 'waiting', questions: 'waiting too' }
     try {
         await expect(createNewDocument()).rejects.toThrow()
         expect(pageState.pinnedId).toBeNull()
+        expect(pageState.pendingNotes).toEqual({ state: null, questions: null })
     }
     finally {
         globalThis.fetch = realFetch
