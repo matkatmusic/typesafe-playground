@@ -8,6 +8,7 @@ import { keymap, type ViewUpdate } from '@codemirror/view';
 import { createAddQuestion } from './addQuestion';
 import { createBacktickKeyNames } from './backtickCompletion';
 import { getElement } from './dom';
+import { findDuplicateKeys } from './duplicateKeys';
 import { jsonHighlight } from './editorHighlight';
 import { createPlaceholders } from './placeholders';
 import { createPlaceholderTab } from './placeholderTab';
@@ -45,6 +46,7 @@ export function buildJsonExtensions(): Extension[] {
     syntaxHighlighting(jsonHighlight),
     EditorView.theme(EDITOR_THEME_RULES),
     linter(jsonParseLinter()),
+    linter(findDuplicateKeys),
     lintGutter(),
     createBacktickKeyNames(),
     keymap.of([indentWithTab]),
