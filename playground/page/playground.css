@@ -121,6 +121,7 @@ svg text { fill: var(--text-muted); font-size: 11px; }
 :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-selectionBackground, :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-focused .cm-selectionBackground { background: var(--grid); }
 :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-panels { background: var(--panel); color: var(--text); border-color: var(--grid); }
 :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-textfield { background: var(--surface); color: var(--text); border: 1px solid var(--grid); border-radius: 4px; }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-button { background: var(--surface); color: var(--text); border: 1px solid var(--button-border); }
 #questionsJsonEditor .cm-placeholderValue { background: var(--placeholder-idle-bg); border-radius: 3px; font-style: italic; }
 #questionsJsonEditor .cm-placeholderValue, #questionsJsonEditor .cm-placeholderValue span { color: var(--placeholder-idle-text); }
 #questionsJsonEditor .cm-placeholderValue.cm-placeholderSelected { background: var(--placeholder-bg); outline: 1px dashed var(--placeholder-border); outline-offset: -1px; }
@@ -135,7 +136,7 @@ svg text { fill: var(--text-muted); font-size: 11px; }
 .add-question-item-title { display: block; color: var(--text); font-size: 13px; }
 .add-question-item-desc { display: block; color: var(--text-muted); font-size: 12px; }
 
-body .cm-tooltip {
+body .cm-editor .cm-tooltip {
     background: var(--panel);
     color: var(--text);
     border: 1px solid var(--grid);

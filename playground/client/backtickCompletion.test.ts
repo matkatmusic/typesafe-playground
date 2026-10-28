@@ -6,7 +6,7 @@ import { json } from '@codemirror/lang-json';
 import { basicSetup } from 'codemirror';
 import { EditorState, Prec } from '@codemirror/state';
 import { keymap, type EditorView } from '@codemirror/view';
-import { buildBacktickSource, buildNameOptions, createBacktickKeyNames, listBothEditorStates } from './backtickCompletion';
+import { buildBacktickSource, buildNameOptions, buildUndefinedNameSource, createBacktickKeyNames, listBothEditorStates } from './backtickCompletion';
 
 function validateOptionsInsertNameThenBacktick() {
   const options = buildNameOptions(['mood']);
@@ -110,6 +110,20 @@ function validateTabAcceptsTheCompletionBeforeIndentAndPlaceholderTab() {
   expect(acceptCompletion({ state } as EditorView)).toBe(false);
 }
 
+function validateUndefinedBacktickedNamesGetErrorDiagnostics() {
+  const firstState = createJsonState('{"mood": 1, "q": {"b": 2}}');
+  const secondState = createJsonState('{"x": "`mood` `nope` `q.b` `q.z`"}');
+  const source = buildUndefinedNameSource(() => [firstState, secondState]);
+  const diagnostics = source({ state: secondState } as unknown as EditorView);
+  const text = secondState.doc.toString();
+  const nopeFrom = text.indexOf('nope');
+  const zFrom = text.indexOf('q.z');
+  expect(diagnostics).toEqual([
+    { from: nopeFrom, to: nopeFrom + 4, severity: 'error', message: 'nope is not defined in either JSON editor' },
+    { from: zFrom, to: zFrom + 3, severity: 'error', message: 'q.z is not defined in either JSON editor' },
+  ]);
+}
+
 test('test_tab_accepts_the_completion_before_indent_and_placeholder_tab', validateTabAcceptsTheCompletionBeforeIndentAndPlaceholderTab);
 test('test_options_insert_name_then_backtick', validateOptionsInsertNameThenBacktick);
 test('test_backtick_lists_first_editor_names_first_without_duplicates', validateBacktickListsFirstEditorNamesFirstWithoutDuplicates);
@@ -121,3 +135,4 @@ test('test_dot_lists_nothing_without_object_children', validateDotListsNothingWi
 test('test_dot_outside_a_backtick_key_lists_nothing', validateDotOutsideABacktickKeyListsNothing);
 test('test_no_list_while_read_only', validateNoListWhileReadOnly);
 test('test_extension_builds_before_editors_exist', validateExtensionBuildsBeforeEditorsExist);
+test('test_undefined_backticked_names_get_error_diagnostics', validateUndefinedBacktickedNamesGetErrorDiagnostics);
