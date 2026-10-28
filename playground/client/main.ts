@@ -20,6 +20,7 @@ import { attachResizer } from './resizer';
 import { getShownVersion, pageState } from './state';
 import { executeSubmit } from './submit';
 import { notifyOnUnsavedClose } from './unsavedClose';
+import { attachUndoRedoButtons } from './undoRedoButtons';
 import { applyQuestionsRedo, applyQuestionsUndo, applyStateRedo, applyStateUndo } from './undoRedo';
 import { readThemeName, setTheme, toggleTheme } from './theme';
 import { createNewDocument, openVersionsFile, resetToSavedFile, writeVersionsFile } from './versionActions';
@@ -75,4 +76,5 @@ function renderShownGraphs(): void {
 initGraphs(getElement('graphContainerBox'), renderShownGraphs);
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 setTheme(readThemeName(localStorage.getItem('theme'), prefersDark));
+attachUndoRedoButtons();
 await launchDraftSession();
