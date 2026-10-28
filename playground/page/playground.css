@@ -55,6 +55,11 @@ button:disabled { opacity: 0.5; cursor: default; }
 #unsavedDialog form { display: flex; flex-direction: column; gap: 12px; }
 #unsavedDialog p { margin: 0; }
 #unsavedDialogButtons { display: flex; gap: 8px; justify-content: flex-end; }
+#notesDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; width: min(560px, 90vw); }
+#notesDialog form { display: flex; flex-direction: column; gap: 12px; }
+#notesDialog p { margin: 0; }
+#notesDialogText { width: 100%; resize: vertical; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+#notesDialogButtons { display: flex; gap: 8px; justify-content: flex-end; }
 #costTokenSubmitBox { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--grid); }
 #callsSubmitGroup { margin-left: auto; display: flex; align-items: center; }
 #callsLabel { margin-right: 6px; color: var(--text-muted); }
