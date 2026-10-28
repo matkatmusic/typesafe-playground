@@ -4,6 +4,8 @@ import type { EditorView } from '@codemirror/view';
 import { getQuestionsEditor, getStateEditor, setEditorLocked } from './editors';
 import { computeJsonParseResult } from './jsonParse';
 import { markPageChanged } from './pageChanged';
+import { isKindTextEdited } from './noteKind';
+import { saveInheritedNote } from './saveVersionNote';
 import { getShownVersion, pageState } from './state';
 import type { RunBody, RunResult } from './types';
 import { renderShownVersion } from './versionBox';
@@ -46,6 +48,9 @@ export async function executeSubmit(): Promise<void> {
     errorLine.textContent = questionsResult.errorMessage;
     return;
   }
+  const baseVersion = getShownVersion();
+  const isStateUnchanged = !isKindTextEdited('state');
+  const isQuestionsUnchanged = !isKindTextEdited('questions');
   submitButton.disabled = true;
   submitButton.textContent = RUNNING_TEXT;
   setEditorsLocked(true);
@@ -59,6 +64,11 @@ export async function executeSubmit(): Promise<void> {
     }
     const result: RunResult = await response.json();
     pageState.versions[result.version.id - 1] = result.version;
+    const isNewVersion = result.version.id !== baseVersion.id;
+    if (isNewVersion) {
+      await saveInheritedNote('state', baseVersion.stateNote, isStateUnchanged, result.version);
+      await saveInheritedNote('questions', baseVersion.questionsNote, isQuestionsUnchanged, result.version);
+    }
     pageState.index = result.version.id - 1;
     pageState.editedDraft = null;
     markPageChanged('last run');

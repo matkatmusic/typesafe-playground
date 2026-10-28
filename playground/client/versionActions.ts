@@ -2,7 +2,7 @@ import type { Version } from '../playgroundHistory';
 import { appendEditedVersion } from './appendEditedVersion';
 import { refreshFileView } from './fileView';
 import { applyPinInfo } from './pinInfo';
-import { pageState } from './state';
+import { buildEmptyPendingNotes, pageState } from './state';
 import { computeUnsavedStep, readUnsavedChoice } from './unsavedDialog';
 import { renderLastVersion } from './versionBox';
 
@@ -22,6 +22,7 @@ async function replaceVersions(path: string, body: object): Promise<void> {
   pageState.versions = replaced.versions;
   pageState.editedDraft = null;
   pageState.pinnedId = null;
+  pageState.pendingNotes = buildEmptyPendingNotes();
   pageState.isDirty = false;
   renderLastVersion();
   applyPinInfo(pageState.pinnedId);

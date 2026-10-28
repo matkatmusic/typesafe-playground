@@ -2,16 +2,17 @@ import { acceptCompletion, autocompletion } from '@codemirror/autocomplete';
 import type { Completion, CompletionContext, CompletionResult, CompletionSource } from '@codemirror/autocomplete';
 import { linter } from '@codemirror/lint';
 import type { Diagnostic, LintSource } from '@codemirror/lint';
-import { Prec } from '@codemirror/state';
+import { Prec, StateEffect } from '@codemirror/state';
 import type { EditorState, Extension } from '@codemirror/state';
-import { keymap } from '@codemirror/view';
-import type { EditorView } from '@codemirror/view';
+import { EditorView, keymap } from '@codemirror/view';
+import type { ViewUpdate } from '@codemirror/view';
 import { getQuestionsEditor, getStateEditor } from './editors';
-import { listEditorChildNames, listEditorNames, mergeNames } from './propertyNames';
+import { findEditorValueText, listEditorChildNames, listEditorNames, mergeNames, splitKeyPath } from './propertyNames';
 
 const NAME_TYPING = /^[^`\s]*$/;
 const KEY_PATH_TYPING = /`([^`\s.]+(?:\.[^`\s.]+)*)\.$/;
 const BACKTICKED_NAME = /`([^`\s]+)`/g;
+const OTHER_EDITOR_CHANGED = StateEffect.define<null>();
 
 export function buildNameOptions(names: string[]): Completion[] {
   const options: Completion[] = [];
@@ -22,6 +23,37 @@ export function buildNameOptions(names: string[]): Completion[] {
 
 export function listBothEditorStates(): EditorState[] {
   return [getStateEditor().state, getQuestionsEditor().state];
+}
+
+export function listBothEditorViews(): EditorView[] {
+  return [getStateEditor(), getQuestionsEditor()];
+}
+
+export function buildOtherEditorRelint(listViews: () => EditorView[]): (update: ViewUpdate) => void {
+  function dispatchToOtherEditors(update: ViewUpdate): void {
+    const isDocUnchanged = !update.docChanged;
+    if (isDocUnchanged)
+      return;
+    const views = listViews();
+    for (let i = 0; i < views.length; i++) {
+      const isOtherEditor = views[i] !== update.view;
+      if (isOtherEditor)
+        views[i].dispatch({ effects: OTHER_EDITOR_CHANGED.of(null) });
+    }
+  }
+  return dispatchToOtherEditors;
+}
+
+export function isOtherEditorChanged(update: ViewUpdate): boolean {
+  for (let i = 0; i < update.transactions.length; i++) {
+    const effects = update.transactions[i].effects;
+    for (let j = 0; j < effects.length; j++) {
+      const isRelintEffect = effects[j].is(OTHER_EDITOR_CHANGED);
+      if (isRelintEffect)
+        return true;
+    }
+  }
+  return false;
 }
 
 export function readKeyPath(context: CompletionContext): string[] | null {
@@ -57,13 +89,23 @@ export function buildBacktickSource(listStates: () => EditorState[]): Completion
   return findBacktickNames;
 }
 
+// export function isNameDefined(states: EditorState[], keyName: string): boolean {
+//   const path = keyName.split('.');
+//   const lastSegment = path[path.length - 1];
+//   for (let i = 0; i < states.length; i++) {
+//     const siblingNames = path.length === 1 ? listEditorNames(states[i]) : listEditorChildNames(states[i], path.slice(0, -1));
+//     const hasLastSegment = siblingNames.includes(lastSegment);
+//     if (hasLastSegment)
+//       return true;
+//   }
+//   return false;
+// }
+
 export function isNameDefined(states: EditorState[], keyName: string): boolean {
-  const path = keyName.split('.');
-  const lastSegment = path[path.length - 1];
+  const path = splitKeyPath(keyName);
   for (let i = 0; i < states.length; i++) {
-    const siblingNames = path.length === 1 ? listEditorNames(states[i]) : listEditorChildNames(states[i], path.slice(0, -1));
-    const hasLastSegment = siblingNames.includes(lastSegment);
-    if (hasLastSegment)
+    const hasValue = findEditorValueText(states[i], path) !== null;
+    if (hasValue)
       return true;
   }
   return false;
@@ -93,8 +135,9 @@ export function buildUndefinedNameSource(listStates: () => EditorState[]): LintS
 export function createBacktickKeyNames(): Extension {
   return [
     autocompletion({ override: [buildBacktickSource(listBothEditorStates)] }),
-    // ponytail: rechecks only when this editor changes; edits in the other editor show up on the next edit here.
-    linter(buildUndefinedNameSource(listBothEditorStates)),
+    // // ponytail: rechecked only on this editor's own edits.
+    linter(buildUndefinedNameSource(listBothEditorStates), { needsRefresh: isOtherEditorChanged }),
+    EditorView.updateListener.of(buildOtherEditorRelint(listBothEditorViews)),
     Prec.highest(keymap.of([{ key: 'Tab', run: acceptCompletion }])),
   ];
 }

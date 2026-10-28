@@ -28,6 +28,7 @@ export function refreshVersionBox(): void {
   const shownNumber = isEdited ? versions.length + 1 : index + 1;
   // const versionCount = isEdited ? versions.length + 1 : versions.length;
   const versionCount = computePositionCount();
+  applyNoteBox(version);
   getElement('versionLabel').textContent = formatVersionLabel(shownNumber, versionCount, version.time, version.calls);
 }
 

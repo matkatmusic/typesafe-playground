@@ -29,6 +29,10 @@ async function validateMainBundlesForTheBrowser() {
     expect(script.includes('nextVersionButton')).toBe(true)
     expect(script.includes('lastEditedLabel')).toBe(true)
     expect(script.includes('/open')).toBe(true)
+    expect(script.includes('stateNotesButton')).toBe(true)
+    expect(script.includes('notesDialog')).toBe(true)
+    expect(script.includes('questionsNotesButton')).toBe(true)
+    expect(script.includes('resultNotesButton')).toBe(true)
 }
 
 test('test_main_bundles_for_the_browser', validateMainBundlesForTheBrowser)

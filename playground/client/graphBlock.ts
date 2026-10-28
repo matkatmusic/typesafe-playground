@@ -3,6 +3,8 @@ import type { Version } from '../playgroundHistory';
 import type { GraphBlock, RenderCallback } from './graphTypes';
 import { graphState } from './graphState';
 import { formatValueText } from './graphValues';
+import { createNotesButton } from './notesButton';
+import { appendReferenceText } from './backtickTooltip';
 import { replaceReferences } from './references';
 
 export function formatGraphTitle(questionNumber: number, name: string, question: Question): string {
@@ -52,10 +54,14 @@ export function createGraphBlock(questionNumber: number, name: string, question:
   titleRow.className = 'graph-title-row';
   const title = document.createElement('div');
   title.className = 'graph-title';
-  title.textContent = titleText;
+  // title.textContent = titleText;
+  appendReferenceText(title, titleText, version.state, version.questions);
   title.title = titleText;
   titleRow.appendChild(createCollapseButton(name, onChange));
   titleRow.appendChild(title);
+  const isRunCompleted = version.outputs.length > 0;
+  if (isRunCompleted)
+    titleRow.appendChild(createNotesButton('resultNotesButton' + name, 'Result notes: ' + name, { kind: 'result', question: name }));
   titleRow.appendChild(createAverageToggle(name, onChange));
   const box = document.createElement('div');
   box.className = 'chart-box';

@@ -15,6 +15,16 @@ function createFakeElement() {
   return element;
 }
 
+function createFakeText(text: string) {
+  const element = createFakeElement();
+  element.textContent = text;
+  return element;
+}
+
+function installFakeDocument() {
+  Object.assign(globalThis, { document: { createElement: createFakeElement, createTextNode: createFakeText } });
+}
+
 function removeFakeDocument() {
   Reflect.deleteProperty(globalThis, 'document');
   graphState.collapsedByName = {};
@@ -32,7 +42,7 @@ function validateGraphTitleHoldsNumberNameAndInstructions() {
 }
 
 function validateCollapseButtonShowsStateAndFlipsIt() {
-  Object.assign(globalThis, { document: { createElement: createFakeElement } });
+  installFakeDocument();
   let renderCount = 0;
   function countRender() {
     renderCount++;
@@ -45,7 +55,7 @@ function validateCollapseButtonShowsStateAndFlipsIt() {
 }
 
 function validateBlockHoldsTitleRowThenChartBox() {
-  Object.assign(globalThis, { document: { createElement: createFakeElement } });
+  installFakeDocument();
   graphState.collapsedByName.q = true;
   const graphBlock = createGraphBlock(1, 'q', { type: 'noul' }, noop, version);
   const block = graphBlock.block as unknown as ReturnType<typeof createFakeElement>;
@@ -56,14 +66,34 @@ function validateBlockHoldsTitleRowThenChartBox() {
   expect(titleRow.children.length).toBe(3);
 }
 
-function readTitleText(isReferencesReplaced: boolean): string {
-  Object.assign(globalThis, { document: { createElement: createFakeElement } });
+function validateResultNotesButtonShowsOnlyForAVersionWithARun() {
+  installFakeDocument();
+  const withoutRun = createGraphBlock(1, 'q', { type: 'noul' }, noop, version);
+  const withRun = createGraphBlock(1, 'q', { type: 'noul' }, noop, { ...version, outputs: [{}] as never });
+  const emptyRow = (withoutRun.block as unknown as ReturnType<typeof createFakeElement>).children[0] as ReturnType<typeof createFakeElement>;
+  const runRow = (withRun.block as unknown as ReturnType<typeof createFakeElement>).children[0] as ReturnType<typeof createFakeElement>;
+  expect(emptyRow.children.length).toBe(3);
+  expect(runRow.children.length).toBe(4);
+  const button = runRow.children[2] as unknown as { id: string; textContent: string };
+  expect(button.id).toBe('resultNotesButtonq');
+  expect(button.textContent).toBe('notes');
+}
+
+function readTitleParts(isReferencesReplaced: boolean): FakeElement[] {
+  installFakeDocument();
   graphState.isReferencesReplaced = isReferencesReplaced;
   const question = { type: 'noul', instructions: 'Does `message.text` ask?' } as const;
   const graphBlock = createGraphBlock(1, 'q', question, noop, { ...version, state: { message: { text: 'Hi.' } } });
-  const block = graphBlock.block as unknown as ReturnType<typeof createFakeElement>;
-  const titleRow = block.children[0] as ReturnType<typeof createFakeElement>;
-  return (titleRow.children[1] as ReturnType<typeof createFakeElement>).textContent;
+  const block = graphBlock.block as unknown as FakeElement;
+  const titleRow = block.children[0] as FakeElement;
+  return (titleRow.children[1] as FakeElement).children as FakeElement[];
+}
+
+function readTitleText(isReferencesReplaced: boolean): string {
+  let text = '';
+  for (const part of readTitleParts(isReferencesReplaced))
+    text += part.textContent;
+  return text;
 }
 
 function validateTitleReferencesAreReplacedOnlyWhenTheToggleIsOn() {
@@ -71,8 +101,22 @@ function validateTitleReferencesAreReplacedOnlyWhenTheToggleIsOn() {
   expect(readTitleText(true)).toBe("Q1 q · Does 'Hi.' ask?");
 }
 
+function validateTitleReferenceShowsTheReplacedTextInATooltip() {
+  const parts = readTitleParts(false);
+  expect(parts.length).toBe(3);
+  expect(parts[1].className).toBe('backtick-ref');
+  expect(parts[1].textContent).toBe('`message.text`');
+  expect(parts[1].title).toBe('');
+  expect(typeof parts[1].listeners.mouseenter).toBe('function');
+  expect(typeof parts[1].listeners.mouseleave).toBe('function');
+}
+
+type FakeElement = ReturnType<typeof createFakeElement>;
+
 afterEach(removeFakeDocument);
+test('test_title_reference_shows_the_replaced_text_in_a_tooltip', validateTitleReferenceShowsTheReplacedTextInATooltip);
 test('test_title_references_are_replaced_only_when_the_toggle_is_on', validateTitleReferencesAreReplacedOnlyWhenTheToggleIsOn);
 test('test_graph_title_holds_number_name_and_instructions', validateGraphTitleHoldsNumberNameAndInstructions);
 test('test_collapse_button_shows_state_and_flips_it', validateCollapseButtonShowsStateAndFlipsIt);
 test('test_block_holds_title_row_then_chart_box', validateBlockHoldsTitleRowThenChartBox);
+test('test_result_notes_button_shows_only_for_a_version_with_a_run', validateResultNotesButtonShowsOnlyForAVersionWithARun);

@@ -33,8 +33,14 @@ function createFakeTag(tag: string) {
   return createFakeElementNamed('', tag);
 }
 
+function createFakeText(text: string) {
+  const element = new FakeElement();
+  element.textContent = text;
+  return element;
+}
+
 function installFakeDocument() {
-  Object.assign(globalThis, { document: { createElementNS: createFakeElementNamed, createElement: createFakeTag } });
+  Object.assign(globalThis, { document: { createElementNS: createFakeElementNamed, createElement: createFakeTag, createTextNode: createFakeText } });
 }
 
 function removeFakeDocument() {
@@ -97,7 +103,7 @@ function validateTogglingAverageRendersAgain() {
     drawn.push(charts);
   }
   renderGraphs(twoQuestions, container as unknown as HTMLElement, recordCharts);
-  const checkbox = container.children[0].children[0].children[2].children[0];
+  const checkbox = container.children[0].children[0].children[3].children[0];
   checkbox.checked = true;
   checkbox.listeners.change();
   expect(drawn.length).toBe(2);

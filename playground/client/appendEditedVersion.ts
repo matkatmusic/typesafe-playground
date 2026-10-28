@@ -7,6 +7,7 @@ import { attachInfoBox } from './infoBox';
 import { computeJsonParseResult } from './jsonParse';
 import { applyNoteBox } from './noteBox';
 import { applyPinButtons } from './pinButtons';
+import { saveInheritedNote } from './saveVersionNote';
 import { getShownVersion, pageState } from './state';
 import { sendJson } from './versionActions';
 import { updateVersionArrows } from './versionArrows';
@@ -40,6 +41,8 @@ export async function appendEditedVersion(): Promise<boolean> {
   pageState.index = opened.versions.length - 1;
   pageState.editedDraft = null;
   const appendedVersion = getShownVersion();
+  await saveInheritedNote('state', shownVersion.stateNote, !isStateEdited, appendedVersion);
+  await saveInheritedNote('questions', shownVersion.questionsNote, !isQuestionsEdited, appendedVersion);
   applyNoteBox(appendedVersion);
   refreshVersionBox();
   renderCostAndTokens(appendedVersion);

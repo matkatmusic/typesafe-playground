@@ -55,6 +55,26 @@ button:disabled { opacity: 0.5; cursor: default; }
 #unsavedDialog form { display: flex; flex-direction: column; gap: 12px; }
 #unsavedDialog p { margin: 0; }
 #unsavedDialogButtons { display: flex; gap: 8px; justify-content: flex-end; }
+#notesDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; width: min(560px, 90vw); }
+#notesDialog form { display: flex; flex-direction: column; gap: 12px; }
+#notesDialog p { margin: 0; }
+#notesDialogText { width: 100%; resize: vertical; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+#notesDialogButtons { display: flex; gap: 8px; justify-content: flex-end; }
+/* #reportDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; width: min(800px, 90vw); max-height: 85vh; padding: 12px; } */
+#reportDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; inset: 40px; margin: 0; width: auto; height: auto; max-width: none; max-height: none; padding: 12px; }
+#reportDialog[open] { display: flex; flex-direction: column; gap: 12px; }
+#reportDialogHeader { flex: none; display: flex; align-items: center; gap: 8px; }
+#reportDialogTitle { margin-right: auto; font-weight: 600; }
+/* #reportBody { flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-wrap: anywhere; } */
+#reportBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-wrap: anywhere; }
+#reportBody h1, #reportBody h2, #reportBody h3, #reportBody h4 { margin: 12px 0 6px; }
+#reportBody summary { margin: 12px 0 6px; font-size: 1.5em; font-weight: bold; cursor: pointer; }
+#reportBody p { margin: 6px 0; }
+#reportBody blockquote { margin: 6px 0; padding-left: 10px; border-left: 3px solid var(--grid); color: var(--text-muted); }
+#reportBody code { font: 13px/1.4 ui-monospace, Menlo, monospace; }
+#reportBody table { border-collapse: collapse; }
+#reportBody th, #reportBody td { border: 1px solid var(--grid); padding: 4px 8px; text-align: left; vertical-align: top; }
+#reportBody td:first-child { white-space: nowrap; overflow-wrap: normal; }
 #costTokenSubmitBox { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--grid); }
 #callsSubmitGroup { margin-left: auto; display: flex; align-items: center; }
 #callsLabel { margin-right: 6px; color: var(--text-muted); }
@@ -76,6 +96,8 @@ button:disabled { opacity: 0.5; cursor: default; }
 #stateTitleRow, #questionsTitleRow { flex: none; display: flex; align-items: center; gap: 8px; }
 .format-json-button { margin-left: auto; padding: 2px 10px; font-size: 13px; }
 .format-json-button + .format-json-button { margin-left: 0; }
+#stateNotesButton, #questionsNotesButton { margin-left: 0; }
+#stateUndoButton, #questionsUndoButton { margin-left: auto; }
 #questionsTitleRow .add-question { padding: 0; }
 .row-resizer { flex: none; height: 8px; border-top: 3px solid transparent; border-bottom: 3px solid transparent; background-color: var(--grid); background-clip: content-box; cursor: row-resize; touch-action: none; }
 .row-resizer:hover { background-color: var(--text-muted); }
@@ -105,12 +127,14 @@ button:disabled { opacity: 0.5; cursor: default; }
 .graph-title-row { grid-column: 1 / -1; grid-row: 1; height: 21px; display: flex; gap: 6px; align-items: center; }
 button.graph-toggle { flex: none; width: 20px; height: 20px; padding: 0; font-size: 11px; line-height: 1; }
 .graph-title { flex: 1; min-width: 0; color: var(--label-other); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.graph-title-row .format-json-button { flex: none; margin-left: 0; height: 20px; padding: 0 8px; line-height: 1; }
 .avg-toggle { flex: none; font-size: 12px; color: var(--text-muted); }
 .graph-block .chart-box { grid-column: 1; grid-row: 2; contain: size; overflow-x: auto; overflow-y: hidden; background: var(--panel); border: 1px solid var(--grid); border-radius: 6px; }
 .graph-block .chart-box.empty { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; color: var(--label-other); }
 .bar-info { grid-column: 2; grid-row: 2; align-self: start; margin-left: 6px; display: grid; grid-template-columns: max-content 1fr; column-gap: 6px; row-gap: 2px; padding: 6px 10px; background: var(--surface); border: 1px solid var(--score); }
 .info-label { color: var(--good); }
 .info-value { color: var(--score); }
+.backtick-ref { text-decoration: underline dotted; cursor: help; }
 .info-num { display: inline-block; width: 5ch; }
 .info-cell { overflow-wrap: anywhere; white-space: pre-wrap; }
 svg text { fill: var(--text-muted); font-size: 11px; }
@@ -142,6 +166,22 @@ body .cm-editor .cm-tooltip {
     color: var(--text);
     border: 1px solid var(--grid);
 }
+
+/* .cm-backtick-value { margin: 0; padding: 2px 6px; max-height: 300px; overflow: auto; } */
+
+.backtick-tooltip {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--grid);
+    white-space: pre-wrap;
+    max-width: 400px;
+    max-height: 300px;
+    overflow: auto;
+    padding: 2px 6px;
+    z-index: 2000;
+}
+
+.cm-tooltip .backtick-tooltip { border: none; }
 
 body .cm-tooltip.cm-tooltip-autocomplete > ul > li[aria-selected] {
     background: var(--grid);

@@ -7,6 +7,7 @@ import { Annotation, Compartment, EditorState, Transaction, type Extension } fro
 import { keymap, type ViewUpdate } from '@codemirror/view';
 import { createAddQuestion } from './addQuestion';
 import { createBacktickKeyNames } from './backtickCompletion';
+import { createBacktickHover } from './backtickTooltip';
 import { getElement } from './dom';
 import { findDuplicateKeys } from './duplicateKeys';
 import { jsonHighlight } from './editorHighlight';
@@ -49,6 +50,7 @@ export function buildJsonExtensions(): Extension[] {
     linter(findDuplicateKeys),
     lintGutter(),
     createBacktickKeyNames(),
+    createBacktickHover(),
     keymap.of([indentWithTab]),
     LOCK_COMPARTMENT.of([]),
   ];

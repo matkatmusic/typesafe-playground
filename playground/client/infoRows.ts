@@ -2,10 +2,13 @@ import type { Answer } from './graphTypes';
 import type { BarInfoRequest, InfoPart, InfoRow } from './infoTypes';
 import { computeSummary, listValues } from './graphValues';
 import { readConfidence, readDescription, readTopKey } from './infoValues';
+import { getShownVersion } from './state';
+import { buildTextFormatter } from './winnersDom';
 
 const LABEL = 'info-label';
 const VALUE = 'info-value';
-const NUMBER = 'info-value info-num';
+const MESSAGE = 'info-value info-message';
+const NUMBER ='info-value info-num';
 
 function formatThreeDecimals(value: number): string {
   return value.toFixed(3);
@@ -59,7 +62,7 @@ export function buildBarInfoRows(request: BarInfoRequest): InfoRow[] {
   if (isBarShown) {
     const values = listValues(answers, key);
     const stat = computeSummary(values);
-    messageText = readDescription(question, key);
+    messageText = buildTextFormatter(getShownVersion())(readDescription(question, key));
     lowText = formatThreeDecimals(stat.low);
     highText = formatThreeDecimals(stat.high);
     averageText = formatThreeDecimals(stat.average);
@@ -79,6 +82,6 @@ export function buildBarInfoRows(request: BarInfoRequest): InfoRow[] {
     const pinnedParts = listRangeParts(formatThreeDecimals(pinnedStat.low), formatThreeDecimals(pinnedStat.high), formatThreeDecimals(pinnedStat.average));
     rows.push({ label: `Pinned v${pinned.id}:`, parts: pinnedParts });
   }
-  rows.push({ label: 'Message:', parts: [[messageText, VALUE]] });
+  rows.push({ label: 'Message:', parts: [[messageText, MESSAGE]] });
   return rows;
 }

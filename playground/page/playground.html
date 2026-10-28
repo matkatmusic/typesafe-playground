@@ -17,12 +17,32 @@
         </div>
     </form>
 </dialog>
+<dialog id="notesDialog">
+    <form method="dialog">
+        <p id="notesDialogTitle"></p>
+        <textarea id="notesDialogText" rows="8"></textarea>
+        <div id="notesDialogButtons">
+            <button value="cancel">Cancel</button>
+            <button value="ok">OK</button>
+        </div>
+    </form>
+</dialog>
+<dialog id="reportDialog">
+    <div id="reportDialogHeader">
+        <span id="reportDialogTitle">Report</span>
+        <button id="reportCopyButton">Copy</button>
+        <button id="reportDownloadButton">Download .md</button>
+        <button id="reportCloseButton" aria-label="close report">&times;</button>
+    </div>
+    <div id="reportBody"></div>
+</dialog>
 <div id="playgroundComponentBox">
     <div id="headerBox">
         <button id="newButton">New</button>
         <button id="openButton">Open</button>
         <button id="saveButton">Save</button>
         <button id="resetButton">Reset</button>
+        <button id="reportButton">Report</button>
         <label id="typeSafeKeyLabel" for="typeSafeKeyEditor">TypeSafe API key</label>
         <input id="typeSafeKeyEditor" type="password" autocomplete="off" spellcheck="false" placeholder="TypeSafe API key">
         <button id="showKeyButton">Show</button>
@@ -34,7 +54,7 @@
         <span id="versionLabel"></span>
         <button id="nextVersionButton" aria-label="next version">&gt;</button>
         <div id="versionNoteDivider"></div>
-        <div id="noteBox"><label for="noteText">Note:</label><textarea id="noteText" rows="1" wrap="soft" disabled placeholder="Submit a run to add a note"></textarea></div>
+        <div id="noteBox"><label for="noteText">Run comments:</label><textarea id="noteText" rows="1" wrap="soft" disabled placeholder="Submit a run to add a note"></textarea></div>
         <button id="resetRunsButton">Reset this version's runs</button>
     </div>
     <div id="inputResultsBox">
