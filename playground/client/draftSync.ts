@@ -1,15 +1,34 @@
-import { StateEffect } from '@codemirror/state';
-import { EditorView, type ViewUpdate } from '@codemirror/view';
+// import { StateEffect } from '@codemirror/state';
+// import { EditorView, type ViewUpdate } from '@codemirror/view';
+import type { Draft } from '../playgroundDraftRequests';
 import { getQuestionsEditor, getStateEditor, replaceEditorText } from './editors';
 import { markPageChanged } from './pageChanged';
-import type { PageData } from './types';
+// import type { PageData } from './types';
 import { sendJson } from './versionActions';
 import { refreshVersionBox } from './versionBox';
 
+const SESSION_ID_KEY = 'playgroundSessionId';
+const DRAFT_INTERVAL_MS = 2000;
+
+let sessionId = '';
+let lastSentState = '';
+let lastSentQuestions = '';
 let pendingDraftWrite: Promise<unknown> = Promise.resolve();
 
+// export function sendDraft(): Promise<unknown> {
+//   const body = { state: getStateEditor().state.doc.toString(), questions: getQuestionsEditor().state.doc.toString() };
+//   function sendBody(): Promise<Response> {
+//     return sendJson('/draft', body);
+//   }
+//   pendingDraftWrite = pendingDraftWrite.then(sendBody);
+//   return pendingDraftWrite;
+// }
 export function sendDraft(): Promise<unknown> {
-  const body = { state: getStateEditor().state.doc.toString(), questions: getQuestionsEditor().state.doc.toString() };
+  const state = getStateEditor().state.doc.toString();
+  const questions = getQuestionsEditor().state.doc.toString();
+  lastSentState = state;
+  lastSentQuestions = questions;
+  const body = { id: sessionId, state, questions };
   function sendBody(): Promise<Response> {
     return sendJson('/draft', body);
   }
@@ -17,19 +36,36 @@ export function sendDraft(): Promise<unknown> {
   return pendingDraftWrite;
 }
 
-export function syncDraftOnChange(update: ViewUpdate): void {
-  if (!update.docChanged)
+export function syncDraftOnTick(): void {
+  const isStateChanged = getStateEditor().state.doc.toString() !== lastSentState;
+  const isQuestionsChanged = getQuestionsEditor().state.doc.toString() !== lastSentQuestions;
+  const isChanged = isStateChanged || isQuestionsChanged;
+  if (!isChanged)
     return;
   void sendDraft();
 }
 
-export function attachDraftSync(): void {
-  const effects = StateEffect.appendConfig.of(EditorView.updateListener.of(syncDraftOnChange));
-  getStateEditor().dispatch({ effects });
-  getQuestionsEditor().dispatch({ effects });
+// export function syncDraftOnChange(update: ViewUpdate): void {
+//   if (!update.docChanged)
+//     return;
+//   void sendDraft();
+// }
+//
+// export function attachDraftSync(): void {
+//   const effects = StateEffect.appendConfig.of(EditorView.updateListener.of(syncDraftOnChange));
+//   getStateEditor().dispatch({ effects });
+//   getQuestionsEditor().dispatch({ effects });
+// }
+
+export async function fetchDraft(id: string): Promise<Draft | null> {
+  const response = await fetch(`/draft?id=${id}`);
+  if (!response.ok)
+    throw new Error(`HTTP ${response.status} ${await response.text()}`);
+  return response.json();
 }
 
-export function applyDraft(draft: PageData['draft']): void {
+// export function applyDraft(draft: PageData['draft']): void {
+export function applyDraft(draft: Draft | null): void {
   if (draft === null)
     return;
   const stateEditor = getStateEditor();
@@ -45,4 +81,20 @@ export function applyDraft(draft: PageData['draft']): void {
     return;
   refreshVersionBox();
   markPageChanged('last edited');
+}
+
+function createSessionId(): string {
+  const id = crypto.randomUUID();
+  sessionStorage.setItem(SESSION_ID_KEY, id);
+  return id;
+}
+
+export async function launchDraftSession(): Promise<void> {
+  const storedId = sessionStorage.getItem(SESSION_ID_KEY);
+  sessionId = storedId ?? createSessionId();
+  if (storedId !== null)
+    applyDraft(await fetchDraft(storedId));
+  lastSentState = getStateEditor().state.doc.toString();
+  lastSentQuestions = getQuestionsEditor().state.doc.toString();
+  setInterval(syncDraftOnTick,DRAFT_INTERVAL_MS);
 }
