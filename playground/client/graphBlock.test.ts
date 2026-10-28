@@ -106,7 +106,9 @@ function validateTitleReferenceShowsTheReplacedTextInATooltip() {
   expect(parts.length).toBe(3);
   expect(parts[1].className).toBe('backtick-ref');
   expect(parts[1].textContent).toBe('`message.text`');
-  expect(parts[1].title).toBe("'Hi.'");
+  expect(parts[1].title).toBe('');
+  expect(typeof parts[1].listeners.mouseenter).toBe('function');
+  expect(typeof parts[1].listeners.mouseleave).toBe('function');
 }
 
 type FakeElement = ReturnType<typeof createFakeElement>;

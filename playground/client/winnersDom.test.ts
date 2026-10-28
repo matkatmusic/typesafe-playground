@@ -10,6 +10,8 @@ class FakeElement {
   textContent = '';
   title = '';
   children: FakeElement[] = [];
+  listeners: Record<string, () => void> = {};
+  addEventListener(type: string, listener: () => void) { this.listeners[type] = listener; }
   appendChild(child: FakeElement) { this.children.push(child); }
   replaceChildren(...nodes: FakeElement[]) { this.children = nodes; }
 }
@@ -119,9 +121,11 @@ function validateBackTickedNamesShowTheReplacedTextInATooltip() {
   const winnerRef = label.children[1].children[1];
   expect(instructionRef.className).toBe('backtick-ref');
   expect(instructionRef.textContent).toBe('`tone`');
-  expect(instructionRef.title).toBe("'calm'");
+  expect(instructionRef.title).toBe('');
+  expect(typeof instructionRef.listeners.mouseenter).toBe('function');
   expect(winnerRef.className).toBe('backtick-ref');
-  expect(winnerRef.title).toBe("'calm'");
+  expect(winnerRef.title).toBe('');
+  expect(typeof winnerRef.listeners.mouseleave).toBe('function');
 }
 
 function removeFakeState() {

@@ -4,7 +4,8 @@ import type { GraphBlock, RenderCallback } from './graphTypes';
 import { graphState } from './graphState';
 import { formatValueText } from './graphValues';
 import { createNotesButton } from './notesButton';
-import { appendReferenceText, replaceReferences } from './references';
+import { appendReferenceText } from './backtickTooltip';
+import { replaceReferences } from './references';
 
 export function formatGraphTitle(questionNumber: number, name: string, question: Question): string {
   return 'Q' + questionNumber + ' ' + name + ' · ' + formatValueText(question.instructions);

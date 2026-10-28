@@ -1,5 +1,5 @@
 import type { InfoPart, InfoRow } from './infoTypes';
-import { appendReferenceText } from './references';
+import { appendReferenceText } from './backtickTooltip';
 import { getShownVersion } from './state';
 
 export function addPart(parent: HTMLElement, text: string, className: string): void {

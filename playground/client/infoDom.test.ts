@@ -4,8 +4,9 @@ import { pageState } from './state';
 
 function createFakeElement() {
   const element = {
-    className: '', textContent: '', title: '', children: [] as unknown[],
+    className: '', textContent: '', title: '', children: [] as unknown[], listeners: {} as Record<string, () => void>,
     appendChild(child: unknown) { element.children.push(child); },
+    addEventListener(type: string, listener: () => void) { element.listeners[type] = listener; },
   };
   return element;
 }
@@ -68,7 +69,9 @@ function validateMessagePartShowsTheReplacedTextInATooltip() {
   expect(parts[0].textContent).toBe('Be ');
   expect(parts[1].className).toBe('backtick-ref');
   expect(parts[1].textContent).toBe('`tone`');
-  expect(parts[1].title).toBe("'calm'");
+  expect(parts[1].title).toBe('');
+  expect(typeof parts[1].listeners.mouseenter).toBe('function');
+  expect(typeof parts[1].listeners.mouseleave).toBe('function');
   expect(parts[2].textContent).toBe('.');
 }
 

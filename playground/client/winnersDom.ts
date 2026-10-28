@@ -4,7 +4,8 @@ import type { Answer } from './graphTypes';
 import { graphState } from './graphState';
 import { isRunDataPresent } from './graphs';
 import { formatValueText, listAnswers, readQuestions } from './graphValues';
-import { appendReferenceText, replaceReferences } from './references';
+import { appendReferenceText } from './backtickTooltip';
+import { replaceReferences } from './references';
 import { formatWinnerLine, listWinnerGroups } from './winners';
 
 export function createQuestionResultLabel(question: Question, answers: Answer[], formatText: (text: string) => string, version: Version): HTMLDivElement {

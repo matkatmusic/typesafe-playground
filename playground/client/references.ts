@@ -2,7 +2,7 @@ import { splitKeyPath } from './propertyNames';
 
 export type PathLookup = { isFound: true; value: unknown } | { isFound: false };
 
-const REFERENCE_PATTERN = /`([^`\s.]+(?:\.[^`\s.]+)*)`/g;
+export const REFERENCE_PATTERN =/`([^`\s.]+(?:\.[^`\s.]+)*)`/g;
 // const ARRAY_INDEX = /^\d+$/;
 
 export function findPathValue(root: unknown, path: string): PathLookup {
@@ -32,23 +32,23 @@ export function formatReferenceValue(value: unknown): string {
   return `'${typeof value === 'string' ? value : JSON.stringify(value)}'`;
 }
 
-export function appendReferenceText(parent: HTMLElement, text: string, state: unknown, questions: unknown): void {
-  let plainStart = 0;
-  for (const match of text.matchAll(REFERENCE_PATTERN)) {
-    const stateLookup = findPathValue(state, match[1]);
-    const lookup = stateLookup.isFound ? stateLookup : findPathValue(questions, match[1]);
-    if (!lookup.isFound)
-      continue;
-    parent.appendChild(document.createTextNode(text.slice(plainStart, match.index)));
-    const span = document.createElement('span');
-    span.className = 'backtick-ref';
-    span.title = formatReferenceValue(lookup.value);
-    span.textContent = match[0];
-    parent.appendChild(span);
-    plainStart = match.index + match[0].length;
-  }
-  parent.appendChild(document.createTextNode(text.slice(plainStart)));
-}
+// export function appendReferenceText(parent: HTMLElement, text: string, state: unknown, questions: unknown): void {
+//   let plainStart = 0;
+//   for (const match of text.matchAll(REFERENCE_PATTERN)) {
+//     const stateLookup = findPathValue(state, match[1]);
+//     const lookup = stateLookup.isFound ? stateLookup : findPathValue(questions, match[1]);
+//     if (!lookup.isFound)
+//       continue;
+//     parent.appendChild(document.createTextNode(text.slice(plainStart, match.index)));
+//     const span = document.createElement('span');
+//     span.className = 'backtick-ref';
+//     span.title = formatReferenceValue(lookup.value);
+//     span.textContent = match[0];
+//     parent.appendChild(span);
+//     plainStart = match.index + match[0].length;
+//   }
+//   parent.appendChild(document.createTextNode(text.slice(plainStart)));
+// }
 
 export function replaceReferences(text: string, state: unknown, questions: unknown): string {
   function formatReference(reference: string, path: string): string {
