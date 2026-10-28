@@ -2,7 +2,7 @@
 
 A local web page for trying TypeSafe questions.
 
-![The playground page with graphs](docs/playground-graphs.png)
+![The playground page with graphs, Winners, notes buttons, and the Report button](docs/playground-graphs.png)
 
 ## Run it
 
@@ -32,7 +32,7 @@ Without a key, the Submit button is disabled. `.env` is in `playground/.gitignor
 
 ## Data on disk
 
-- `playground/results/playground-history.json` holds every version: its state, its questions, the output of each run, and its note. The server makes this file when it first starts. It writes the file again after each Submit, New, Open, note change, and **Reset this version's runs**. `results/` is in `playground/.gitignore`.
+- `playground/results/playground-history.json` holds every version: its state, its questions, the output of each run, and its notes. The server makes this file when it first starts. It writes the file again after each Submit, New, Open, note change, and **Reset this version's runs**. `results/` is in `playground/.gitignore`.
 - **Save** writes the same versions to a JSON file that you choose. The default name is `playground-versions.json`.
 - **Open** reads a file like that and replaces the history file with it.
 - **New** replaces the history file with one blank version.
@@ -76,3 +76,50 @@ In the state editor or the questions editor, type a backtick (`` ` ``). A list s
 - Use the arrow keys to select a name, then press Tab or Enter. The editor adds the name and a closing backtick.
 - After a key name and a dot, for example `` `message. ``, the list shows only the keys inside that object.
 - Use this to write references such as `` `message.text` `` in question instructions.
+
+## Back-ticked name checks
+
+A back-ticked name that no editor defines gets a red squiggle. The message says the name is not defined in either JSON editor.
+
+- The squiggles update when the other editor changes. For example, rename a key in the state editor. The old name gets a squiggle in the questions editor.
+- To point at an item in an array, write the index in square brackets, for example `` `userMessageArray[0]` ``. A name like `` `userMessageArray.0` `` is not an index, so it gets a squiggle.
+
+![A red squiggle under a name that the state editor no longer defines](docs/undefined-name-squiggle.png)
+
+## Back-ticked name tooltips
+
+Put the pointer on a back-ticked name. A box shows the value of that name. The value comes from the state or the questions.
+
+- This works in the state editor, the questions editor, the Winners box, the graph titles, and the Message line of the InfoBox.
+- Only one box shows at a time.
+- The box does not show when the state or the questions have a JSON error.
+
+![The tooltip box on a back-ticked name in the questions editor](docs/backtick-tooltip.png)
+
+### Replace references
+
+The **replace references** box above the graphs replaces each back-ticked name with its value. This changes the Winners box, the graph titles, and the Message line of the InfoBox. It also reads names with an index, such as `` `userMessageArray[0]` ``.
+
+## Notes
+
+Notes help you remember why you made a change. Each note belongs to one version.
+
+- **Run comments** is the box under the version label. It is for the runs of the version. It is off until the version has a run. It is also off while the editors show edits that you did not run.
+- The **notes** button next to **state** and next to **questions** opens a notes dialog. Press OK to keep the text.
+- Each graph has its own **notes** button for that question's result. A result note needs a run.
+- A state note or a questions note on unsaved edits waits. The page keeps it until you press Save or Submit. Then it goes into the new version.
+- When you do not change the state, the new version gets the state note of the version before it. The questions note works the same way.
+
+![The notes dialog](docs/notes-dialog.png)
+
+## Report
+
+The **Report** button at the top opens a report of every version that has notes or runs. The report is markdown. For each version it shows:
+
+- **Changes**: what changed in the state and in the questions since the version before it.
+- The state notes, the questions notes, and the run comments. A state note or a questions note shows only in the version where it is new.
+- **Results**: the winner of each question, its average, and the result note. A line ends with ▲ or ▼ and the size of the change in the average, when an earlier version has a run for that question. If the winner changed, the line ends with "winner was" and the old winner. If the average did not change, it ends with "no change".
+
+**Copy** puts the markdown on the clipboard. **Download .md** saves it as `<open file>-notes.md`. For example, if the open file is `playground-versions.json`, the report file is `playground-versions-notes.md`. Without an open file, the name is `notes.md`.
+
+![The Report with Changes, notes, and results](docs/report.png)
