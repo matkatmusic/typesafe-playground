@@ -4,19 +4,21 @@ import type { Answer } from './graphTypes';
 import { graphState } from './graphState';
 import { isRunDataPresent } from './graphs';
 import { formatValueText, listAnswers, readQuestions } from './graphValues';
-import { replaceReferences } from './references';
+import { appendReferenceText, replaceReferences } from './references';
 import { formatWinnerLine, listWinnerGroups } from './winners';
 
-export function createQuestionResultLabel(question: Question, answers: Answer[], formatText: (text: string) => string): HTMLDivElement {
+export function createQuestionResultLabel(question: Question, answers: Answer[], formatText: (text: string) => string, version: Version): HTMLDivElement {
   const label = document.createElement('div');
   const instructionLine = document.createElement('div');
   instructionLine.className = 'winner-instructions';
-  instructionLine.textContent = formatText(formatValueText(question.instructions));
+  // instructionLine.textContent = formatText(formatValueText(question.instructions));
+  appendReferenceText(instructionLine, formatText(formatValueText(question.instructions)), version.state, version.questions);
   label.appendChild(instructionLine);
   for (const group of listWinnerGroups(answers)) {
     const winnerLine = document.createElement('div');
     winnerLine.className = 'winner-line';
-    winnerLine.textContent = formatText(formatWinnerLine(question, group));
+    // winnerLine.textContent = formatText(formatWinnerLine(question, group));
+    appendReferenceText(winnerLine, formatText(formatWinnerLine(question, group)), version.state, version.questions);
     label.appendChild(winnerLine);
   }
   return label;
@@ -44,6 +46,6 @@ export function renderWinners(version: Version, container: HTMLElement): void {
   for (const name of Object.keys(questions)) {
     const isDataPresent = isRunDataPresent(version, name);
     if (isDataPresent)
-      container.appendChild(createQuestionResultLabel(questions[name], listAnswers(version, name), formatText));
+      container.appendChild(createQuestionResultLabel(questions[name], listAnswers(version, name), formatText, version));
   }
 }

@@ -4,7 +4,7 @@ import type { GraphBlock, RenderCallback } from './graphTypes';
 import { graphState } from './graphState';
 import { formatValueText } from './graphValues';
 import { createNotesButton } from './notesButton';
-import { replaceReferences } from './references';
+import { appendReferenceText, replaceReferences } from './references';
 
 export function formatGraphTitle(questionNumber: number, name: string, question: Question): string {
   return 'Q' + questionNumber + ' ' + name + ' · ' + formatValueText(question.instructions);
@@ -53,7 +53,8 @@ export function createGraphBlock(questionNumber: number, name: string, question:
   titleRow.className = 'graph-title-row';
   const title = document.createElement('div');
   title.className = 'graph-title';
-  title.textContent = titleText;
+  // title.textContent = titleText;
+  appendReferenceText(title, titleText, version.state, version.questions);
   title.title = titleText;
   titleRow.appendChild(createCollapseButton(name, onChange));
   titleRow.appendChild(title);

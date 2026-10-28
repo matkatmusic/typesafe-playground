@@ -3,6 +3,7 @@ import type { Version } from '../playgroundHistory';
 import { graphState } from './graphState';
 import { renderGraphs } from './graphs';
 import { attachInfoBox } from './infoBox';
+import { pageState } from './state';
 
 class FakeElement {
   name = '';
@@ -43,9 +44,16 @@ function createFakeTag(tag: string) {
   return createFakeElementNamed('', tag);
 }
 
+function createFakeText(text: string) {
+  const element = new FakeElement();
+  element.textContent = text;
+  return element;
+}
+
 function removeFakeDocument() {
   Reflect.deleteProperty(globalThis, 'document');
   graphState.averageShownByName = {};
+  pageState.versions = [];
 }
 
 const usage = { input_tokens: 1, output_tokens: 1 };
@@ -55,7 +63,9 @@ const noulVersion: Version = {
 };
 
 function drawNoulBlock(): FakeElement {
-  Object.assign(globalThis, { document: { createElementNS: createFakeElementNamed, createElement: createFakeTag } });
+  Object.assign(globalThis, { document: { createElementNS: createFakeElementNamed, createElement: createFakeTag, createTextNode: createFakeText } });
+  pageState.versions = [noulVersion];
+  pageState.index = 0;
   const container = new FakeElement();
   renderGraphs(noulVersion, container as unknown as HTMLElement, attachInfoBox);
   return container.children[0];
@@ -91,7 +101,7 @@ function validateNoulHoverDoesNotThrowAndShowsTheValue() {
   expect(labels[0].children[0].textContent).toBe('0.800');
   const shownBox = block.children[block.children.length - 1];
   expect(shownBox.children.length).toBe(10);
-  expect(shownBox.children[9].children[0].textContent).toBe('is yes');
+  expect(shownBox.children[9].children[0].children[0].textContent).toBe('is yes');
 }
 
 function validateAverageAddsAnAverageHitRectFirst() {

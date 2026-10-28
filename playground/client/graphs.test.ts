@@ -33,8 +33,14 @@ function createFakeTag(tag: string) {
   return createFakeElementNamed('', tag);
 }
 
+function createFakeText(text: string) {
+  const element = new FakeElement();
+  element.textContent = text;
+  return element;
+}
+
 function installFakeDocument() {
-  Object.assign(globalThis, { document: { createElementNS: createFakeElementNamed, createElement: createFakeTag } });
+  Object.assign(globalThis, { document: { createElementNS: createFakeElementNamed, createElement: createFakeTag, createTextNode: createFakeText } });
 }
 
 function removeFakeDocument() {

@@ -1,8 +1,17 @@
 import type { InfoPart, InfoRow } from './infoTypes';
+import { appendReferenceText } from './references';
+import { getShownVersion } from './state';
 
 export function addPart(parent: HTMLElement, text: string, className: string): void {
   const span = document.createElement('span');
   span.className = className;
+  const isMessage = className.includes('info-message');
+  if (isMessage) {
+    const version = getShownVersion();
+    appendReferenceText(span, text, version.state, version.questions);
+    parent.appendChild(span);
+    return;
+  }
   span.textContent = text;
   parent.appendChild(span);
 }

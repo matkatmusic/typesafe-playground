@@ -7,7 +7,8 @@ import { buildTextFormatter } from './winnersDom';
 
 const LABEL = 'info-label';
 const VALUE = 'info-value';
-const NUMBER = 'info-value info-num';
+const MESSAGE = 'info-value info-message';
+const NUMBER ='info-value info-num';
 
 function formatThreeDecimals(value: number): string {
   return value.toFixed(3);
@@ -81,6 +82,6 @@ export function buildBarInfoRows(request: BarInfoRequest): InfoRow[] {
     const pinnedParts = listRangeParts(formatThreeDecimals(pinnedStat.low), formatThreeDecimals(pinnedStat.high), formatThreeDecimals(pinnedStat.average));
     rows.push({ label: `Pinned v${pinned.id}:`, parts: pinnedParts });
   }
-  rows.push({ label: 'Message:', parts: [[messageText, VALUE]] });
+  rows.push({ label: 'Message:', parts: [[messageText, MESSAGE]] });
   return rows;
 }
