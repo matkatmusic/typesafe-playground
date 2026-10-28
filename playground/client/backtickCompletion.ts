@@ -1,13 +1,17 @@
 import { acceptCompletion, autocompletion } from '@codemirror/autocomplete';
 import type { Completion, CompletionContext, CompletionResult, CompletionSource } from '@codemirror/autocomplete';
+import { linter } from '@codemirror/lint';
+import type { Diagnostic, LintSource } from '@codemirror/lint';
 import { Prec } from '@codemirror/state';
 import type { EditorState, Extension } from '@codemirror/state';
 import { keymap } from '@codemirror/view';
+import type { EditorView } from '@codemirror/view';
 import { getQuestionsEditor, getStateEditor } from './editors';
 import { listEditorChildNames, listEditorNames, mergeNames } from './propertyNames';
 
 const NAME_TYPING = /^[^`\s]*$/;
 const KEY_PATH_TYPING = /`([^`\s.]+(?:\.[^`\s.]+)*)\.$/;
+const BACKTICKED_NAME = /`([^`\s]+)`/g;
 
 export function buildNameOptions(names: string[]): Completion[] {
   const options: Completion[] = [];
@@ -53,9 +57,44 @@ export function buildBacktickSource(listStates: () => EditorState[]): Completion
   return findBacktickNames;
 }
 
+export function isNameDefined(states: EditorState[], keyName: string): boolean {
+  const path = keyName.split('.');
+  const lastSegment = path[path.length - 1];
+  for (let i = 0; i < states.length; i++) {
+    const siblingNames = path.length === 1 ? listEditorNames(states[i]) : listEditorChildNames(states[i], path.slice(0, -1));
+    const hasLastSegment = siblingNames.includes(lastSegment);
+    if (hasLastSegment)
+      return true;
+  }
+  return false;
+}
+
+export function buildUndefinedNameSource(listStates: () => EditorState[]): LintSource {
+  function findUndefinedNames(view: EditorView): Diagnostic[] {
+    const states = listStates();
+    const diagnostics: Diagnostic[] = [];
+    for (const match of view.state.doc.toString().matchAll(BACKTICKED_NAME)) {
+      const keyName = match[1];
+      const isDefined = isNameDefined(states, keyName);
+      if (isDefined)
+        continue;
+      diagnostics.push({
+        from: match.index + 1,
+        to: match.index + 1 + keyName.length,
+        severity: 'error',
+        message: `${keyName} is not defined in either JSON editor`,
+      });
+    }
+    return diagnostics;
+  }
+  return findUndefinedNames;
+}
+
 export function createBacktickKeyNames(): Extension {
   return [
     autocompletion({ override: [buildBacktickSource(listBothEditorStates)] }),
+    // ponytail: rechecks only when this editor changes; edits in the other editor show up on the next edit here.
+    linter(buildUndefinedNameSource(listBothEditorStates)),
     Prec.highest(keymap.of([{ key: 'Tab', run: acceptCompletion }])),
   ];
 }

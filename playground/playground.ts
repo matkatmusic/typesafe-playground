@@ -4,6 +4,8 @@ import { isLanArgument } from './parseLanArgument';
 import { isRequestAllowed } from './playgroundGuard';
 import { parsePortArgument } from './parsePortArgument';
 import { HISTORY_PATH, initHistory, loadHistory } from './playgroundHistory';
+import { executeDraftGetRequest, executeDraftRequest } from './playgroundDraftRequests';
+// import { executeDraftRequest, readDraft } from './playgroundDraftRequests';
 import { executeNoteRequest } from './playgroundNoteRequests';
 import { createTypeSafeClient, executeRunRequest, type CreateRunClient } from './playgroundRequests';
 import { executeNewRequest, executeOpenRequest, executeResetRunsRequest, executeSaveRequest } from './playgroundVersionRequests';
@@ -35,6 +37,8 @@ export async function buildPage(historyPath: string): Promise<string> {
   const css = await cssFile.text();
   const script = await buildClientScript();
   const hasEnvKey = (Bun.env.TYPESAFE_API_KEY ?? '').trim() !== '';
+  // const draft = await readDraft(historyPath);
+  // const safeJson = JSON.stringify({ versions, draft, hasEnvKey }).replaceAll('<', '\\u003c');
   const safeJson = JSON.stringify({ versions, hasEnvKey }).replaceAll('<', '\\u003c');
   function getCss() {
     return css;
@@ -70,6 +74,12 @@ export async function dispatchRequest(request: Request, port: number, historyPat
   const isNotePost = request.method === 'POST' && pathname === '/note';
   if (isNotePost)
     return executeNoteRequest(request, historyPath);
+  const isDraftPost = request.method === 'POST' && pathname === '/draft';
+  if (isDraftPost)
+    return executeDraftRequest(request, historyPath);
+  const isDraftGet = request.method === 'GET' && pathname === '/draft';
+  if (isDraftGet)
+    return executeDraftGetRequest(request, historyPath);
   const isResetRunsPost = request.method === 'POST' && pathname === '/reset-runs';
   if (isResetRunsPost)
     return executeResetRunsRequest(request, historyPath);

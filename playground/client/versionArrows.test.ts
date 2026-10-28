@@ -53,6 +53,7 @@ afterEach(removeFakeState)
 
 function validateOneVersionDisablesBothButtonsAndTwoEnablesThem() {
     const elements = installFakeDom()
+    installRenderStubs()
     pageState.versions = [makeVersion(1)]
     updateVersionArrows()
     expect(isVersionMovePossible()).toBe(false)
@@ -67,12 +68,14 @@ function validateOneVersionDisablesBothButtonsAndTwoEnablesThem() {
 
 function validateArrowKeysDoNothingWithOneVersion() {
     installFakeDom()
-    const renderSpy = installRenderStubs()
+    installRenderStubs()
+    let renderGraphsCount = 0
+    spyOn(graphs, 'renderGraphs').mockImplementation((() => { renderGraphsCount += 1 }) as never)
     pageState.versions = [makeVersion(1)]
     moveOnArrowKey({ key: 'ArrowRight', target: { closest: () => null } } as unknown as KeyboardEvent)
     moveOnArrowKey({ key: 'ArrowLeft', target: { closest: () => null } } as unknown as KeyboardEvent)
     expect(pageState.index).toBe(0)
-    expect(renderSpy.mock.calls.length).toBe(0)
+    expect(renderGraphsCount).toBe(0)
 }
 
 function validateArrowKeysMoveAndEnableButtonsWithTwoVersions() {

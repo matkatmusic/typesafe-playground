@@ -1,7 +1,9 @@
 import type { ViewUpdate } from '@codemirror/view';
 import { renderCostAndTokens } from './costTokens';
 import { getElement } from './dom';
-import { FILL_ANNOTATION, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson } from './editors';
+import { computePositionCount, isEditorTextEdited } from './editedPosition';
+// import { FILL_ANNOTATION, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson, replaceEditorText } from './editors';
+import { FILL_ANNOTATION, fillEditorText, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson } from './editors';
 import { renderGraphs } from './graphs';
 import { attachInfoBox } from './infoBox';
 import { applyNoteBox } from './noteBox';
@@ -24,7 +26,8 @@ export function refreshVersionBox(): void {
   const isEdited = isStateEdited || isQuestionsEdited;
   const version = isEdited ? createEditedVersion(shownVersion, versions.length) : shownVersion;
   const shownNumber = isEdited ? versions.length + 1 : index + 1;
-  const versionCount = isEdited ? versions.length + 1 : versions.length;
+  // const versionCount = isEdited ? versions.length + 1 : versions.length;
+  const versionCount = computePositionCount();
   getElement('versionLabel').textContent = formatVersionLabel(shownNumber, versionCount, version.time, version.calls);
 }
 
@@ -51,8 +54,29 @@ export function moveByVersions(step: number): void {
   const isMovePossible = isVersionMovePossible();
   if (!isMovePossible)
     return;
-  pageState.index = computeWrappedIndex(pageState.index, step, pageState.versions.length);
+  // pageState.index = computeWrappedIndex(pageState.index, step, pageState.versions.length);
+  // renderShownVersion();
+  const isEdited = isEditorTextEdited();
+  if (isEdited)
+    pageState.editedDraft = { state: getStateEditor().state.doc.toString(), questions: getQuestionsEditor().state.doc.toString(), baseIndex: pageState.index };
+  const currentPosition = isEdited ? pageState.versions.length : pageState.index;
+  const targetPosition = computeWrappedIndex(currentPosition, step, computePositionCount());
+  const draft = pageState.editedDraft;
+  const isEditedTarget = targetPosition === pageState.versions.length;
+  if (!isEditedTarget) {
+    pageState.index = targetPosition;
+    renderShownVersion();
+    return;
+  }
+  if (draft === null)
+    throw new Error('the edited position has no draft');
+  pageState.index = draft.baseIndex;
   renderShownVersion();
+  // replaceEditorText(getStateEditor(), draft.state);
+  // replaceEditorText(getQuestionsEditor(), draft.questions);
+  fillEditorText(getStateEditor(), draft.state);
+  fillEditorText(getQuestionsEditor(), draft.questions);
+  refreshVersionBox();
 }
 
 export function moveToPreviousVersion(): void {
@@ -67,6 +91,7 @@ export function updateOnEditorChange(update: ViewUpdate): void {
   if (!update.docChanged)
     return;
   refreshVersionBox();
+  updateVersionArrows();
   for (const transaction of update.transactions) {
     const isFill = transaction.annotation(FILL_ANNOTATION) === true;
     if (!isFill)

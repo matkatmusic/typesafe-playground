@@ -3,11 +3,12 @@ import { indentWithTab } from '@codemirror/commands';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { syntaxHighlighting } from '@codemirror/language';
 import { linter, lintGutter } from '@codemirror/lint';
-import { Annotation, Compartment, EditorState, type Extension } from '@codemirror/state';
+import { Annotation, Compartment, EditorState, Transaction, type Extension } from '@codemirror/state';
 import { keymap, type ViewUpdate } from '@codemirror/view';
 import { createAddQuestion } from './addQuestion';
 import { createBacktickKeyNames } from './backtickCompletion';
 import { getElement } from './dom';
+import { findDuplicateKeys } from './duplicateKeys';
 import { jsonHighlight } from './editorHighlight';
 import { createPlaceholders } from './placeholders';
 import { createPlaceholderTab } from './placeholderTab';
@@ -45,6 +46,7 @@ export function buildJsonExtensions(): Extension[] {
     syntaxHighlighting(jsonHighlight),
     EditorView.theme(EDITOR_THEME_RULES),
     linter(jsonParseLinter()),
+    linter(findDuplicateKeys),
     lintGutter(),
     createBacktickKeyNames(),
     keymap.of([indentWithTab]),
@@ -98,6 +100,10 @@ export function replaceEditorText(editor: EditorView, text: string): void {
   editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: text }, annotations: FILL_ANNOTATION.of(true) });
 }
 
+export function fillEditorText(editor: EditorView, text: string): void {
+  editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: text }, annotations: [FILL_ANNOTATION.of(true), Transaction.addToHistory.of(false)] });
+}
+
 export function setEditorLocked(editor: EditorView, isLocked: boolean): void {
   editor.dispatch({ effects: LOCK_COMPARTMENT.reconfigure(isLocked ? LOCKED_EXTENSIONS : []), annotations: FILL_ANNOTATION.of(true) });
 }
@@ -107,9 +113,11 @@ export function renderResultJson(value: unknown): void {
 }
 
 export function renderStateJson(value: unknown): void {
-  replaceEditorText(getStateEditor(), formatResultJson(value));
+  // replaceEditorText(getStateEditor(), formatResultJson(value));
+  fillEditorText(getStateEditor(), formatResultJson(value));
 }
 
 export function renderQuestionsJson(value: unknown): void {
-  replaceEditorText(getQuestionsEditor(), formatResultJson(value));
+  // replaceEditorText(getQuestionsEditor(), formatResultJson(value));
+  fillEditorText(getQuestionsEditor(), formatResultJson(value));
 }

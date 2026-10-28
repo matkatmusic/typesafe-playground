@@ -40,6 +40,16 @@ Without a key, the Submit button is disabled. `.env` is in `playground/.gitignor
 - Save and Open use the browser's file picker. It works only in Chromium browsers, such as Chrome and Edge.
 - The browser's local storage keeps your light or dark theme choice.
 
+## Auto-save
+
+The page saves your State and Questions text on its own, so a reload does not lose your edits.
+
+- Each browser tab gets its own id. The tab keeps the id in sessionStorage, so the id survives a reload of that tab.
+- Every 2 seconds, the page checks the State and Questions editors. If the text of either editor changed, the page writes both texts to `playground/results/.currentSession-<id>.json`.
+- When you reload the same tab, the page restores the text of that tab. Other tabs do not overwrite it, because each tab writes only its own file.
+- When you close a tab, it loses its id. The file stays on disk, but a new tab does not restore it. A tab that you reopen, for example with Cmd+Shift+T, may not bring back the same unsaved session.
+- Auto-save does not replace **Save**. Only **Save** writes a versions file.
+
 ## Versions
 
 A version is one state and one set of questions, plus all the runs made with them. Use versions to compare how a change to the state or the questions changes the answers.
