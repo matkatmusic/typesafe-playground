@@ -2,7 +2,7 @@ import { hoverTooltip } from '@codemirror/view';
 import type { EditorView, Tooltip } from '@codemirror/view';
 import type { EditorState, Extension } from '@codemirror/state';
 import { listBothEditorStates } from './backtickCompletion';
-import { findEditorValueText } from './propertyNames';
+import { findEditorValueText, splitKeyPath } from './propertyNames';
 
 const BACKTICKED_NAME = /`([^`\s]+)`/g;
 
@@ -18,7 +18,7 @@ export function buildBacktickHoverSource(listStates: () => EditorState[]): (view
         continue;
       const states = listStates();
       for (let i = 0; i < states.length; i++) {
-        const valueText = findEditorValueText(states[i], name.split('.'));
+        const valueText = findEditorValueText(states[i], splitKeyPath(name));
         if (valueText !== null)
           return { pos: from, end: to, above: true, create: () => ({ dom: createValueElement(valueText) }) };
       }

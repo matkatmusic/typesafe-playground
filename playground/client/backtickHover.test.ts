@@ -37,6 +37,17 @@ function validateHoverOnUndefinedNameGivesNull() {
   expect(createSource()(createView(), nopeFrom + 1)).toBe(null);
 }
 
+function validateHoverOnArrayIndexNameGivesTooltipOnTheWholeName() {
+  const questionsText = '{"q": "`userMessageArray[1]`"}';
+  const source = buildBacktickHoverSource(() => [createJsonState('{"userMessageArray": ["a", "b"]}'), createJsonState(questionsText)]);
+  const view = { state: createJsonState(questionsText) } as unknown as EditorView;
+  const nameFrom = questionsText.indexOf('userMessageArray[1]');
+  const tooltip = source(view, nameFrom + 3);
+  expect(tooltip?.pos).toBe(nameFrom);
+  expect(tooltip?.end).toBe(nameFrom + 'userMessageArray[1]'.length);
+}
+
+test('test_hover_on_array_index_name_gives_tooltip_on_the_whole_name', validateHoverOnArrayIndexNameGivesTooltipOnTheWholeName);
 test('test_hover_inside_name_gives_tooltip_on_the_name', validateHoverInsideNameGivesTooltipOnTheName);
 test('test_hover_outside_backticks_gives_null', validateHoverOutsideBackticksGivesNull);
 test('test_hover_on_undefined_name_gives_null', validateHoverOnUndefinedNameGivesNull);

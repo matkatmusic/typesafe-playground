@@ -7,7 +7,7 @@ import type { EditorState, Extension } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
 import type { ViewUpdate } from '@codemirror/view';
 import { getQuestionsEditor, getStateEditor } from './editors';
-import { listEditorChildNames, listEditorNames, mergeNames } from './propertyNames';
+import { findEditorValueText, listEditorChildNames, listEditorNames, mergeNames, splitKeyPath } from './propertyNames';
 
 const NAME_TYPING = /^[^`\s]*$/;
 const KEY_PATH_TYPING = /`([^`\s.]+(?:\.[^`\s.]+)*)\.$/;
@@ -89,13 +89,23 @@ export function buildBacktickSource(listStates: () => EditorState[]): Completion
   return findBacktickNames;
 }
 
+// export function isNameDefined(states: EditorState[], keyName: string): boolean {
+//   const path = keyName.split('.');
+//   const lastSegment = path[path.length - 1];
+//   for (let i = 0; i < states.length; i++) {
+//     const siblingNames = path.length === 1 ? listEditorNames(states[i]) : listEditorChildNames(states[i], path.slice(0, -1));
+//     const hasLastSegment = siblingNames.includes(lastSegment);
+//     if (hasLastSegment)
+//       return true;
+//   }
+//   return false;
+// }
+
 export function isNameDefined(states: EditorState[], keyName: string): boolean {
-  const path = keyName.split('.');
-  const lastSegment = path[path.length - 1];
+  const path = splitKeyPath(keyName);
   for (let i = 0; i < states.length; i++) {
-    const siblingNames = path.length === 1 ? listEditorNames(states[i]) : listEditorChildNames(states[i], path.slice(0, -1));
-    const hasLastSegment = siblingNames.includes(lastSegment);
-    if (hasLastSegment)
+    const hasValue = findEditorValueText(states[i], path) !== null;
+    if (hasValue)
       return true;
   }
   return false;

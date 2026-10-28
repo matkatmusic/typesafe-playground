@@ -56,6 +56,21 @@ function validateRenamedKeyGetsSquiggleInTheQuestionsEditor() {
   expect(originalSource(view)).toEqual([]);
 }
 
-test('test_relint_goes_only_to_the_other_view_on_doc_change', validateRelintGoesOnlyToTheOtherViewOnDocChange);
+function validateArrayIndexNamesAreDefinedOnlyInsideTheArray() {
+  const questionsText = '{"q": {"criteria": {"0": "`userMessageArray[0]`", "1": "`userMessageArray[1]`", "x": "`userMessageArray[2]` `q.criteria.0` `userMessageArray.0`"}}}';
+  const questionsState = createJsonState(questionsText);
+  const view = { state: questionsState } as unknown as EditorView;
+  const stateState = createJsonState('{"userMessageArray": ["a", "b"]}');
+  const diagnostics = buildUndefinedNameSource(() => [stateState, questionsState])(view);
+  const outOfRangeFrom = questionsText.indexOf('userMessageArray[2]');
+  const dotStepFrom = questionsText.indexOf('userMessageArray.0');
+  expect(diagnostics).toEqual([
+    { from: outOfRangeFrom, to: outOfRangeFrom + 'userMessageArray[2]'.length, severity: 'error', message: 'userMessageArray[2] is not defined in either JSON editor' },
+    { from: dotStepFrom, to: dotStepFrom + 'userMessageArray.0'.length, severity: 'error', message: 'userMessageArray.0 is not defined in either JSON editor' },
+  ]);
+}
+
+test('test_array_index_names_are_defined_only_inside_the_array', validateArrayIndexNamesAreDefinedOnlyInsideTheArray);
+test('test_relint_goes_only_to_the_other_view_on_doc_change',validateRelintGoesOnlyToTheOtherViewOnDocChange);
 test('test_plain_transaction_is_not_an_other_editor_change', validatePlainTransactionIsNotAnOtherEditorChange);
 test('test_renamed_key_gets_squiggle_in_the_questions_editor', validateRenamedKeyGetsSquiggleInTheQuestionsEditor);

@@ -1,7 +1,7 @@
 import { test, expect } from 'bun:test';
 import { jsonLanguage, json } from '@codemirror/lang-json';
 import { EditorState } from '@codemirror/state';
-import { collectAllObjects, collectNamedObjectValues, collectPropertyNames, findEditorValueText, findValueText, listChildNames, listEditorChildNames, listEditorNames, mergeNames } from './propertyNames';
+import { collectAllObjects, collectNamedObjectValues, collectPropertyNames, findEditorValueText, findValueText, listChildNames, listEditorChildNames, listEditorNames, mergeNames, splitKeyPath } from './propertyNames';
 
 function validateCollectsDistinctNamesAtAnyDepth() {
   const text = '{"a": {"b": 1, "a": 2}, "c": [{"d": 1}]}';
@@ -81,6 +81,25 @@ function validateFindsValueTextFromEditorState() {
   expect(findEditorValueText(state, ['a', 'b'])).toBe('1');
 }
 
+function validateSplitKeyPathKeepsIndexSteps() {
+  expect(splitKeyPath('a.b[0][1].c')).toEqual(['a', 'b', '[0]', '[1]', 'c']);
+  expect(splitKeyPath('a')).toEqual(['a']);
+  expect(splitKeyPath('.')).toEqual([]);
+}
+
+function validateFindsValueTextInsideArrays() {
+  const text = '{"a": ["x", "y"], "b": [{"c": 1}, {"c": 2}], "o": {"0": "zero"}}';
+  const tree = jsonLanguage.parser.parse(text);
+  expect(findValueText(tree, text, splitKeyPath('a[1]'))).toBe('"y"');
+  expect(findValueText(tree, text, splitKeyPath('b[1].c'))).toBe('2');
+  expect(findValueText(tree, text, splitKeyPath('a[2]'))).toBe(null);
+  expect(findValueText(tree, text, splitKeyPath('o[0]'))).toBe(null);
+  expect(findValueText(tree, text, splitKeyPath('o.0'))).toBe('"zero"');
+  expect(findValueText(tree, text, splitKeyPath('a.0'))).toBe(null);
+}
+
+test('test_split_key_path_keeps_index_steps', validateSplitKeyPathKeepsIndexSteps);
+test('test_find_value_text_steps_into_arrays', validateFindsValueTextInsideArrays);
 test('test_find_value_text_reads_string_and_object_values', validateFindsStringAndObjectValueText);
 test('test_find_value_text_is_null_when_missing', validateFindValueTextIsNullWhenMissing);
 test('test_find_editor_value_text_reads_syntax_tree', validateFindsValueTextFromEditorState);
