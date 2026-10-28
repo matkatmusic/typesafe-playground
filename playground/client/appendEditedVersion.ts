@@ -42,6 +42,7 @@ export async function appendEditedVersion(): Promise<boolean> {
   pageState.editedDraft = null;
   const appendedVersion = getShownVersion();
   await saveInheritedNote('state', shownVersion.stateNote, !isStateEdited, appendedVersion);
+  await saveInheritedNote('questions', shownVersion.questionsNote, !isQuestionsEdited, appendedVersion);
   applyNoteBox(appendedVersion);
   refreshVersionBox();
   renderCostAndTokens(appendedVersion);

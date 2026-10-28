@@ -1,6 +1,7 @@
 import { test, expect, afterEach, mock, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
 import * as editors from './editors'
+import type { NoteLocation } from './noteLocation'
 import { createNotesButton } from './notesButton'
 import { buildEmptyPendingNotes, pageState } from './state'
 
@@ -62,8 +63,8 @@ function removeFakeState() {
 
 afterEach(removeFakeState)
 
-function clickNewButton() {
-  const button = createNotesButton('stateNotesButton', 'State notes', 'state') as unknown as FakeButton
+function clickNewButton(location: NoteLocation = { kind: 'state' }) {
+  const button = createNotesButton('stateNotesButton', 'State notes', location) as unknown as FakeButton
   button.clickListener?.()
   return button
 }
@@ -114,7 +115,33 @@ function validateOkWithUnrunEditsKeepsThePendingText() {
   expect(pageState.versions[0].stateNote).toBe('saved')
 }
 
-test('test_button_looks_like_a_format_button_and_opens_the_dialog_with_the_saved_note', validateButtonLooksLikeAFormatButtonAndOpensTheDialogWithTheSavedNote)
+function validateQuestionsButtonStartsWithTheQuestionsNoteAndPendingText() {
+  const { textArea } = installFakeDom()
+  installPage('{"a":1}')
+  pageState.versions[0].questionsNote = 'questions saved'
+  clickNewButton({ kind: 'questions' })
+  expect(textArea.value).toBe('questions saved')
+  spyOn(editors, 'getQuestionsEditor').mockReturnValue({ state: { doc: { toString: () => '{"q":2}' } } } as unknown as EditorView)
+  pageState.pendingNotes.questions = 'questions pending'
+  clickNewButton({ kind: 'questions' })
+  expect(textArea.value).toBe('questions pending')
+}
+
+function validateResultButtonStartsWithItsQuestionNoteEvenWithUnrunEdits() {
+  const { textArea, title } = installFakeDom()
+  installPage('{"a":2}')
+  pageState.versions[0].resultNotes = { needsTask: 'result saved' }
+  pageState.pendingNotes.state = 'pending'
+  clickNewButton({ kind: 'result', question: 'needsTask' })
+  expect(textArea.value).toBe('result saved')
+  expect(title.textContent).toBe('State notes')
+  clickNewButton({ kind: 'result', question: 'other' })
+  expect(textArea.value).toBe('')
+}
+
+test('test_questions_button_starts_with_the_questions_note_and_pending_text', validateQuestionsButtonStartsWithTheQuestionsNoteAndPendingText)
+test('test_result_button_starts_with_its_question_note_even_with_unrun_edits', validateResultButtonStartsWithItsQuestionNoteEvenWithUnrunEdits)
+test('test_button_looks_like_a_format_button_and_opens_the_dialog_with_the_saved_note',validateButtonLooksLikeAFormatButtonAndOpensTheDialogWithTheSavedNote)
 test('test_unrun_edits_start_with_the_pending_text', validateUnrunEditsStartWithThePendingText)
 test('test_unrun_edits_without_pending_text_start_empty_when_the_state_changed', validateUnrunEditsWithoutPendingTextStartEmptyWhenTheStateChanged)
 test('test_unrun_edits_to_other_text_keep_the_base_note_when_the_state_is_unchanged', validateUnrunEditsToOtherTextKeepTheBaseNoteWhenTheStateIsUnchanged)

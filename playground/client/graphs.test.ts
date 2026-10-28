@@ -97,7 +97,7 @@ function validateTogglingAverageRendersAgain() {
     drawn.push(charts);
   }
   renderGraphs(twoQuestions, container as unknown as HTMLElement, recordCharts);
-  const checkbox = container.children[0].children[0].children[2].children[0];
+  const checkbox = container.children[0].children[0].children[3].children[0];
   checkbox.checked = true;
   checkbox.listeners.change();
   expect(drawn.length).toBe(2);

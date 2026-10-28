@@ -50,6 +50,7 @@ export async function executeSubmit(): Promise<void> {
   }
   const baseVersion = getShownVersion();
   const isStateUnchanged = !isKindTextEdited('state');
+  const isQuestionsUnchanged = !isKindTextEdited('questions');
   submitButton.disabled = true;
   submitButton.textContent = RUNNING_TEXT;
   setEditorsLocked(true);
@@ -64,8 +65,10 @@ export async function executeSubmit(): Promise<void> {
     const result: RunResult = await response.json();
     pageState.versions[result.version.id - 1] = result.version;
     const isNewVersion = result.version.id !== baseVersion.id;
-    if (isNewVersion)
+    if (isNewVersion) {
       await saveInheritedNote('state', baseVersion.stateNote, isStateUnchanged, result.version);
+      await saveInheritedNote('questions', baseVersion.questionsNote, isQuestionsUnchanged, result.version);
+    }
     pageState.index = result.version.id - 1;
     pageState.editedDraft = null;
     markPageChanged('last run');

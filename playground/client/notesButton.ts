@@ -1,24 +1,28 @@
 import { isEditorTextEdited } from './editedPosition';
-import { isKindTextEdited, type NoteKind } from './noteKind';
+import { isKindTextEdited } from './noteKind';
+import { readSavedNote, type NoteLocation } from './noteLocation';
 import { computeNoteStartText } from './noteInheritance';
 import { openNotesDialog } from './notesDialog';
 import { saveShownNote } from './saveVersionNote';
 import { getShownVersion, pageState } from './state';
 
-export function createNotesButton(id: string, title: string, kind: NoteKind): HTMLButtonElement {
+export function computeLocationStartText(location: NoteLocation): string {
+  const savedNote = readSavedNote(getShownVersion(), location);
+  if (location.kind === 'result')
+    return savedNote ?? '';
+  return computeNoteStartText(isEditorTextEdited(), savedNote, pageState.pendingNotes[location.kind], !isKindTextEdited(location.kind));
+}
+
+export function createNotesButton(id: string, title: string, location: NoteLocation): HTMLButtonElement {
   const button = document.createElement('button');
   button.id = id;
   button.className = 'format-json-button';
   button.textContent = 'notes';
-  const field = `${kind}Note` as const;
   function saveText(text: string): Promise<void> {
-    return saveShownNote(kind, text);
+    return saveShownNote(location, text);
   }
   function openNotes(): void {
-    const isEdited = isEditorTextEdited();
-    const isUnchanged = !isKindTextEdited(kind);
-    const startText = computeNoteStartText(isEdited, getShownVersion()[field], pageState.pendingNotes[kind], isUnchanged);
-    openNotesDialog(title, startText, saveText);
+    openNotesDialog(title, computeLocationStartText(location), saveText);
   }
   button.addEventListener('click', openNotes);
   return button;

@@ -14,7 +14,7 @@ class FakeBox { textContent = '' }
 const realFetch = globalThis.fetch
 
 function buildVersion(id: number, stateNote: string | undefined): Version {
-    return { id: id, time: 't', state: { a: 1 }, questions: {}, calls: 1, outputs: [], stateNote: stateNote }
+    return { id: id, time: 't', state: { a: 1 }, questions: {}, calls: 1, outputs: [], stateNote: stateNote, questionsNote: stateNote && 'questions of ' + stateNote }
 }
 
 function buildStubEditor(text: string) {
@@ -60,6 +60,7 @@ async function validateANewVersionFromASubmitGetsTheInheritedNote() {
     pageState.versions = [base]
     await executeSubmit()
     expect(saveSpy).toHaveBeenCalledWith('state', 'base note', true, created)
+    expect(saveSpy).toHaveBeenCalledWith('questions', 'questions of base note', true, created)
 }
 
 async function validateAChangedStateIsReportedAsChanged() {
@@ -68,6 +69,7 @@ async function validateAChangedStateIsReportedAsChanged() {
     pageState.versions = [buildVersion(1, 'base note')]
     await executeSubmit()
     expect(saveSpy).toHaveBeenCalledWith('state', 'base note', false, created)
+    expect(saveSpy).toHaveBeenCalledWith('questions', 'questions of base note', true, created)
 }
 
 async function validateARunOnTheSameVersionLeavesTheNotesAlone() {

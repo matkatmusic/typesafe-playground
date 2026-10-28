@@ -28,5 +28,14 @@ function validateDifferentStateTextIsEdited() {
   expect(isKindTextEdited('state')).toBe(true)
 }
 
-test('test_same_state_text_is_not_edited', validateSameStateTextIsNotEdited)
+function validateQuestionsTextIsComparedToTheQuestions() {
+  installState('{ "a": 1 }')
+  spyOn(editors, 'getQuestionsEditor').mockReturnValue({ state: { doc: { toString: () => '{ "q": 1 }' } } } as unknown as EditorView)
+  expect(isKindTextEdited('questions')).toBe(true)
+  pageState.versions[0].questions = { q: 1 }
+  expect(isKindTextEdited('questions')).toBe(false)
+}
+
+test('test_questions_text_is_compared_to_the_questions', validateQuestionsTextIsComparedToTheQuestions)
+test('test_same_state_text_is_not_edited',validateSameStateTextIsNotEdited)
 test('test_different_state_text_is_edited', validateDifferentStateTextIsEdited)

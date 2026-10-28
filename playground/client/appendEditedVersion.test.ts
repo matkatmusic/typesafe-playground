@@ -112,9 +112,10 @@ async function validateAppendedVersionGetsTheInheritedStateNote() {
   installPage('{"a": 2}', '{"q": 1}')
   installOpenFetch()
   const saveSpy = spyOn(saveVersionNote, 'saveInheritedNote').mockResolvedValue(undefined)
-  pageState.versions = [{ ...buildVersion(1), stateNote: 'base note' }]
+  pageState.versions = [{ ...buildVersion(1), stateNote: 'base note', questionsNote: 'base questions' }]
   await appendEditedVersion()
   expect(saveSpy).toHaveBeenCalledWith('state', 'base note', false, pageState.versions[1])
+  expect(saveSpy).toHaveBeenCalledWith('questions', 'base questions', true, pageState.versions[1])
 }
 
 test('test_appended_version_gets_the_inherited_state_note', validateAppendedVersionGetsTheInheritedStateNote)

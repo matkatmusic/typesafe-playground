@@ -4,7 +4,7 @@ import { HARD_CODED_QUESTIONS, HARD_CODED_STATE } from './typeSafeQuery';
 export const HISTORY_PATH = `${import.meta.dir}/results/playground-history.json`;
 
 export type RunOutput = SystemOneResult<Questions>;
-export type Version = { id: number; time: string; state: unknown; questions: unknown; calls: number; outputs: RunOutput[]; note?: string; stateNote?: string };
+export type Version = { id: number; time: string; state: unknown; questions: unknown; calls: number; outputs: RunOutput[]; note?: string; stateNote?: string; questionsNote?: string; resultNotes?: Record<string, string> };
 
 export async function loadHistory(historyPath: string): Promise<Version[]> {
   const history: Version[] = await Bun.file(historyPath).json();
