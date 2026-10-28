@@ -123,6 +123,27 @@ function validateVersionsAreListedNewestFirst() {
   expect(markdown).toContain('## Version 2 (t2)\n\n### Changes\n\n- state: `b` added\n');
 }
 
+function validateDividersSitBetweenVersionsOnly() {
+  const versions = [buildVersion(1, { note: 'one' }), buildVersion(2, {}), buildVersion(3, { note: 'three' }), buildVersion(4, { note: 'four' })];
+  const markdown = buildReportMarkdown(versions);
+  const expected = [
+    '# Notes report',
+    '## Version 4 (t4)', '### Run comments', 'four',
+    '---',
+    '## Version 3 (t3)', '### Run comments', 'three',
+    '---',
+    '## Version 1 (t1)', '### Run comments', 'one',
+  ].join('\n\n') + '\n';
+  expect(markdown).toBe(expected);
+}
+
+function validateSingleVersionHasNoDivider() {
+  const markdown = buildReportMarkdown([buildVersion(1, { note: 'one' })]);
+  expect(markdown).not.toContain('---');
+}
+
+test('test_dividers_sit_between_versions_only', validateDividersSitBetweenVersionsOnly);
+test('test_single_version_has_no_divider', validateSingleVersionHasNoDivider);
 test('test_no_versions_gives_no_notes_yet', validateNoVersionsGivesNoNotesYet);
 test('test_versions_without_notes_give_no_notes_yet', validateVersionsWithoutNotesGiveNoNotesYet);
 test('test_mixed_sections_appear_in_order', validateMixedSectionsAppearInOrder);

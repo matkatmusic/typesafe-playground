@@ -72,8 +72,13 @@ export function buildReportMarkdown(versions: Version[]): string {
   const blocks = ['# Notes report'];
   const versionBlocks: string[] = [];
   // for (let i = 0; i < versions.length; i++)
-  for (let i = versions.length - 1; i >= 0; i--)
-    versionBlocks.push(...listVersionBlocks(versions, i));
+  for (let i = versions.length - 1; i >= 0; i--) {
+    const blocksOfVersion = listVersionBlocks(versions, i);
+    const needsDivider = blocksOfVersion.length > 0 && versionBlocks.length > 0;
+    if (needsDivider)
+      versionBlocks.push('---');
+    versionBlocks.push(...blocksOfVersion);
+  }
   const hasVersionBlocks = versionBlocks.length > 0;
   if (!hasVersionBlocks)
     return [...blocks, NO_NOTES_TEXT].join('\n\n') + '\n';
