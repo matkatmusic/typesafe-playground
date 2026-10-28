@@ -27,12 +27,22 @@
         </div>
     </form>
 </dialog>
+<dialog id="reportDialog">
+    <div id="reportDialogHeader">
+        <span id="reportDialogTitle">Report</span>
+        <button id="reportCopyButton">Copy</button>
+        <button id="reportDownloadButton">Download .md</button>
+        <button id="reportCloseButton" aria-label="close report">&times;</button>
+    </div>
+    <div id="reportBody"></div>
+</dialog>
 <div id="playgroundComponentBox">
     <div id="headerBox">
         <button id="newButton">New</button>
         <button id="openButton">Open</button>
         <button id="saveButton">Save</button>
         <button id="resetButton">Reset</button>
+        <button id="reportButton">Report</button>
         <label id="typeSafeKeyLabel" for="typeSafeKeyEditor">TypeSafe API key</label>
         <input id="typeSafeKeyEditor" type="password" autocomplete="off" spellcheck="false" placeholder="TypeSafe API key">
         <button id="showKeyButton">Show</button>

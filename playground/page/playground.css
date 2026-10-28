@@ -60,6 +60,15 @@ button:disabled { opacity: 0.5; cursor: default; }
 #notesDialog p { margin: 0; }
 #notesDialogText { width: 100%; resize: vertical; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
 #notesDialogButtons { display: flex; gap: 8px; justify-content: flex-end; }
+#reportDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; width: min(800px, 90vw); max-height: 85vh; padding: 12px; }
+#reportDialog[open] { display: flex; flex-direction: column; gap: 12px; }
+#reportDialogHeader { flex: none; display: flex; align-items: center; gap: 8px; }
+#reportDialogTitle { margin-right: auto; font-weight: 600; }
+#reportBody { flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-wrap: anywhere; }
+#reportBody h1, #reportBody h2, #reportBody h3, #reportBody h4 { margin: 12px 0 6px; }
+#reportBody p { margin: 6px 0; }
+#reportBody blockquote { margin: 6px 0; padding-left: 10px; border-left: 3px solid var(--grid); color: var(--text-muted); }
+#reportBody code { font: 13px/1.4 ui-monospace, Menlo, monospace; }
 #costTokenSubmitBox { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--grid); }
 #callsSubmitGroup { margin-left: auto; display: flex; align-items: center; }
 #callsLabel { margin-right: 6px; color: var(--text-muted); }
