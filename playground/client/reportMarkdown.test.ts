@@ -107,6 +107,22 @@ function validateChangesAppearBeforeNotesAndResults() {
   expect(markdown).toContain('Winner: a task (1) · avg 0.800 · ▲ 0.300');
 }
 
+function validateVersionsAreListedNewestFirst() {
+  const versions = [
+    buildVersion(1, { state: { a: 1 }, note: 'one' }),
+    buildVersion(2, { state: { a: 1, b: 2 }, note: 'two' }),
+    buildVersion(3, { state: { a: 1, b: 2, c: 3 }, note: 'three' }),
+  ];
+  const markdown = buildReportMarkdown(versions);
+  const versionThree = markdown.indexOf('## Version 3');
+  const versionTwo = markdown.indexOf('## Version 2');
+  const versionOne = markdown.indexOf('## Version 1');
+  expect(versionThree).toBeGreaterThan(-1);
+  expect(versionThree).toBeLessThan(versionTwo);
+  expect(versionTwo).toBeLessThan(versionOne);
+  expect(markdown).toContain('## Version 2 (t2)\n\n### Changes\n\n- state: `b` added\n');
+}
+
 test('test_no_versions_gives_no_notes_yet', validateNoVersionsGivesNoNotesYet);
 test('test_versions_without_notes_give_no_notes_yet', validateVersionsWithoutNotesGiveNoNotesYet);
 test('test_mixed_sections_appear_in_order', validateMixedSectionsAppearInOrder);
@@ -117,3 +133,4 @@ test('test_results_include_instructions_metric_line_and_note', validateResultsIn
 test('test_version_with_runs_but_no_notes_appears', validateVersionWithRunsButNoNotesAppears);
 test('test_result_note_without_runs_shows_no_runs_instead_of_throwing', validateResultNoteWithoutRunsShowsNoRunsInsteadOfThrowing);
 test('test_changes_appear_before_notes_and_results', validateChangesAppearBeforeNotesAndResults);
+test('test_versions_are_listed_newest_first', validateVersionsAreListedNewestFirst);

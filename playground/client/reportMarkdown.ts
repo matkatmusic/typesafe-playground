@@ -68,7 +68,8 @@ function listVersionBlocks(versions: Version[], index: number): string[] {
 export function buildReportMarkdown(versions: Version[]): string {
   const blocks = ['# Notes report'];
   const versionBlocks: string[] = [];
-  for (let i = 0; i < versions.length; i++)
+  // for (let i = 0; i < versions.length; i++)
+  for (let i = versions.length - 1; i >= 0; i--)
     versionBlocks.push(...listVersionBlocks(versions, i));
   const hasVersionBlocks = versionBlocks.length > 0;
   if (!hasVersionBlocks)
