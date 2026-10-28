@@ -1,11 +1,15 @@
 import { test, expect, afterEach, mock, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
 import { appendEditedVersion } from './appendEditedVersion'
+import * as costTokens from './costTokens'
 import * as editors from './editors'
+import * as graphs from './graphs'
+import * as noteBox from './noteBox'
 import * as pinButtons from './pinButtons'
 import { pageState } from './state'
 import * as versionArrows from './versionArrows'
 import * as versionBox from './versionBox'
+import * as winnersDom from './winnersDom'
 
 const realFetch = globalThis.fetch
 
@@ -34,7 +38,16 @@ function installPage(stateText: string, questionsText: string) {
   const refreshSpy = spyOn(versionBox, 'refreshVersionBox').mockImplementation(() => {})
   const arrowsSpy = spyOn(versionArrows, 'updateVersionArrows').mockImplementation(() => {})
   const pinSpy = spyOn(pinButtons, 'applyPinButtons').mockImplementation(() => {})
-  return { errorLine, refreshSpy, arrowsSpy, pinSpy }
+  const renderSpies = {
+    note: spyOn(noteBox, 'applyNoteBox').mockImplementation(() => {}),
+    cost: spyOn(costTokens, 'renderCostAndTokens').mockImplementation(() => {}),
+    result: spyOn(editors, 'renderResultJson').mockImplementation(() => {}),
+    graphs: spyOn(graphs, 'renderGraphs').mockImplementation(() => {}),
+    winners: spyOn(winnersDom, 'renderWinners').mockImplementation(() => {}),
+    stateFill: spyOn(editors, 'renderStateJson').mockImplementation(() => {}),
+    questionsFill: spyOn(editors, 'renderQuestionsJson').mockImplementation(() => {}),
+  }
+  return { errorLine, refreshSpy, arrowsSpy, pinSpy, renderSpies }
 }
 
 function installOpenFetch() {
@@ -49,7 +62,7 @@ function installOpenFetch() {
 }
 
 async function validateEditedTextAppendsOneUnrunVersionWithTheParsedText() {
-  const { refreshSpy, arrowsSpy, pinSpy } = installPage('{"a": 2}', '{"q": 1}')
+  const { refreshSpy, arrowsSpy, pinSpy, renderSpies } = installPage('{"a": 2}', '{"q": 1}')
   const seen = installOpenFetch()
   pageState.pinnedId = 1
   expect(await appendEditedVersion()).toBe(true)
@@ -65,6 +78,14 @@ async function validateEditedTextAppendsOneUnrunVersionWithTheParsedText() {
   expect(refreshSpy).toHaveBeenCalledTimes(1)
   expect(arrowsSpy).toHaveBeenCalledTimes(1)
   expect(pinSpy).toHaveBeenCalledTimes(1)
+  const appendedVersion = pageState.versions[1]
+  expect(renderSpies.note).toHaveBeenCalledWith(appendedVersion)
+  expect(renderSpies.cost).toHaveBeenCalledWith(appendedVersion)
+  expect(renderSpies.result).toHaveBeenCalledWith([])
+  expect(renderSpies.graphs.mock.calls[0][0]).toBe(appendedVersion)
+  expect(renderSpies.winners.mock.calls[0][0]).toBe(appendedVersion)
+  expect(renderSpies.stateFill).not.toHaveBeenCalled()
+  expect(renderSpies.questionsFill).not.toHaveBeenCalled()
   pageState.pinnedId = null
 }
 

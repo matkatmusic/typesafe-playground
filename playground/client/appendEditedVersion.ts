@@ -1,13 +1,18 @@
 import type { Version } from '../playgroundHistory';
+import { renderCostAndTokens } from './costTokens';
 import { getElement } from './dom';
-import { getQuestionsEditor, getStateEditor } from './editors';
+import { getQuestionsEditor, getStateEditor, renderResultJson } from './editors';
+import { renderGraphs } from './graphs';
+import { attachInfoBox } from './infoBox';
 import { computeJsonParseResult } from './jsonParse';
+import { applyNoteBox } from './noteBox';
 import { applyPinButtons } from './pinButtons';
 import { getShownVersion, pageState } from './state';
 import { sendJson } from './versionActions';
 import { updateVersionArrows } from './versionArrows';
 import { refreshVersionBox } from './versionBox';
 import { isJsonTextEdited, NOT_RUN_TIME } from './versionLabel';
+import { renderWinners } from './winnersDom';
 
 export async function appendEditedVersion(): Promise<boolean> {
   const shownVersion = getShownVersion();
@@ -33,7 +38,13 @@ export async function appendEditedVersion(): Promise<boolean> {
   const opened: { versions: Version[] } = await response.json();
   pageState.versions = opened.versions;
   pageState.index = opened.versions.length - 1;
+  const appendedVersion = getShownVersion();
+  applyNoteBox(appendedVersion);
   refreshVersionBox();
+  renderCostAndTokens(appendedVersion);
+  renderResultJson(appendedVersion.outputs);
+  renderGraphs(appendedVersion, getElement('graphContainerBox'), attachInfoBox);
+  renderWinners(appendedVersion, getElement('winnerBox'));
   updateVersionArrows();
   applyPinButtons();
   return true;
