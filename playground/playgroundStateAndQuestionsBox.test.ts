@@ -70,6 +70,28 @@ async function validatePlaceholderHighlightDoesNotChangeTheTextBox() {
     }
 }
 
+async function validateIssue26DarkModeHoverBoxRuleBeatsCodeMirrorsLightTooltipRule() {
+    const page = await buildPage(await buildTempHistoryPath())
+    const rule = page.match(/body \.cm-editor \.cm-tooltip \{([^}]*)\}/)?.[1]
+    expect(rule).toBeDefined()
+    expect(rule).toContain('background: var(--panel);')
+    expect(rule).toContain('color: var(--text);')
+    expect(rule).toContain('border: 1px solid var(--grid);')
+    expect(page).not.toContain('body .cm-tooltip {')
+}
+
+async function validateIssue32FindReplaceButtonsAreStyledInAllThreeEditors() {
+    const page = await buildPage(await buildTempHistoryPath())
+    const selector = ':is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-button {'
+    const rule = page.split('\n').find((line) => line.startsWith(selector))
+    expect(rule).toBeDefined()
+    expect(rule).toContain('background: var(--surface);')
+    expect(rule).toContain('color: var(--text);')
+    expect(rule).toContain('border: 1px solid var(--button-border);')
+}
+
+test('test_issue_26_dark_mode_hover_box_rule_beats_codemirrors_light_tooltip_rule', validateIssue26DarkModeHoverBoxRuleBeatsCodeMirrorsLightTooltipRule)
+test('test_issue_32_find_replace_buttons_are_styled_in_all_three_editors', validateIssue32FindReplaceButtonsAreStyledInAllThreeEditors)
 test('test_placeholder_highlight_does_not_change_the_text_box', validatePlaceholderHighlightDoesNotChangeTheTextBox)
 test('test_lock_grey_cue_only_matches_the_locked_content_element', validateLockGreyCueOnlyMatchesTheLockedContentElement)
 test('test_each_row_starts_with_its_title_label_inside_the_sized_box', validateEachRowStartsWithItsTitleLabelInsideTheSizedBox)
