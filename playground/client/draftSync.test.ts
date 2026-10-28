@@ -73,7 +73,7 @@ async function validateStartDraftSessionRestoresTheDraftOfAnExistingId() {
   installFakeLabel()
   const seen = installFetchRecorder({ state: 's', questions: 'q draft' })
   spyOn(globalThis, 'setInterval').mockImplementation((() => 0) as unknown as typeof setInterval)
-  const replaceSpy = spyOn(editors, 'replaceEditorText').mockImplementation(() => {})
+  const replaceSpy = spyOn(editors, 'fillEditorText').mockImplementation(() => {})
   spyOn(versionBox, 'refreshVersionBox').mockImplementation(() => {})
   await launchDraftSession()
   expect(seen).toEqual([{ path: `/draft?id=${SESSION_ID}`, method: 'GET', body: null }])
@@ -114,7 +114,7 @@ async function validateSendDraftPostsInOrder() {
 
 function validateApplyDraftDoesNothingForNullOrEqualText() {
   installStubEditors('s', 'q')
-  const replaceSpy = spyOn(editors, 'replaceEditorText').mockImplementation(() => {})
+  const replaceSpy = spyOn(editors, 'fillEditorText').mockImplementation(() => {})
   const refreshSpy = spyOn(versionBox, 'refreshVersionBox').mockImplementation(() => {})
   applyDraft(null)
   applyDraft({ state: 's', questions: 'q' })
@@ -126,7 +126,7 @@ function validateApplyDraftDoesNothingForNullOrEqualText() {
 function validateApplyDraftReplacesOnlyTheDifferingEditorAndMarksTheChangeOnce() {
   const { stateEditor, questionsEditor } = installStubEditors('s', 'q')
   const label = installFakeLabel()
-  const replaceSpy = spyOn(editors, 'replaceEditorText').mockImplementation(() => {})
+  const replaceSpy = spyOn(editors, 'fillEditorText').mockImplementation(() => {})
   const refreshSpy = spyOn(versionBox, 'refreshVersionBox').mockImplementation(() => {})
   applyDraft({ state: 's', questions: 'q draft' })
   expect(replaceSpy).toHaveBeenCalledTimes(1)

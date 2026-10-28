@@ -2,7 +2,8 @@
 // import { EditorView, type ViewUpdate } from '@codemirror/view';
 import type { Draft } from '../playgroundDraftRequests';
 import { isEditorTextEdited } from './editedPosition';
-import { getQuestionsEditor, getStateEditor, replaceEditorText } from './editors';
+// import { getQuestionsEditor, getStateEditor, replaceEditorText } from './editors';
+import { fillEditorText, getQuestionsEditor, getStateEditor } from './editors';
 import { markPageChanged } from './pageChanged';
 import { pageState } from './state';
 // import type { PageData } from './types';
@@ -86,10 +87,12 @@ export function applyDraft(draft: Draft | null): void {
   const questionsEditor = getQuestionsEditor();
   const isStateDifferent = draft.state !== stateEditor.state.doc.toString();
   if (isStateDifferent)
-    replaceEditorText(stateEditor, draft.state);
+    // replaceEditorText(stateEditor, draft.state);
+    fillEditorText(stateEditor, draft.state);
   const isQuestionsDifferent = draft.questions !== questionsEditor.state.doc.toString();
   if (isQuestionsDifferent)
-    replaceEditorText(questionsEditor, draft.questions);
+    // replaceEditorText(questionsEditor, draft.questions);
+    fillEditorText(questionsEditor, draft.questions);
   const isRestored = isStateDifferent || isQuestionsDifferent;
   if (!isRestored)
     return;

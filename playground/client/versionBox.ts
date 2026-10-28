@@ -2,7 +2,8 @@ import type { ViewUpdate } from '@codemirror/view';
 import { renderCostAndTokens } from './costTokens';
 import { getElement } from './dom';
 import { computePositionCount, isEditorTextEdited } from './editedPosition';
-import { FILL_ANNOTATION, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson, replaceEditorText } from './editors';
+// import { FILL_ANNOTATION, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson, replaceEditorText } from './editors';
+import { FILL_ANNOTATION, fillEditorText, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson } from './editors';
 import { renderGraphs } from './graphs';
 import { attachInfoBox } from './infoBox';
 import { applyNoteBox } from './noteBox';
@@ -71,8 +72,10 @@ export function moveByVersions(step: number): void {
     throw new Error('the edited position has no draft');
   pageState.index = draft.baseIndex;
   renderShownVersion();
-  replaceEditorText(getStateEditor(), draft.state);
-  replaceEditorText(getQuestionsEditor(), draft.questions);
+  // replaceEditorText(getStateEditor(), draft.state);
+  // replaceEditorText(getQuestionsEditor(), draft.questions);
+  fillEditorText(getStateEditor(), draft.state);
+  fillEditorText(getQuestionsEditor(), draft.questions);
   refreshVersionBox();
 }
 

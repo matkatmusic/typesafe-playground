@@ -46,7 +46,7 @@ function installOneVersionWithAnEditedState() {
     spyOn(editors, 'getQuestionsEditor').mockReturnValue(questionsEditor)
     spyOn(editors, 'renderStateJson').mockImplementation((value) => { texts.state = JSON.stringify(value) })
     spyOn(editors, 'renderQuestionsJson').mockImplementation((value) => { texts.questions = JSON.stringify(value) })
-    spyOn(editors, 'replaceEditorText').mockImplementation((editor, text) => {
+    spyOn(editors, 'fillEditorText').mockImplementation((editor, text) => {
         if (editor === stateEditor)
             texts.state = text
         else
