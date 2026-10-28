@@ -1,5 +1,6 @@
 import type { Version } from '../playgroundHistory';
 import { listChangeBlocks } from './reportChanges';
+import { replaceVersionReferences } from './reportReferences';
 import { isNotePresent, listResultBlocks } from './reportResults';
 // import { formatValueText, listAnswers, readQuestions } from './graphValues';
 // import { formatWinnerLine, listWinnerGroups } from './winners';
@@ -62,7 +63,9 @@ function listVersionBlocks(versions: Version[], index: number): string[] {
   const hasContent = noteBlocks.length > 0 || resultBlocks.length > 0;
   if (!hasContent)
     return [];
-  return [`## Version ${version.id} (${version.time})`, ...listChangeBlocks(version, previous), ...noteBlocks, ...resultBlocks];
+  // return [`## Version ${version.id} (${version.time})`, ...listChangeBlocks(version, previous), ...noteBlocks, ...resultBlocks];
+  const textBlocks = replaceVersionReferences([...noteBlocks, ...resultBlocks], version);
+  return [`## Version ${version.id} (${version.time})`, ...listChangeBlocks(version, previous), ...textBlocks];
 }
 
 export function buildReportMarkdown(versions: Version[]): string {
