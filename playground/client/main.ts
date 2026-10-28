@@ -1,5 +1,6 @@
 import { refreshSubmitAvailability, setKeyPlaceholder, setTypedKeyToVisible, updateShowKeyButton } from './apiKey';
 import { getButton, getElement, getInput } from './dom';
+import { applyDraft, attachDraftSync } from './draftSync';
 import { createHeaderAddQuestion } from './addQuestionHeader';
 import { setAllGraphsToCollapsed, setAllGraphsToExpanded } from './collapseActions';
 import { createQuestionsEditor, createResultEditor, createStateEditor } from './editors';
@@ -56,6 +57,8 @@ const pageData = readPageData();
 pageState.versions = pageData.versions;
 refreshFileView();
 renderLastVersion();
+applyDraft(pageData.draft);
+attachDraftSync();
 applyPinInfo(pageState.pinnedId);
 function renderShownGraphs(): void {
   renderGraphs(getShownVersion(), getElement('graphContainerBox'), attachInfoBox);
