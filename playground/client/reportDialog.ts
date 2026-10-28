@@ -2,10 +2,13 @@ import { getDialog, getElement } from './dom';
 import { computeReportFileName } from './reportFileName';
 import { renderReportHtml } from './reportHtml';
 import { buildReportMarkdown } from './reportMarkdown';
+import { wrapVersionSections } from './reportSections';
 import { pageState } from './state';
 
 export function openReportDialog(): void {
-  getElement('reportBody').innerHTML = renderReportHtml(buildReportMarkdown(pageState.versions));
+  const body = getElement('reportBody');
+  body.innerHTML = renderReportHtml(buildReportMarkdown(pageState.versions));
+  wrapVersionSections(body);
   getDialog('reportDialog').showModal();
 }
 

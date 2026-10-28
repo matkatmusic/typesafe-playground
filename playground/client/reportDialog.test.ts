@@ -14,7 +14,7 @@ class FakeDialog {
 
 function installFakeDom() {
   const dialog = new FakeDialog()
-  const body = { innerHTML: '' }
+  const body = { innerHTML: '', children: [] }
   const link = { href: '', download: '', clickCount: 0, click() { this.clickCount++ } }
   const elements: Record<string, unknown> = { reportDialog: dialog, reportBody: body }
   Object.assign(globalThis, { HTMLDialogElement: FakeDialog, document: { getElementById: (id: string) => elements[id] ?? null, createElement: () => link } })
