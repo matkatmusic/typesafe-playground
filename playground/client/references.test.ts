@@ -5,14 +5,29 @@ const state = { message: { text: 'Please send me the report by Friday.', tags: [
 
 function validatePathLookupWalksObjectKeysAndArrayIndexes() {
   expect(findPathValue(state, 'message.text')).toEqual({ isFound: true, value: 'Please send me the report by Friday.' });
-  expect(findPathValue(state, 'message.tags.0')).toEqual({ isFound: true, value: 'a' });
-  expect(findPathValue(state, 'message.tags.1.deep')).toEqual({ isFound: true, value: 7 });
+  // expect(findPathValue(state, 'message.tags.0')).toEqual({ isFound: true, value: 'a' });
+  // expect(findPathValue(state, 'message.tags.1.deep')).toEqual({ isFound: true, value: 7 });
+  expect(findPathValue(state, 'message.tags[0]')).toEqual({ isFound: true, value: 'a' });
+  expect(findPathValue(state, 'message.tags[1].deep')).toEqual({ isFound: true, value: 7 });
+  expect(findPathValue(state, 'message.tags.0')).toEqual({ isFound: false });
   expect(findPathValue(state, 'empty')).toEqual({ isFound: true, value: null });
+}
+
+function validateBracketIndexesOnlyStepIntoArrays() {
+  const userState = { userMessageArray: ['feature request:', 'hovering over ...'], criteria: { 0: 'x' }, grid: [['a', 'b']] };
+  expect(replaceReferences('`userMessageArray[1]`', userState, {})).toBe(formatReferenceValue('hovering over ...'));
+  expect(replaceReferences('`userMessageArray[5]`', userState, {})).toBe('`userMessageArray[5]`');
+  expect(replaceReferences('`userMessageArray.0`', userState, {})).toBe('`userMessageArray.0`');
+  expect(replaceReferences('`criteria.0`', userState, {})).toBe(formatReferenceValue('x'));
+  expect(replaceReferences('`criteria[0]`', userState, {})).toBe('`criteria[0]`');
+  expect(replaceReferences('`grid[0][1]`', userState, {})).toBe(formatReferenceValue('b'));
+  expect(findPathValue(userState, '.')).toEqual({ isFound: false });
 }
 
 function validatePathLookupReportsMissingPaths() {
   expect(findPathValue(state, 'message.nope')).toEqual({ isFound: false });
-  expect(findPathValue(state, 'message.tags.5')).toEqual({ isFound: false });
+  // expect(findPathValue(state, 'message.tags.5')).toEqual({ isFound: false });
+  expect(findPathValue(state, 'message.tags[5]')).toEqual({ isFound: false });
   expect(findPathValue(state, 'message.tags.length')).toEqual({ isFound: false });
   expect(findPathValue(state, 'count.deeper')).toEqual({ isFound: false });
   expect(findPathValue(state, 'constructor')).toEqual({ isFound: false });
@@ -29,7 +44,8 @@ function validateNonStringValuesAreWrittenAsJson() {
 function validateTitleReferencesAreReplacedFromStateThenQuestions() {
   const title = 'Q1 requestsAction · Does `message.text` ask the reader to do something?';
   expect(replaceReferences(title, state, {})).toBe("Q1 requestsAction · Does 'Please send me the report by Friday.' ask the reader to do something?");
-  expect(replaceReferences('`count` and `message.tags.1.deep`', state, {})).toBe("'3' and '7'");
+  // expect(replaceReferences('`count` and `message.tags.1.deep`', state, {})).toBe("'3' and '7'");
+  expect(replaceReferences('`count` and `message.tags[1].deep`', state, {})).toBe("'3' and '7'");
   expect(replaceReferences('`other.name`', state, { other: { name: 'from questions' } })).toBe("'from questions'");
   expect(replaceReferences('`message.text`', { message: { text: 'state wins' } }, { message: { text: 'questions' } })).toBe("'state wins'");
 }
@@ -40,6 +56,7 @@ function validateMissingReferencesStayAsTyped() {
 }
 
 test('test_path_lookup_walks_object_keys_and_array_indexes', validatePathLookupWalksObjectKeysAndArrayIndexes);
+test('test_bracket_indexes_only_step_into_arrays', validateBracketIndexesOnlyStepIntoArrays);
 test('test_path_lookup_reports_missing_paths', validatePathLookupReportsMissingPaths);
 test('test_non_string_values_are_written_as_json', validateNonStringValuesAreWrittenAsJson);
 test('test_title_references_are_replaced_from_state_then_questions', validateTitleReferencesAreReplacedFromStateThenQuestions);

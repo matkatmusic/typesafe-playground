@@ -1,21 +1,29 @@
+import { splitKeyPath } from './propertyNames';
+
 export type PathLookup = { isFound: true; value: unknown } | { isFound: false };
 
 const REFERENCE_PATTERN = /`([^`\s.]+(?:\.[^`\s.]+)*)`/g;
-const ARRAY_INDEX = /^\d+$/;
+// const ARRAY_INDEX = /^\d+$/;
 
 export function findPathValue(root: unknown, path: string): PathLookup {
   let current = root;
-  for (const step of path.split('.')) {
+  const steps = splitKeyPath(path);
+  const isEmptyPath = steps.length === 0;
+  if (isEmptyPath)
+    return { isFound: false };
+  for (const step of steps) {
     const isContainer = typeof current === 'object' && current !== null;
     if (!isContainer)
       return { isFound: false };
-    const isStepAllowed = Array.isArray(current) ? ARRAY_INDEX.test(step) : true;
+    const isIndexStep = step.startsWith('[');
+    const isStepAllowed = isIndexStep === Array.isArray(current);
     if (!isStepAllowed)
       return { isFound: false };
-    const hasStep = Object.hasOwn(current as object, step);
+    const key = isIndexStep ? step.slice(1, -1) : step;
+    const hasStep = Object.hasOwn(current as object, key);
     if (!hasStep)
       return { isFound: false };
-    current = (current as Record<string, unknown>)[step];
+    current = (current as Record<string, unknown>)[key];
   }
   return { isFound: true, value: current };
 }
