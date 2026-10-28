@@ -60,6 +60,7 @@ export async function executeSubmit(): Promise<void> {
     const result: RunResult = await response.json();
     pageState.versions[result.version.id - 1] = result.version;
     pageState.index = result.version.id - 1;
+    pageState.editedDraft = null;
     markPageChanged('last run');
     renderShownVersion();
   }

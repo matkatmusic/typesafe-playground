@@ -38,6 +38,7 @@ export async function appendEditedVersion(): Promise<boolean> {
   const opened: { versions: Version[] } = await response.json();
   pageState.versions = opened.versions;
   pageState.index = opened.versions.length - 1;
+  pageState.editedDraft = null;
   const appendedVersion = getShownVersion();
   applyNoteBox(appendedVersion);
   refreshVersionBox();

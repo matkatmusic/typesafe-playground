@@ -20,6 +20,7 @@ async function replaceVersions(path: string, body: object): Promise<void> {
   const response = await sendJson(path, body);
   const replaced: { versions: Version[] } = await response.json();
   pageState.versions = replaced.versions;
+  pageState.editedDraft = null;
   pageState.pinnedId = null;
   pageState.isDirty = false;
   renderLastVersion();

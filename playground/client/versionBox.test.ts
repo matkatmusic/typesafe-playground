@@ -102,8 +102,10 @@ function validateMovingWrapsAndRendersThatVersion() {
     const shownStates: unknown[] = []
     const shownResults: unknown[] = []
     const shownGraphOutputs: unknown[] = []
+    let stateText = '{"b":2}'
     function recordState(value: unknown) {
         shownStates.push(value)
+        stateText = JSON.stringify(value)
     }
     function recordResult(value: unknown) {
         shownResults.push(value)
@@ -115,7 +117,7 @@ function validateMovingWrapsAndRendersThatVersion() {
     spyOn(editors, 'renderResultJson').mockImplementation(recordResult)
     spyOn(graphs, 'renderGraphs').mockImplementation(recordGraphs as never)
     spyOn(winnersDom, 'renderWinners').mockImplementation(() => {})
-    spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
+    spyOn(editors, 'getStateEditor').mockReturnValue({ state: { doc: { toString: () => stateText } } } as unknown as EditorView)
     const renderQuestionsSpy = installQuestionsStub('{}')
     pageState.versions = [makeVersion(1, { a: 1 }), makeVersion(2, { b: 2 })]
     pageState.index = 1

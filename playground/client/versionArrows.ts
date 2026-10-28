@@ -1,8 +1,10 @@
 import { getButton } from './dom';
-import { pageState } from './state';
+import { computePositionCount } from './editedPosition';
+// import { pageState } from './state';
 
 export function isVersionMovePossible(): boolean {
-  return pageState.versions.length >= 2;
+  // return pageState.versions.length >= 2;
+  return computePositionCount() >= 2;
 }
 
 export function updateVersionArrows(): void {
