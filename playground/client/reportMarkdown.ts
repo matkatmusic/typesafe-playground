@@ -7,6 +7,7 @@ import { isNotePresent, listResultBlocks } from './reportResults';
 
 // export const NO_NOTES_TEXT = 'No notes yet.';
 export const NO_NOTES_TEXT = 'No notes or runs yet.';
+export const PLACEHOLDER_NOTE_TEXT = 'Placeholders (`name`) are used. See the References table below for the actual values.';
 
 // function isNotePresent(note: string | undefined): note is string {
 //   return note !== undefined && note !== '';
@@ -65,7 +66,10 @@ function listVersionBlocks(versions: Version[], index: number): string[] {
     return [];
   // return [`## Version ${version.id} (${version.time})`, ...listChangeBlocks(version, previous), ...noteBlocks, ...resultBlocks];
   const textBlocks = replaceVersionReferences([...noteBlocks, ...resultBlocks], version);
-  return [`## Version ${version.id} (${version.time})`, ...listChangeBlocks(version, previous), ...textBlocks];
+  const hasReferences = textBlocks.includes('### References');
+  const placeholderBlocks = hasReferences ? [PLACEHOLDER_NOTE_TEXT] : [];
+  // return [`## Version ${version.id} (${version.time})`, ...listChangeBlocks(version, previous), ...textBlocks];
+  return [`## Version ${version.id} (${version.time})`, ...placeholderBlocks, ...listChangeBlocks(version, previous), ...textBlocks];
 }
 
 export function buildReportMarkdown(versions: Version[]): string {

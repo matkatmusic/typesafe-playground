@@ -1,6 +1,6 @@
 import { test, expect } from 'bun:test';
 import type { Version } from '../playgroundHistory';
-import { buildReportMarkdown } from './reportMarkdown';
+import { buildReportMarkdown, PLACEHOLDER_NOTE_TEXT } from './reportMarkdown';
 import { replaceVersionReferences } from './reportReferences';
 
 const LONG_TEXT = 'a value that is longer than forty characters in total';
@@ -66,6 +66,19 @@ function validateChangesBulletsAreNotTouched() {
   expect(markdown).toContain("now 'Bob'");
 }
 
+function validatePlaceholderNoteFollowsHeading() {
+  const versions = [buildVersion(1, { state: { a: 1 } }), buildVersion(2, { state: { a: 2, big: LONG_TEXT }, note: 'see `big`' })];
+  const blocks = buildReportMarkdown(versions).split('\n\n');
+  const headingIndex = blocks.indexOf('## Version 2 (t2)');
+  expect(blocks[headingIndex + 1]).toBe(PLACEHOLDER_NOTE_TEXT);
+  expect(blocks.indexOf('### Changes')).toBeGreaterThan(headingIndex + 1);
+}
+
+function validateNoPlaceholderNoteForShortValues() {
+  const versions = [buildVersion(1, { state: { name: 'Ann' }, note: 'hi `name`' })];
+  expect(buildReportMarkdown(versions)).not.toContain(PLACEHOLDER_NOTE_TEXT);
+}
+
 test('test_short_value_is_replaced', validateShortValueIsReplaced);
 test('test_questions_are_used_after_state', validateQuestionsAreUsedAfterState);
 test('test_long_value_is_kept_and_defined', validateLongValueIsKeptAndDefined);
@@ -75,3 +88,5 @@ test('test_same_name_gives_one_row', validateSameNameGivesOneRow);
 test('test_missing_name_is_left_alone', validateMissingNameIsLeftAlone);
 test('test_no_table_without_long_values', validateNoTableWithoutLongValues);
 test('test_changes_bullets_are_not_touched', validateChangesBulletsAreNotTouched);
+test('test_placeholder_note_follows_heading', validatePlaceholderNoteFollowsHeading);
+test('test_no_placeholder_note_for_short_values', validateNoPlaceholderNoteForShortValues);
