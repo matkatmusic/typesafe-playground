@@ -84,6 +84,26 @@ export function listChildNames(tree: Tree, text: string, path: string[]): string
   return names;
 }
 
+export function findValueText(tree: Tree, text: string, path: string[]): string | null {
+  let scopes = collectAllObjects(tree);
+  for (let i = 0; i < path.length - 1; i++)
+    scopes = collectNamedObjectValues(scopes, text, path[i]);
+  for (const scope of scopes) {
+    for (const property of listTopLevelProperties(scope)) {
+      const nameNode = property.getChild('PropertyName');
+      const value = property.lastChild;
+      const isMatch = nameNode !== null && value !== null && readPropertyName(text, nameNode) === path[path.length - 1];
+      if (isMatch)
+        return text.slice(value.from, value.to);
+    }
+  }
+  return null;
+}
+
+export function findEditorValueText(state: EditorState, path: string[]): string | null {
+  return findValueText(syntaxTree(state), state.doc.toString(), path);
+}
+
 export function listEditorChildNames(state: EditorState, path: string[]): string[] {
   return listChildNames(syntaxTree(state), state.doc.toString(), path);
 }

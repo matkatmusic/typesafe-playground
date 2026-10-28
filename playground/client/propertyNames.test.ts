@@ -1,7 +1,7 @@
 import { test, expect } from 'bun:test';
 import { jsonLanguage, json } from '@codemirror/lang-json';
 import { EditorState } from '@codemirror/state';
-import { collectAllObjects, collectNamedObjectValues, collectPropertyNames, listChildNames, listEditorChildNames, listEditorNames, mergeNames } from './propertyNames';
+import { collectAllObjects, collectNamedObjectValues, collectPropertyNames, findEditorValueText, findValueText, listChildNames, listEditorChildNames, listEditorNames, mergeNames } from './propertyNames';
 
 function validateCollectsDistinctNamesAtAnyDepth() {
   const text = '{"a": {"b": 1, "a": 2}, "c": [{"d": 1}]}';
@@ -60,6 +60,30 @@ function validateCollectsEveryObjectAndNamedObjectValues() {
   expect(collectNamedObjectValues(objects, text, 'a').length).toBe(2);
 }
 
+function validateFindsStringAndObjectValueText() {
+  const text = '{"message": {"text": "hi", "x": {"deep": 2}}}';
+  const tree = jsonLanguage.parser.parse(text);
+  expect(findValueText(tree, text, ['message', 'text'])).toBe('"hi"');
+  expect(findValueText(tree, text, ['message', 'x'])).toBe('{"deep": 2}');
+  expect(findValueText(tree, text, ['message', 'x', 'deep'])).toBe('2');
+}
+
+function validateFindValueTextIsNullWhenMissing() {
+  const text = '{"message": {"text": "hi"}}';
+  const tree = jsonLanguage.parser.parse(text);
+  expect(findValueText(tree, text, ['message', 'nope'])).toBe(null);
+  expect(findValueText(tree, text, ['nope', 'text'])).toBe(null);
+  expect(findValueText(tree, text, ['nope'])).toBe(null);
+}
+
+function validateFindsValueTextFromEditorState() {
+  const state = EditorState.create({ doc: '{"a": {"b": 1}}', extensions: [json()] });
+  expect(findEditorValueText(state, ['a', 'b'])).toBe('1');
+}
+
+test('test_find_value_text_reads_string_and_object_values', validateFindsStringAndObjectValueText);
+test('test_find_value_text_is_null_when_missing', validateFindValueTextIsNullWhenMissing);
+test('test_find_editor_value_text_reads_syntax_tree', validateFindsValueTextFromEditorState);
 test('test_collect_names_reads_every_depth_once',validateCollectsDistinctNamesAtAnyDepth);
 test('test_collect_names_works_on_broken_json', validateCollectsNamesFromBrokenJson);
 test('test_collect_names_skips_empty_names', validateSkipsEmptyNames);

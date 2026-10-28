@@ -143,6 +143,8 @@ body .cm-editor .cm-tooltip {
     border: 1px solid var(--grid);
 }
 
+.cm-backtick-value { margin: 0; padding: 2px 6px; max-height: 300px; overflow: auto; }
+
 body .cm-tooltip.cm-tooltip-autocomplete > ul > li[aria-selected] {
     background: var(--grid);
     color: var(--text);
