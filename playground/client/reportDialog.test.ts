@@ -71,7 +71,7 @@ async function validateSaveClicksADownloadLinkNamedAfterTheOpenFile() {
   expect(link.clickCount).toBe(1)
   expect(revokeUrl).toHaveBeenCalledWith('blob:fake')
   const blob = createUrl.mock.calls[0][0] as Blob
-  expect(await blob.text()).toBe('# Notes report\n\nNo notes yet.\n')
+  expect(await blob.text()).toBe('# Notes report\n\nNo notes or runs yet.\n')
   createUrl.mockRestore()
   revokeUrl.mockRestore()
 }
