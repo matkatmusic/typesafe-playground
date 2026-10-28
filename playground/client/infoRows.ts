@@ -2,6 +2,8 @@ import type { Answer } from './graphTypes';
 import type { BarInfoRequest, InfoPart, InfoRow } from './infoTypes';
 import { computeSummary, listValues } from './graphValues';
 import { readConfidence, readDescription, readTopKey } from './infoValues';
+import { getShownVersion } from './state';
+import { buildTextFormatter } from './winnersDom';
 
 const LABEL = 'info-label';
 const VALUE = 'info-value';
@@ -59,7 +61,7 @@ export function buildBarInfoRows(request: BarInfoRequest): InfoRow[] {
   if (isBarShown) {
     const values = listValues(answers, key);
     const stat = computeSummary(values);
-    messageText = readDescription(question, key);
+    messageText = buildTextFormatter(getShownVersion())(readDescription(question, key));
     lowText = formatThreeDecimals(stat.low);
     highText = formatThreeDecimals(stat.high);
     averageText = formatThreeDecimals(stat.average);
