@@ -60,7 +60,7 @@ refreshFileView();
 renderLastVersion();
 // applyDraft(pageData.draft);
 // attachDraftSync();
-await launchDraftSession();
+// await launchDraftSession();
 applyPinInfo(pageState.pinnedId);
 function renderShownGraphs(): void {
   renderGraphs(getShownVersion(), getElement('graphContainerBox'), attachInfoBox);
@@ -68,3 +68,4 @@ function renderShownGraphs(): void {
 initGraphs(getElement('graphContainerBox'), renderShownGraphs);
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 setTheme(readThemeName(localStorage.getItem('theme'), prefersDark));
+await launchDraftSession();
