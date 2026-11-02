@@ -2,7 +2,7 @@ import { test, expect } from 'bun:test'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { buildPage, dispatchRequest } from './playground'
-import { initHistory } from './playgroundHistory'
+import { initHistory, loadHistory } from './playgroundHistory'
 import { executeRunRequest, type CreateRunClient } from './playgroundRequests'
 import { executeNewRequest, executeSaveRequest, isPlainObject, isVersionShape } from './playgroundVersionRequests'
 import { HARD_CODED_QUESTIONS, HARD_CODED_STATE } from './typeSafeQuery'
@@ -10,7 +10,7 @@ import type { Version } from './playgroundHistory'
 
 const PORT = 4318
 const ALLOWED_HOST = `127.0.0.1:${PORT}`
-const OPENED_VERSION = { id: 7, time: 'now', state: { a: 1 }, questions: {}, calls: 2, outputs: [] }
+const OPENED_VERSION = { time: 'now', state: { a: 1 }, questions: {}, calls: 2, outputs: [] }
 
 async function buildTempHistoryPath() {
     const historyPath = `${mkdtempSync(`${tmpdir()}/playground-version-requests-test-`)}/results/playground-history.json`
@@ -31,9 +31,8 @@ function validateIsPlainObject() {
 }
 
 function validateIsVersionShape() {
-    const good = { id: 1, time: 't', state: {}, questions: {}, calls: 0, outputs: [] }
+    const good = { time: 't', state: {}, questions: {}, calls: 0, outputs: [] }
     expect(isVersionShape(good)).toBe(true)
-    expect(isVersionShape({ ...good, id: 1.5 })).toBe(false)
     expect(isVersionShape({ ...good, state: [] })).toBe(false)
     expect(isVersionShape({ ...good, questions: null })).toBe(false)
     expect(isVersionShape({ ...good, calls: '0' })).toBe(false)
@@ -61,16 +60,47 @@ async function validateNewWritesABlankDocument() {
     expect(created.versions[0].outputs).toEqual([])
 }
 
+async function validateNewWritesAHistoryFileWithoutIdKeys() {
+    const historyPath = await buildTempHistoryPath()
+    await dispatchRequest(buildPostRequest('/new', {}), PORT, historyPath)
+    const written = (await Bun.file(historyPath).json()) as object[]
+    expect(written.length).toBe(1)
+    expect('id' in written[0]).toBe(false)
+}
+
+async function validateOpenReturnsVersionsWithoutIdKeys() {
+    const historyPath = await buildTempHistoryPath()
+    const response = await dispatchRequest(buildPostRequest('/open', { versions: [{ ...OPENED_VERSION, id: 7 }] }), PORT, historyPath)
+    expect(response.status).toBe(200)
+    const opened = (await response.json()) as { versions: object[] }
+    expect(opened.versions.length).toBe(1)
+    expect('id' in opened.versions[0]).toBe(false)
+}
+
+async function validateLoadHistoryStripsOldIdKeys() {
+    const historyPath = await buildTempHistoryPath()
+    await Bun.write(historyPath, JSON.stringify([{ ...OPENED_VERSION, id: 3 }, { ...OPENED_VERSION, id: 4 }]))
+    const history = await loadHistory(historyPath)
+    expect(history.length).toBe(2)
+    expect('id' in history[0]).toBe(false)
+    expect('id' in history[1]).toBe(false)
+}
+
+function validateVersionWithoutIdPassesIsVersionShape() {
+    expect('id' in OPENED_VERSION).toBe(false)
+    expect(isVersionShape(OPENED_VERSION)).toBe(true)
+}
+
 async function validateFirstSubmitAfterNewMakesVersionOneOfOne() {
     Bun.env.TYPESAFE_API_KEY = 'env-key'
     const historyPath = await buildTempHistoryPath()
     await executeNewRequest(historyPath)
     const stubClient = { systemOne: async () => ({ answers: {}, usage: { input_tokens: 5, output_tokens: 1 } }) }
     const createClient = (() => stubClient) as unknown as CreateRunClient
-    const body = JSON.stringify({ id: 1, calls: 1, state: { typed: 'changed' }, questions: HARD_CODED_QUESTIONS })
+    const body = JSON.stringify({ index: 0, calls: 1, state: { typed: 'changed' }, questions: HARD_CODED_QUESTIONS })
     const response = await executeRunRequest(new Request(`http://${ALLOWED_HOST}/run`, { method: 'POST', body }), createClient, historyPath)
-    const result = (await response.json()) as { version: Version }
-    expect(result.version.id).toBe(1)
+    const result = (await response.json()) as { version: Version; index: number }
+    expect(result.index).toBe(0)
     const saved = (await (await executeSaveRequest(historyPath)).json()) as { versions: Version[] }
     expect(saved.versions.length).toBe(1)
     expect(saved.versions[0].state).toEqual({ typed: 'changed' })
@@ -79,33 +109,34 @@ async function validateFirstSubmitAfterNewMakesVersionOneOfOne() {
 
 async function validateResetRunsClearsOutputsAndCallsOfOneVersionAndKeepsTheRest() {
     const historyPath = await buildTempHistoryPath()
-    const ranVersion = (id: number) => ({ id, time: 't', state: { a: id }, questions: { q: id }, calls: 2, outputs: [{}, {}], note: 'kept' })
+    const ranVersion = (id: number) => ({ time: 't', state: { a: id }, questions: { q: id }, calls: 2, outputs: [{}, {}], note: 'kept' })
     await dispatchRequest(buildPostRequest('/open', { versions: [ranVersion(1), ranVersion(2)] }), PORT, historyPath)
-    const response = await dispatchRequest(buildPostRequest('/reset-runs', { id: 2 }), PORT, historyPath)
+    const response = await dispatchRequest(buildPostRequest('/reset-runs', { index: 1 }), PORT, historyPath)
     expect(response.status).toBe(200)
     const cleared = (await response.json()) as Version
-    expect(cleared).toEqual({ id: 2, time: 't', state: { a: 2 }, questions: { q: 2 }, calls: 0, outputs: [], note: 'kept' })
+    expect(cleared).toEqual({ time: 't', state: { a: 2 }, questions: { q: 2 }, calls: 0, outputs: [], note: 'kept' })
     const saved = (await (await executeSaveRequest(historyPath)).json()) as { versions: Version[] }
     expect(saved.versions[1]).toEqual(cleared)
     expect(saved.versions[0]).toEqual(ranVersion(1) as unknown as Version)
 }
 
-async function validateResetRunsRejectsAnUnknownId() {
+async function validateResetRunsRejectsAnUnknownIndex() {
     const historyPath = await buildTempHistoryPath()
-    const response = await dispatchRequest(buildPostRequest('/reset-runs', { id: 999999 }), PORT, historyPath)
+    const response = await dispatchRequest(buildPostRequest('/reset-runs', { index: 999999 }), PORT, historyPath)
     expect(response.status).toBe(400)
+    expect(await response.text()).toBe('index must be the integer index of an existing version')
 }
 
 async function validateSubmitAfterResettingTheOnlyVersionFillsItInPlace() {
     Bun.env.TYPESAFE_API_KEY = 'env-key'
     const historyPath = await buildTempHistoryPath()
     const oldRun = { answers: {}, usage: { input_tokens: 1, output_tokens: 1 } }
-    const ranVersion = { id: 1, time: 't', state: { a: 1 }, questions: {}, calls: 1, outputs: [oldRun], note: 'old note' }
+    const ranVersion = { time: 't', state: { a: 1 }, questions: HARD_CODED_QUESTIONS, calls: 1, outputs: [oldRun], note: 'old note' }
     await dispatchRequest(buildPostRequest('/open', { versions: [ranVersion] }), PORT, historyPath)
-    await dispatchRequest(buildPostRequest('/reset-runs', { id: 1 }), PORT, historyPath)
+    await dispatchRequest(buildPostRequest('/reset-runs', { index: 0 }), PORT, historyPath)
     const stubClient = { systemOne: async () => ({ answers: {}, usage: { input_tokens: 5, output_tokens: 1 } }) }
     const createClient = (() => stubClient) as unknown as CreateRunClient
-    const body = JSON.stringify({ id: 1, calls: 1, state: { typed: 'new' }, questions: {} })
+    const body = JSON.stringify({ index: 0, calls: 1, state: { typed: 'new' }, questions: {} })
     await executeRunRequest(new Request(`http://${ALLOWED_HOST}/run`, { method: 'POST', body }), createClient, historyPath)
     const saved = (await (await executeSaveRequest(historyPath)).json()) as { versions: Version[] }
     expect(saved.versions.length).toBe(1)
@@ -134,7 +165,11 @@ test('test_open_then_save_round_trips_through_the_temp_file', validateOpenThenSa
 test('test_new_writes_a_blank_document', validateNewWritesABlankDocument)
 test('test_first_submit_after_new_makes_version_one_of_one', validateFirstSubmitAfterNewMakesVersionOneOfOne)
 test('test_reset_runs_clears_outputs_and_calls_of_one_version_and_keeps_the_rest', validateResetRunsClearsOutputsAndCallsOfOneVersionAndKeepsTheRest)
-test('test_reset_runs_rejects_an_unknown_id', validateResetRunsRejectsAnUnknownId)
+test('test_reset_runs_rejects_an_unknown_index', validateResetRunsRejectsAnUnknownIndex)
+test('test_new_writes_a_history_file_without_id_keys', validateNewWritesAHistoryFileWithoutIdKeys)
+test('test_open_returns_versions_without_id_keys', validateOpenReturnsVersionsWithoutIdKeys)
+test('test_load_history_strips_old_id_keys', validateLoadHistoryStripsOldIdKeys)
+test('test_a_version_without_id_passes_is_version_shape', validateVersionWithoutIdPassesIsVersionShape)
 test('test_submit_after_resetting_the_only_version_fills_it_in_place', validateSubmitAfterResettingTheOnlyVersionFillsItInPlace)
 test('test_open_rejects_bad_versions', validateOpenRejectsBadVersions)
 test('test_page_holds_the_unsaved_dialog_and_an_untitled_title', validatePageHoldsTheUnsavedDialogAndAnUntitledTitle)

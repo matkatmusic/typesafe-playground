@@ -7,16 +7,16 @@ function removeFakeDocument() {
   Reflect.deleteProperty(globalThis, 'document')
 }
 
-function joinPartTexts(pinnedId: number | null) {
+function joinPartTexts(pinnedIndex: number | null) {
   let text = ''
-  for (const part of listPinLineParts(pinnedId))
+  for (const part of listPinLineParts(pinnedIndex))
     text += part[0]
   return text
 }
 
 function validatePinInfoTextReadsNothingPinnedOrTheVersion() {
   expect(joinPartTexts(null)).toBe('nothing pinned')
-  expect(joinPartTexts(7)).toBe('pinned: version 7')
+  expect(joinPartTexts(7)).toBe('pinned: version 8')
 }
 
 function validateApplyPinInfoFillsThePinInfoElement() {
@@ -25,7 +25,7 @@ function validateApplyPinInfoFillsThePinInfoElement() {
   const createElement = () => ({ className: '', textContent: '' })
   Object.assign(globalThis, { document: { getElementById: () => pinInfo, createElement } })
   applyPinInfo(7)
-  expect(children).toEqual(['pinned: version ', '7'])
+  expect(children).toEqual(['pinned: version ', '8'])
 }
 
 test('test_pin_info_text_reads_nothing_pinned_or_the_version', validatePinInfoTextReadsNothingPinnedOrTheVersion)

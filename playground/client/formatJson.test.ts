@@ -1,6 +1,6 @@
 import { test, expect, afterEach } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
-import { isInputUnchanged } from '../playgroundRequests'
+import { isInputUnchanged } from '../playgroundVersionStep'
 import { FILL_ANNOTATION } from './editors'
 import { formatEditorJson } from './formatJson'
 import { isJsonTextEdited } from './versionLabel'
@@ -46,7 +46,7 @@ function validateFormatOfInvalidJsonShowsTheErrorAndChangesNothing() {
 function validateFormattingNeverMakesAnEditedVersionOrANewRunVersion() {
     const savedState = { a: 1, b: [true] }
     const formattedText = JSON.stringify(savedState, null, 2)
-    const version = { id: 1, time: 'now', state: savedState, questions: {}, calls: 1, outputs: [] }
+    const version = { time: 'now', state: savedState, questions: {}, calls: 1, outputs: [] }
     expect(isJsonTextEdited(formattedText, savedState)).toBe(false)
     expect(isJsonTextEdited(JSON.stringify(savedState), savedState)).toBe(false)
     expect(isInputUnchanged(version, JSON.parse(formattedText), {})).toBe(true)

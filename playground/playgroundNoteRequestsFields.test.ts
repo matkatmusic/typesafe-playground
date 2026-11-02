@@ -14,17 +14,17 @@ function buildPostRequest(body: unknown) {
   return new Request('http://127.0.0.1:4399/note', { method: 'POST', body: JSON.stringify(body) })
 }
 
-function buildVersion(id: number, outputCount: number): Version {
+function buildVersion(outputCount: number): Version {
   const outputs: RunOutput[] = []
   for (let i = 0; i < outputCount; i++)
     outputs.push(OUTPUT)
-  return { id: id, time: 't', state: {}, questions: {}, calls: outputCount, outputs: outputs }
+  return { time: 't', state: {}, questions: {}, calls: outputCount, outputs: outputs }
 }
 
 async function validateQuestionsNoteIsStoredOnAVersionWithoutRuns() {
   const historyPath = buildTempHistoryPath()
-  await writeHistory(historyPath, [buildVersion(1, 0)])
-  const response = await executeNoteRequest(buildPostRequest({ id: 1, questionsNote: 'about questions' }), historyPath)
+  await writeHistory(historyPath, [buildVersion(0)])
+  const response = await executeNoteRequest(buildPostRequest({ index: 0, questionsNote: 'about questions' }), historyPath)
   expect(response.status).toBe(200)
   const history: Version[] = await loadHistory(historyPath)
   expect(history[0].questionsNote).toBe('about questions')
@@ -32,15 +32,15 @@ async function validateQuestionsNoteIsStoredOnAVersionWithoutRuns() {
 
 async function validateQuestionsNoteRejectsANonString() {
   const historyPath = buildTempHistoryPath()
-  await writeHistory(historyPath, [buildVersion(1, 1)])
-  const response = await executeNoteRequest(buildPostRequest({ id: 1, questionsNote: ['x'] }), historyPath)
+  await writeHistory(historyPath, [buildVersion(1)])
+  const response = await executeNoteRequest(buildPostRequest({ index: 0, questionsNote: ['x'] }), historyPath)
   expect(response.status).toBe(400)
 }
 
 async function validateResultNotesMergeKeysOnACompletedRun() {
   const historyPath = buildTempHistoryPath()
-  await writeHistory(historyPath, [{ ...buildVersion(1, 1), resultNotes: { first: 'one', second: 'two' } }])
-  const response = await executeNoteRequest(buildPostRequest({ id: 1, resultNotes: { second: 'changed', third: 'three' } }), historyPath)
+  await writeHistory(historyPath, [{ ...buildVersion(1), resultNotes: { first: 'one', second: 'two' } }])
+  const response = await executeNoteRequest(buildPostRequest({ index: 0, resultNotes: { second: 'changed', third: 'three' } }), historyPath)
   expect(response.status).toBe(200)
   const history: Version[] = await loadHistory(historyPath)
   expect(history[0].resultNotes).toEqual({ first: 'one', second: 'changed', third: 'three' })
@@ -48,14 +48,14 @@ async function validateResultNotesMergeKeysOnACompletedRun() {
 
 async function validateResultNotesRejectBadShapesAndVersionsWithoutRuns() {
   const historyPath = buildTempHistoryPath()
-  await writeHistory(historyPath, [buildVersion(1, 1), buildVersion(2, 0)])
-  const notAnObject = await executeNoteRequest(buildPostRequest({ id: 1, resultNotes: 'x' }), historyPath)
+  await writeHistory(historyPath, [buildVersion(1), buildVersion(0)])
+  const notAnObject = await executeNoteRequest(buildPostRequest({ index: 0, resultNotes: 'x' }), historyPath)
   expect(notAnObject.status).toBe(400)
-  const notAList = await executeNoteRequest(buildPostRequest({ id: 1, resultNotes: ['x'] }), historyPath)
+  const notAList = await executeNoteRequest(buildPostRequest({ index: 0, resultNotes: ['x'] }), historyPath)
   expect(notAList.status).toBe(400)
-  const badValue = await executeNoteRequest(buildPostRequest({ id: 1, resultNotes: { first: 5 } }), historyPath)
+  const badValue = await executeNoteRequest(buildPostRequest({ index: 0, resultNotes: { first: 5 } }), historyPath)
   expect(badValue.status).toBe(400)
-  const noRun = await executeNoteRequest(buildPostRequest({ id: 2, resultNotes: { first: 'one' } }), historyPath)
+  const noRun = await executeNoteRequest(buildPostRequest({ index: 1, resultNotes: { first: 'one' } }), historyPath)
   expect(noRun.status).toBe(400)
   const history: Version[] = await loadHistory(historyPath)
   expect(history[0].resultNotes).toBeUndefined()

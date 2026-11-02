@@ -25,5 +25,15 @@ function validateCleanStateDoesNotCallPreventDefault() {
   expect(event.preventDefaultCount).toBe(0)
 }
 
+function validateActiveBatchRunCallsPreventDefaultEvenWhenClean() {
+  pageState.isDirty = false
+  pageState.batchRun = { item: 2, count: 5 }
+  const event = buildStubEvent()
+  notifyOnUnsavedClose(event as unknown as BeforeUnloadEvent)
+  pageState.batchRun = null
+  expect(event.preventDefaultCount).toBe(1)
+}
+
+test('test_active_batch_run_calls_prevent_default_even_when_clean', validateActiveBatchRunCallsPreventDefaultEvenWhenClean)
 test('test_dirty_state_calls_prevent_default', validateDirtyStateCallsPreventDefault)
 test('test_clean_state_does_not_call_prevent_default', validateCleanStateDoesNotCallPreventDefault)

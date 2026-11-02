@@ -29,7 +29,7 @@ async function validateEachRowStartsWithItsTitleLabelInsideTheSizedBox() {
     const page = await buildPage(await buildTempHistoryPath())
     const stateUndoRedo = '<button class="format-json-button" id="stateUndoButton">Undo</button><button class="format-json-button" id="stateRedoButton">Redo</button>'
     const questionsUndoRedo = '<button class="format-json-button" id="questionsUndoButton">Undo</button><button class="format-json-button" id="questionsRedoButton">Redo</button>'
-    const stateOpening = `<div id="stateJsonEditor"><div id="stateTitleRow"><span class="other-label">state</span>${stateUndoRedo}<button class="format-json-button" id="stateFormatJsonButton">Format JSON</button></div></div>`
+    const stateOpening = `<div id="stateJsonEditor"><div id="stateTitleRow"><span class="other-label">state</span><label id="batchToggle"><input type="checkbox" id="batchCheckbox"> batch</label>${stateUndoRedo}<button class="format-json-button" id="stateFormatJsonButton">Format JSON</button></div></div>`
     const questionsOpening = `<div id="questionsJsonEditor"><div id="questionsTitleRow"><span class="other-label">questions</span><div id="questionsAddQuestion"></div>${questionsUndoRedo}<button class="format-json-button" id="questionsFormatJsonButton">Format JSON</button></div>`
     expect(page).toContain('.format-json-button { margin-left: auto;')
     expect(page).toContain('.format-json-button + .format-json-button { margin-left: 0; }')

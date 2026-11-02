@@ -11,13 +11,13 @@ function removeFakeState() {
   Reflect.deleteProperty(globalThis, 'confirm')
   globalThis.fetch = realFetch
   pageState.isDirty = false
-  pageState.pinnedId = null
+  pageState.pinnedIndex = null
   pageState.versions = []
   pageState.index = 0
 }
 
 function buildRanVersion() {
-  return { id: 4, time: 't', state: {}, questions: {}, calls: 2, outputs: [{}, {}], note: 'n' }
+  return { time: 't', state: {}, questions: {}, calls: 2, outputs: [{}, {}], note: 'n' }
 }
 
 function installFakeConfirm(answer: boolean) {
@@ -56,7 +56,7 @@ async function validateConfirmedResetPostsTheIdStoresTheClearedVersionAndMarksTh
   // the page draw after the state change needs a real document, so it throws here
   await expect(resetVersionRuns()).rejects.toThrow()
   expect(seenPath).toBe('/reset-runs')
-  expect(JSON.parse(seenBody)).toEqual({ id: 4 })
+  expect(JSON.parse(seenBody)).toEqual({ index: 0 })
   expect(pageState.versions[0].outputs).toEqual([])
   expect(pageState.versions[0].calls).toBe(0)
   expect(pageState.versions[0].note).toBe('n')
@@ -72,12 +72,12 @@ async function validateResetUnpinsOnlyThePinnedVersion() {
   }
   globalThis.fetch = stubFetch as unknown as typeof fetch
   pageState.versions = [buildRanVersion()] as never
-  pageState.pinnedId = 9
+  pageState.pinnedIndex = 9
   await expect(resetVersionRuns()).rejects.toThrow()
-  expect(pageState.pinnedId).toBe(9)
-  pageState.pinnedId = 4
+  expect(pageState.pinnedIndex).toBe(9)
+  pageState.pinnedIndex = 0
   await expect(resetVersionRuns()).rejects.toThrow()
-  expect(pageState.pinnedId).toBeNull()
+  expect(pageState.pinnedIndex).toBeNull()
 }
 
 test('test_reset_unpins_only_the_pinned_version', validateResetUnpinsOnlyThePinnedVersion)

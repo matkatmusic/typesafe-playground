@@ -39,7 +39,8 @@ export async function buildPage(historyPath: string): Promise<string> {
   const hasEnvKey = (Bun.env.TYPESAFE_API_KEY ?? '').trim() !== '';
   // const draft = await readDraft(historyPath);
   // const safeJson = JSON.stringify({ versions, draft, hasEnvKey }).replaceAll('<', '\\u003c');
-  const safeJson = JSON.stringify({ versions, hasEnvKey }).replaceAll('<', '\\u003c');
+  // const safeJson = JSON.stringify({ versions, hasEnvKey }).replaceAll('<', '\\u003c');
+  const safeJson = JSON.stringify({ versions, historyPath, hasEnvKey }).replaceAll('<', '\\u003c');
   function getCss() {
     return css;
   }

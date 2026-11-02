@@ -6,7 +6,7 @@ import { replaceVersionReferences } from './reportReferences';
 const LONG_TEXT = 'a value that is longer than forty characters in total';
 
 function buildVersion(id: number, extra: Partial<Version>): Version {
-  return { id, time: `t${id}`, state: {}, questions: {}, calls: 0, outputs: [], ...extra };
+  return { time: `t${id}`, state: {}, questions: {}, calls: 0, outputs: [], ...extra };
 }
 
 function validateShortValueIsReplaced() {

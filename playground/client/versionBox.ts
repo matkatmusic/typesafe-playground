@@ -1,7 +1,7 @@
 import type { ViewUpdate } from '@codemirror/view';
 import { renderCostAndTokens } from './costTokens';
 import { getElement } from './dom';
-import { computePositionCount, isEditorTextEdited } from './editedPosition';
+import { computePositionCount, isEditorTextEdited, isEditorTextOverwritingShownVersion } from './editedPosition';
 // import { FILL_ANNOTATION, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson, replaceEditorText } from './editors';
 import { FILL_ANNOTATION, fillEditorText, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson } from './editors';
 import { renderGraphs } from './graphs';
@@ -24,10 +24,14 @@ export function refreshVersionBox(): void {
   const isStateEdited = isJsonTextEdited(stateText, shownVersion.state);
   const isQuestionsEdited = isJsonTextEdited(questionsText, shownVersion.questions);
   const isEdited = isStateEdited || isQuestionsEdited;
-  const version = isEdited ? createEditedVersion(shownVersion, versions.length) : shownVersion;
-  const shownNumber = isEdited ? versions.length + 1 : index + 1;
+  // const version = isEdited ? createEditedVersion(shownVersion, versions.length) : shownVersion;
+  const version = isEdited ? createEditedVersion(shownVersion) : shownVersion;
+  const isOverwriting = isEditorTextOverwritingShownVersion();
+  // const shownNumber = isEdited ? versions.length + 1 : index + 1;
+  const shownNumber = isEdited && !isOverwriting ? versions.length + 1 : index + 1;
   // const versionCount = isEdited ? versions.length + 1 : versions.length;
-  const versionCount = computePositionCount();
+  // const versionCount = computePositionCount();
+  const versionCount = isOverwriting ? versions.length : computePositionCount();
   applyNoteBox(version);
   getElement('versionLabel').textContent = formatVersionLabel(shownNumber, versionCount, version.time, version.calls);
 }

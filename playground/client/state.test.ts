@@ -6,12 +6,12 @@ function validatePageStateStartsClean() {
     expect(pageState.fileHandle).toBeNull()
     expect(pageState.versions).toEqual([])
     expect(pageState.index).toBe(0)
-    expect(pageState.pinnedId).toBeNull()
+    expect(pageState.pinnedIndex).toBeNull()
 }
 
 function validateShownVersionFollowsTheIndex() {
-    const first = { id: 1, time: 'a', state: {}, questions: {}, calls: 0, outputs: [] }
-    const second = { id: 2, time: 'b', state: {}, questions: {}, calls: 0, outputs: [] }
+    const first = { time: 'a', state: {}, questions: {}, calls: 0, outputs: [] }
+    const second = { time: 'b', state: {}, questions: {}, calls: 0, outputs: [] }
     pageState.versions = [first, second]
     pageState.index = 1
     expect(getShownVersion()).toBe(second)

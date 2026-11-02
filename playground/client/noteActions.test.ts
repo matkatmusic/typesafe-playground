@@ -28,8 +28,8 @@ function installFakeDom() {
 
 async function validateSaveNotePostsTheNoteAndMarksTheChange() {
   const elements = installFakeDom()
-  const version = { id: 3, time: 't', state: {}, questions: {}, calls: 1, outputs: [] }
-  pageState.versions = [{ ...version, id: 1 }, version]
+  const version = { time: 't', state: {}, questions: {}, calls: 1, outputs: [] }
+  pageState.versions = [{ ...version }, version]
   pageState.index = 1
   let seenPath = ''
   let seenBody = ''
@@ -41,7 +41,7 @@ async function validateSaveNotePostsTheNoteAndMarksTheChange() {
   globalThis.fetch = stubFetch as typeof fetch
   await saveNote()
   expect(seenPath).toBe('/note')
-  expect(JSON.parse(seenBody)).toEqual({ id: 3, note: 'my note' })
+  expect(JSON.parse(seenBody)).toEqual({ index: 1, note: 'my note' })
   expect((version as { note?: string }).note).toBe('my note')
   expect(pageState.isDirty).toBe(true)
   expect(elements.lastEditedLabel.textContent).toContain('last edited: ')
@@ -49,7 +49,7 @@ async function validateSaveNotePostsTheNoteAndMarksTheChange() {
 
 async function validateSaveNoteLeavesThePageCleanWhenTheServerRefuses() {
   installFakeDom()
-  pageState.versions = [{ id: 1, time: 't', state: {}, questions: {}, calls: 0, outputs: [] }]
+  pageState.versions = [{ time: 't', state: {}, questions: {}, calls: 0, outputs: [] }]
   async function stubFetch() {
     return new Response('no', { status: 400 })
   }

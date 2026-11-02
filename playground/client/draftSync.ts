@@ -1,6 +1,7 @@
 // import { StateEffect } from '@codemirror/state';
 // import { EditorView, type ViewUpdate } from '@codemirror/view';
 import type { Draft } from '../playgroundDraftRequests';
+import { applyBatchMode } from './batchControls';
 import { isEditorTextEdited } from './editedPosition';
 // import { getQuestionsEditor, getStateEditor, replaceEditorText } from './editors';
 import { fillEditorText, getQuestionsEditor, getStateEditor } from './editors';
@@ -16,6 +17,7 @@ const DRAFT_INTERVAL_MS = 2000;
 let sessionId = '';
 let lastSentState = '';
 let lastSentQuestions = '';
+let lastSentBatch = false;
 let pendingDraftWrite: Promise<unknown> = Promise.resolve();
 
 // export function sendDraft(): Promise<unknown> {
@@ -28,19 +30,24 @@ let pendingDraftWrite: Promise<unknown> = Promise.resolve();
 // }
 function readDraftTexts(): Draft {
   const draft = pageState.editedDraft;
+  const isBatch = pageState.isBatchOn;
   const isDraftHidden = draft !== null && !isEditorTextEdited();
   if (isDraftHidden)
-    return { state: draft.state, questions: draft.questions };
-  return { state: getStateEditor().state.doc.toString(), questions: getQuestionsEditor().state.doc.toString() };
+    // return { state: draft.state, questions: draft.questions };
+    return { state: draft.state, questions: draft.questions, isBatch };
+  // return { state: getStateEditor().state.doc.toString(), questions: getQuestionsEditor().state.doc.toString() };
+  return { state: getStateEditor().state.doc.toString(), questions: getQuestionsEditor().state.doc.toString(), isBatch };
 }
 
 export function sendDraft(): Promise<unknown> {
   // const state = getStateEditor().state.doc.toString();
   // const questions = getQuestionsEditor().state.doc.toString();
-  const { state, questions } = readDraftTexts();
+  const { state, questions, isBatch } = readDraftTexts();
   lastSentState = state;
   lastSentQuestions = questions;
-  const body = { id: sessionId, state, questions };
+  lastSentBatch = isBatch;
+  // const body = { id: sessionId, state, questions };
+  const body = { id: sessionId, state, questions, isBatch };
   function sendBody(): Promise<Response> {
     return sendJson('/draft', body);
   }
@@ -51,10 +58,11 @@ export function sendDraft(): Promise<unknown> {
 export function syncDraftOnTick(): void {
   // const isStateChanged = getStateEditor().state.doc.toString() !== lastSentState;
   // const isQuestionsChanged = getQuestionsEditor().state.doc.toString() !== lastSentQuestions;
-  const { state, questions } = readDraftTexts();
+  const { state, questions, isBatch } = readDraftTexts();
   const isStateChanged = state !== lastSentState;
   const isQuestionsChanged = questions !== lastSentQuestions;
-  const isChanged = isStateChanged || isQuestionsChanged;
+  const isBatchChanged = isBatch !== lastSentBatch;
+  const isChanged = isStateChanged || isQuestionsChanged || isBatchChanged;
   if (!isChanged)
     return;
   void sendDraft();
@@ -93,7 +101,11 @@ export function applyDraft(draft: Draft | null): void {
   if (isQuestionsDifferent)
     // replaceEditorText(questionsEditor, draft.questions);
     fillEditorText(questionsEditor, draft.questions);
-  const isRestored = isStateDifferent || isQuestionsDifferent;
+  const isDraftBatch = draft.isBatch === true;
+  const isBatchDifferent = isDraftBatch !== pageState.isBatchOn;
+  if (isBatchDifferent)
+    applyBatchMode(isDraftBatch);
+  const isRestored = isStateDifferent || isQuestionsDifferent || isBatchDifferent;
   if (!isRestored)
     return;
   refreshVersionBox();
@@ -113,5 +125,6 @@ export async function launchDraftSession(): Promise<void> {
     applyDraft(await fetchDraft(storedId));
   lastSentState = getStateEditor().state.doc.toString();
   lastSentQuestions = getQuestionsEditor().state.doc.toString();
+  lastSentBatch = pageState.isBatchOn;
   setInterval(syncDraftOnTick, DRAFT_INTERVAL_MS);
 }

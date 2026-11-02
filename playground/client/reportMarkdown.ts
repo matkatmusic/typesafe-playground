@@ -69,7 +69,8 @@ function listVersionBlocks(versions: Version[], index: number): string[] {
   const hasReferences = textBlocks.includes('### References');
   const placeholderBlocks = hasReferences ? [PLACEHOLDER_NOTE_TEXT] : [];
   // return [`## Version ${version.id} (${version.time})`, ...listChangeBlocks(version, previous), ...textBlocks];
-  return [`## Version ${version.id} (${version.time})`, ...placeholderBlocks, ...listChangeBlocks(version, previous), ...textBlocks];
+  // return [`## Version ${version.id} (${version.time})`, ...placeholderBlocks, ...listChangeBlocks(version, previous), ...textBlocks];
+  return [`## Version ${index + 1} (${version.time})`, ...placeholderBlocks, ...listChangeBlocks(version, previous), ...textBlocks];
 }
 
 export function buildReportMarkdown(versions: Version[]): string {

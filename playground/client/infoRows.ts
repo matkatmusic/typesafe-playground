@@ -2,7 +2,7 @@ import type { Answer } from './graphTypes';
 import type { BarInfoRequest, InfoPart, InfoRow } from './infoTypes';
 import { computeSummary, listValues } from './graphValues';
 import { readConfidence, readDescription, readTopKey } from './infoValues';
-import { getShownVersion } from './state';
+import { getShownVersion, pageState } from './state';
 import { buildTextFormatter } from './winnersDom';
 
 const LABEL = 'info-label';
@@ -80,7 +80,10 @@ export function buildBarInfoRows(request: BarInfoRequest): InfoRow[] {
   if (isPinnedRowShown) {
     const pinnedStat = computeSummary(pinned.values);
     const pinnedParts = listRangeParts(formatThreeDecimals(pinnedStat.low), formatThreeDecimals(pinnedStat.high), formatThreeDecimals(pinnedStat.average));
-    rows.push({ label: `Pinned v${pinned.id}:`, parts: pinnedParts });
+    if (pageState.pinnedIndex === null)
+      throw new Error('a pinned row needs a pinned version');
+    // rows.push({ label: `Pinned v${pinned.id}:`, parts: pinnedParts });
+    rows.push({ label: `Pinned v${pageState.pinnedIndex + 1}:`, parts: pinnedParts });
   }
   rows.push({ label: 'Message:', parts: [[messageText, MESSAGE]] });
   return rows;

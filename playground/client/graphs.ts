@@ -51,7 +51,7 @@ export function renderGraphs(version: Version, container: HTMLElement, onRendere
     blocks.push(graphBlock);
   }
   const charts: ChartLayout[] = [];
-  const pinnedVersion = findPinned(pageState.versions, pageState.pinnedId);
+  const pinnedVersion = findPinned(pageState.versions, pageState.pinnedIndex);
   for (let i = 0; i < names.length; i++) {
     const isDataPresent = isRunDataPresent(version, names[i]);
     const isCollapsed = graphState.collapsedByName[names[i]] === true;

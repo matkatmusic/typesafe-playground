@@ -1,7 +1,8 @@
 import { test, expect } from 'bun:test'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { executeRunRequest, isCallsInRange, MISSING_KEY_MESSAGE, selectApiKey, type CreateRunClient } from './playgroundRequests'
+import { NOT_RUN_TIME } from './notRunTime'
+import { addRunToHistory, executeRunRequest, isCallsInRange, MISSING_KEY_MESSAGE, selectApiKey, type CreateRunClient } from './playgroundRequests'
 import { initHistory, loadHistory, type RunOutput } from './playgroundHistory'
 import type { RunResult } from './client/types'
 import { hideKeysInMessage } from './serverErrors'
@@ -29,7 +30,7 @@ function makeStubFactory(calls: Call[]): CreateRunClient {
 }
 
 function makeRunRequest(body: unknown): Request {
-    return new Request('http://127.0.0.1:4399/run', { method: 'POST', body: JSON.stringify({ id: 1, state: {}, questions: HARD_CODED_QUESTIONS, ...(body as object) }) })
+    return new Request('http://127.0.0.1:4399/run', { method: 'POST', body: JSON.stringify({ index: 0, state: {}, questions: HARD_CODED_QUESTIONS, ...(body as object) }) })
 }
 
 function validateTypedKeyBeatsEnvKey() {
@@ -84,15 +85,15 @@ async function validateBadCallsReturn400WithoutCallingTheClient() {
     expect(calls.length).toBe(0)
 }
 
-async function validateBadIdReturns400WithoutCallingTheClient() {
+async function validateBadIndexReturns400WithoutCallingTheClient() {
     Bun.env.TYPESAFE_API_KEY = 'env-key'
     const calls: Call[] = []
     const historyPath = await buildTempHistoryPath()
     const factory = makeStubFactory(calls)
-    for (const badId of [undefined, 99, '1', 1.5, null]) {
-        const response = await executeRunRequest(makeRunRequest({ calls: 1, id: badId }), factory, historyPath)
+    for (const badIndex of [undefined, 99, -1, '0', 1.5, null]) {
+        const response = await executeRunRequest(makeRunRequest({ calls: 1, index: badIndex }), factory, historyPath)
         expect(response.status).toBe(400)
-        expect(await response.text()).toBe('id must be the id of an existing version')
+        expect(await response.text()).toBe('index must be the integer index of an existing version')
     }
     expect(calls.length).toBe(0)
     expect((await loadHistory(historyPath)).length).toBe(1)
@@ -115,7 +116,7 @@ async function validateRunAppendsToTheLastVersionAndRespondsWithOutputsAndVersio
     const factory = makeStubFactory([])
     const first = (await (await executeRunRequest(makeRunRequest({ calls: 2, state: HARD_CODED_STATE }), factory, historyPath)).json()) as RunResult
     expect(first.outputs).toEqual([OUTPUT, OUTPUT])
-    expect(first.version.id).toBe(1)
+    expect(first.index).toBe(0)
     expect(first.version.calls).toBe(2)
     const second = (await (await executeRunRequest(makeRunRequest({ calls: 3, state: HARD_CODED_STATE }), factory, historyPath)).json()) as RunResult
     expect(second.outputs.length).toBe(3)
@@ -138,7 +139,35 @@ test('test_run_uses_typed_key_over_env_key', validateTypedKeyIsUsedOverEnvKey)
 test('test_run_uses_env_key_when_nothing_is_typed', validateEnvKeyIsUsedWhenNothingIsTyped)
 test('test_run_with_no_key_returns_400_and_makes_no_call', validateNoKeyReturns400WithoutCallingTheClient)
 test('test_run_with_bad_calls_returns_400_and_makes_no_call', validateBadCallsReturn400WithoutCallingTheClient)
-test('test_run_with_a_bad_id_returns_400_and_makes_no_call', validateBadIdReturns400WithoutCallingTheClient)
+test('test_run_with_a_bad_index_returns_400_and_makes_no_call', validateBadIndexReturns400WithoutCallingTheClient)
 test('test_run_sends_the_typed_state_and_questions_once_per_call', validateClientReceivesTheTypedStateAndQuestionsOncePerCall)
 test('test_run_appends_to_the_last_version_and_responds_with_outputs_and_version', validateRunAppendsToTheLastVersionAndRespondsWithOutputsAndVersion)
 test('test_run_remembers_typed_key_for_error_scrubbing', validateTypedKeyIsHiddenInLaterErrorMessages)
+
+function buildShownWithTime(time: string) {
+    return { time, state: HARD_CODED_STATE, questions: HARD_CODED_QUESTIONS, calls: 0, outputs: [] as RunOutput[] }
+}
+
+function validateKeepStampsARealTimeOnANotRunVersion() {
+    const shown = buildShownWithTime(NOT_RUN_TIME)
+    addRunToHistory([shown], shown, [OUTPUT], HARD_CODED_STATE, HARD_CODED_QUESTIONS)
+    expect(shown.time).not.toBe(NOT_RUN_TIME)
+    expect(Number.isNaN(new Date(shown.time).getTime())).toBe(false)
+}
+
+function validateOverwriteStampsARealTimeOnANotRunVersion() {
+    const shown = buildShownWithTime(NOT_RUN_TIME)
+    addRunToHistory([shown], shown, [OUTPUT], { message: { text: 'edited' } }, HARD_CODED_QUESTIONS)
+    expect(shown.state).toEqual({ message: { text: 'edited' } })
+    expect(Number.isNaN(new Date(shown.time).getTime())).toBe(false)
+}
+
+function validateARealTimeIsKeptOnLaterRuns() {
+    const shown = buildShownWithTime('2026-01-02T03:04:05.000Z')
+    addRunToHistory([shown], shown, [OUTPUT], HARD_CODED_STATE, HARD_CODED_QUESTIONS)
+    expect(shown.time).toBe('2026-01-02T03:04:05.000Z')
+}
+
+test('test_keep_stamps_a_real_time_on_a_not_run_version', validateKeepStampsARealTimeOnANotRunVersion)
+test('test_overwrite_stamps_a_real_time_on_a_not_run_version', validateOverwriteStampsARealTimeOnANotRunVersion)
+test('test_a_real_time_is_kept_on_later_runs', validateARealTimeIsKeptOnLaterRuns)

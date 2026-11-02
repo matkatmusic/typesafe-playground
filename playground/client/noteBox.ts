@@ -1,5 +1,6 @@
 import type { Version } from '../playgroundHistory';
 import { getElement } from './dom';
+import { isBatchLocked } from './state';
 
 export function computeNoteValue(isRunCompleted: boolean, note: string | undefined): string {
   return isRunCompleted ? note || '' : '';
@@ -20,6 +21,7 @@ export function applyNoteBox(version: Version): void {
   const isRunCompleted = version.outputs.length > 0;
   const noteText = getNoteText();
   noteText.value = computeNoteValue(isRunCompleted, version.note);
-  noteText.disabled = !isRunCompleted;
+  // noteText.disabled = !isRunCompleted;
+  noteText.disabled = !isRunCompleted || isBatchLocked();
   noteText.placeholder = computeNotePlaceholder(isRunCompleted);
 }

@@ -2,6 +2,7 @@ import { test, expect, afterEach } from 'bun:test';
 import { json } from '@codemirror/lang-json';
 import { EditorState } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
+import { pageState } from './state';
 import { appendReferenceText, buildBacktickHoverSource, findReferenceTooltipText } from './backtickTooltip';
 
 interface FakeNode {
@@ -106,6 +107,28 @@ function validateHoverOnArrayIndexNameGivesTooltipOnTheWholeName() {
   expect(tooltip?.end).toBe(nameFrom + 'userMessageArray[1]'.length);
 }
 
+function validateBatchOnHoverShowsTheFixedTextForFoundAndUnknownNames() {
+  installFakeDocument();
+  pageState.isBatchOn = true;
+  const foundFrom = QUESTIONS_TEXT.indexOf('message.text');
+  const unknownFrom = QUESTIONS_TEXT.indexOf('nope');
+  const source = createSource('[{"message": {"text": "Hello"}}]', QUESTIONS_TEXT);
+  for (const from of [foundFrom, unknownFrom]) {
+    const tooltip = source(createView(QUESTIONS_TEXT), from + 1);
+    const dom = tooltip?.create({} as EditorView).dom as unknown as FakeNode;
+    expect(dom.textContent).toBe('hover text replacement not active in batch mode');
+    expect(tooltip?.pos).toBe(from);
+  }
+  expect(source(createView(QUESTIONS_TEXT), QUESTIONS_TEXT.indexOf('Plain') + 2)).toBe(null);
+}
+
+function validateBatchOnLeavesTheSavedVersionTooltipsAlone() {
+  pageState.isBatchOn = true;
+  const nodes = runAppendReferenceText('`count`', { count: 3 }, {});
+  nodes[1].listeners.mouseenter();
+  expect(bodyChildren[0].textContent).toBe("'3'");
+}
+
 function validateFoundReferenceBecomesASpanWithoutATitle() {
   const nodes = runAppendReferenceText('`count`', { count: 3 }, {});
   expect(nodes[1].className).toBe('backtick-ref');
@@ -138,6 +161,11 @@ function validateMouseEnterAddsOneTooltipAndMouseLeaveRemovesIt() {
 }
 
 afterEach(removeFakeDocument);
+afterEach(() => {
+  pageState.isBatchOn = false;
+});
+test('test_batch_on_hover_shows_the_fixed_text_for_found_and_unknown_names', validateBatchOnHoverShowsTheFixedTextForFoundAndUnknownNames);
+test('test_batch_on_leaves_the_saved_version_tooltips_alone', validateBatchOnLeavesTheSavedVersionTooltipsAlone);
 test('test_state_wins_over_questions_and_array_index_and_unknown_name', validateStateWinsOverQuestions);
 test('test_hover_inside_name_gives_tooltip_on_the_name', validateHoverInsideNameGivesTooltipOnTheName);
 test('test_hover_outside_backticks_gives_null', validateHoverOutsideBackticksGivesNull);

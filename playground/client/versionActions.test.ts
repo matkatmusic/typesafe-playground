@@ -93,13 +93,13 @@ async function validateBrokenOpenPickerStillThrows() {
 
 async function validateNewDocumentClearsThePin() {
     const realFetch = globalThis.fetch
-    globalThis.fetch = (async () => Response.json({ versions: [{ id: 1 }] })) as unknown as typeof fetch
+    globalThis.fetch = (async () => Response.json({ versions: [{}] })) as unknown as typeof fetch
     pageState.isDirty = false
-    pageState.pinnedId = 3
+    pageState.pinnedIndex = 3
     pageState.pendingNotes = { state: 'waiting', questions: 'waiting too' }
     try {
         await expect(createNewDocument()).rejects.toThrow()
-        expect(pageState.pinnedId).toBeNull()
+        expect(pageState.pinnedIndex).toBeNull()
         expect(pageState.pendingNotes).toEqual({ state: null, questions: null })
     }
     finally {

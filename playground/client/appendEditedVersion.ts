@@ -1,4 +1,5 @@
 import type { Version } from '../playgroundHistory';
+import { computeVersionStep } from '../playgroundVersionStep';
 import { renderCostAndTokens } from './costTokens';
 import { getElement } from './dom';
 import { getQuestionsEditor, getStateEditor, renderResultJson } from './editors';
@@ -34,15 +35,29 @@ export async function appendEditedVersion(): Promise<boolean> {
     getElement('errorLine').textContent = questionsResult.errorMessage;
     return false;
   }
-  const newVersion: Version = { id: pageState.versions.length + 1, time: NOT_RUN_TIME, state: stateResult.value, questions: questionsResult.value, calls: 0, outputs: [] };
-  const response = await sendJson('/open', { versions: [...pageState.versions, newVersion] });
+  const step = computeVersionStep(shownVersion, stateResult.value, questionsResult.value);
+  if (step === 'keep')
+    return true;
+  const isOverwriting = step === 'overwrite';
+  // const newVersion: Version = { id: pageState.versions.length + 1, time: NOT_RUN_TIME, state: stateResult.value, questions: questionsResult.value, calls: 0, outputs: [] };
+  const newVersion: Version = { time: NOT_RUN_TIME, state: stateResult.value, questions: questionsResult.value, calls: 0, outputs: [] };
+  const overwrittenVersion: Version = { ...shownVersion, state: stateResult.value, questions: questionsResult.value };
+  const sentVersions = [...pageState.versions];
+  if (isOverwriting)
+    sentVersions[pageState.index] = overwrittenVersion;
+  else
+    sentVersions.push(newVersion);
+  const response = await sendJson('/open', { versions: sentVersions });
   const opened: { versions: Version[] } = await response.json();
   pageState.versions = opened.versions;
-  pageState.index = opened.versions.length - 1;
+  if (!isOverwriting)
+    pageState.index = opened.versions.length - 1;
   pageState.editedDraft = null;
   const appendedVersion = getShownVersion();
-  await saveInheritedNote('state', shownVersion.stateNote, !isStateEdited, appendedVersion);
-  await saveInheritedNote('questions', shownVersion.questionsNote, !isQuestionsEdited, appendedVersion);
+  const isStateInherited = !isOverwriting && !isStateEdited;
+  const isQuestionsInherited = !isOverwriting && !isQuestionsEdited;
+  await saveInheritedNote('state', shownVersion.stateNote, isStateInherited, appendedVersion);
+  await saveInheritedNote('questions', shownVersion.questionsNote, isQuestionsInherited, appendedVersion);
   applyNoteBox(appendedVersion);
   refreshVersionBox();
   renderCostAndTokens(appendedVersion);

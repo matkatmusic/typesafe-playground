@@ -65,8 +65,10 @@ function validateScoreTopRunsUseTheProbabilities() {
 }
 
 function validatePinnedRowHoldsTheMinMaxAndAverageOfThePin() {
-  const request = { question, answers, key: 'a', keys: ['a', 'b'], callIndex: 1, pinned: { id: 4, values: [0.1, 0.3] } };
+  const request = { question, answers, key: 'a', keys: ['a', 'b'], callIndex: 1, pinned: { values: [0.1, 0.3] } };
+  pageState.pinnedIndex = 3;
   const rows = buildBarInfoRows(request);
+  pageState.pinnedIndex = null;
   expect(rows.length).toBe(6);
   expect(rows[4].label).toBe('Pinned v4:');
   expect(rows[4].parts[1][0]).toBe('0.100');
@@ -76,13 +78,13 @@ function validatePinnedRowHoldsTheMinMaxAndAverageOfThePin() {
 }
 
 function validateBlankRowsKeepNoPinnedRow() {
-  const rows = buildBarInfoRows({ question, answers, key: '', keys: ['a', 'b'], callIndex: null, pinned: { id: 4, values: [] } });
+  const rows = buildBarInfoRows({ question, answers, key: '', keys: ['a', 'b'], callIndex: null, pinned: { values: [] } });
   expect(rows.length).toBe(4);
 }
 
 function validateMessageRowReplacesReferencesOnlyWhenTicked() {
   const referenceQuestion: Question = { type: 'choice', criteria: { a: '`message.text` here', b: 'second' } };
-  const version = { id: 1, time: '', state: { message: { text: 'Hi' } }, questions: {}, calls: 0, outputs: [] };
+  const version = { time: '', state: { message: { text: 'Hi' } }, questions: {}, calls: 0, outputs: [] };
   pageState.versions = [version];
   pageState.index = 0;
   const request = { question: referenceQuestion, answers, key: 'a', keys: ['a', 'b'], callIndex: 1, pinned: null };

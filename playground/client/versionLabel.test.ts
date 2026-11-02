@@ -3,7 +3,7 @@ import type { Version } from '../playgroundHistory'
 import { computeWrappedIndex, createEditedVersion, formatVersionLabel, isJsonTextEdited, NOT_RUN_TIME } from './versionLabel'
 
 const ISO_TIME = '2026-03-04T05:06:07.000Z'
-const version: Version ={ id: 2, time: 'now', state: { a: 1 }, questions: {}, calls: 1, outputs: [] }
+const version: Version ={ time: 'now', state: { a: 1 }, questions: {}, calls: 1, outputs: [] }
 
 function validateEditDetectionComparesParsedJson() {
     expect(isJsonTextEdited(JSON.stringify(version.state, null, 2), version.state)).toBe(false)
@@ -14,8 +14,7 @@ function validateEditDetectionComparesParsedJson() {
 }
 
 function validateEditedVersionHasNoRun() {
-    const edited = createEditedVersion({ ...version, outputs: [{} as never] }, 5)
-    expect(edited.id).toBe(6)
+    const edited = createEditedVersion({ ...version, outputs: [{} as never] })
     expect(edited.time).toBe(NOT_RUN_TIME)
     expect(edited.outputs).toEqual([])
     expect(edited.calls).toBe(0)

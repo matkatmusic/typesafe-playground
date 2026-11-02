@@ -6,6 +6,7 @@ import * as noteBox from './noteBox'
 import * as pinButtons from './pinButtons'
 import * as winnersDom from './winnersDom'
 import { pageState } from './state'
+import { HARD_CODED_QUESTIONS, HARD_CODED_STATE } from '../typeSafeQuery'
 import * as versionArrows from './versionArrows'
 import { computeArrowStep, isTypingTarget, moveByVersions, renderLastVersion, updateOnEditorChange } from './versionBox'
 
@@ -22,7 +23,7 @@ class StubElement {
 
 function installFakeDom() {
     const elements: Record<string, { textContent: string }> = {
-        versionLabel: { textContent: '' }, costLabel: { textContent: '' }, tokensLabel: { textContent: '' }, lastEditedLabel: { textContent: '' },
+        versionLabel: { textContent: '' }, costLabel: { textContent: '' }, totalCostLabel: { textContent: '' }, tokensLabel: { textContent: '' }, lastEditedLabel: { textContent: '' },
         graphContainerBox: { textContent: '' }, winnerBox: { textContent: '' },
     }
     spyOn(versionArrows, 'updateVersionArrows').mockImplementation(() => {})
@@ -52,6 +53,7 @@ function removeFakeState() {
     pageState.versions = []
     pageState.index = 0
     pageState.isDirty = false
+    pageState.editedDraft = null
 }
 
 afterEach(removeFakeState)
@@ -136,6 +138,84 @@ function validateMovingWrapsAndRendersThatVersion() {
     expect(pageState.index).toBe(1)
 }
 
+function makeDefaultVersion() {
+    return { time: ISO_TIME, state: HARD_CODED_STATE, questions: HARD_CODED_QUESTIONS, calls: 0, outputs: [] }
+}
+
+function validateEditOfAnUnrunDefaultVersionKeepsTheLabelAtOneOfOne() {
+    const elements = installFakeDom()
+    pageState.versions = [makeDefaultVersion()]
+    spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
+    installQuestionsStub(JSON.stringify(HARD_CODED_QUESTIONS))
+    updateOnEditorChange({ docChanged: true, transactions: [] } as never)
+    expect(elements.versionLabel.textContent).toBe('version 1 of 1 · not run yet · 0 calls')
+}
+
+function validateInvalidJsonKeepsTheEditedLabel() {
+    const elements = installFakeDom()
+    pageState.versions = [makeDefaultVersion()]
+    spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":'))
+    installQuestionsStub(JSON.stringify(HARD_CODED_QUESTIONS))
+    updateOnEditorChange({ docChanged: true, transactions: [] } as never)
+    expect(elements.versionLabel.textContent).toBe('version 2 of 2 · not run yet · 0 calls')
+}
+
+function validateMovingAwayAndBackWithTwoVersionsKeepsTheOverwritingText() {
+    const elements = installFakeDom()
+    let stateText = '{"a":1}'
+    const filledTexts: string[] = []
+    function recordState(value: unknown) {
+        stateText = JSON.stringify(value)
+    }
+    function fillText(_editor: EditorView, text: string) {
+        filledTexts.push(text)
+    }
+    spyOn(editors, 'renderStateJson').mockImplementation(recordState)
+    spyOn(editors, 'fillEditorText').mockImplementation(fillText)
+    spyOn(editors, 'renderResultJson').mockImplementation(() => {})
+    spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
+    spyOn(winnersDom, 'renderWinners').mockImplementation(() => {})
+    spyOn(editors, 'getStateEditor').mockReturnValue({ state: { doc: { toString: () => stateText } } } as unknown as EditorView)
+    installQuestionsStub(JSON.stringify(HARD_CODED_QUESTIONS))
+    pageState.versions = [makeDefaultVersion(), { ...makeDefaultVersion(), state: { b: 2 } }]
+    pageState.index = 0
+    updateOnEditorChange({ docChanged: true, transactions: [] } as never)
+    expect(elements.versionLabel.textContent).toBe('version 1 of 2 · not run yet · 0 calls')
+    moveByVersions(-1)
+    expect(pageState.index).toBe(1)
+    expect(stateText).toBe('{"b":2}')
+    moveByVersions(1)
+    expect(pageState.index).toBe(0)
+    expect(filledTexts[0]).toBe('{"a":1}')
+}
+
+function validateEveryRenderOfAVersionShowsTheTotalCostOfAllVersions() {
+    // Step: the page holds two versions, each with 1000000 input tokens (page load, New, Open, Reset, Delete and reset-runs all end in a render).
+    const elements = installFakeDom()
+    spyOn(editors, 'renderStateJson').mockImplementation(() => {})
+    spyOn(editors, 'renderResultJson').mockImplementation(() => {})
+    spyOn(graphs, 'renderGraphs').mockImplementation(() => {})
+    spyOn(winnersDom, 'renderWinners').mockImplementation(() => {})
+    spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
+    installQuestionsStub('{}')
+    const outputs = [{ usage: { input_tokens: 1000000, output_tokens: 1 } }]
+    pageState.versions = [{ ...makeVersion(1, { a: 1 }), outputs }, { ...makeVersion(2, { b: 2 }), outputs }] as never
+    renderLastVersion()
+    expect(elements.totalCostLabel.textContent).toBe('total cost: $0.084000')
+    expect(elements.costLabel.textContent).toBe('Cost: $0.042000')
+    // Step: one version is removed or its runs are cleared, then the next render shows the new total.
+    pageState.versions = [{ ...makeVersion(1, { a: 1 }), outputs }] as never
+    renderLastVersion()
+    expect(elements.totalCostLabel.textContent).toBe('total cost: $0.042000')
+    pageState.versions = [makeVersion(1, { a: 1 })] as never
+    renderLastVersion()
+    expect(elements.totalCostLabel.textContent).toBe('total cost: $0.000000')
+}
+
+test('test_every_render_of_a_version_shows_the_total_cost_of_all_versions', validateEveryRenderOfAVersionShowsTheTotalCostOfAllVersions)
+test('test_edit_of_an_unrun_default_version_keeps_the_label_at_one_of_one', validateEditOfAnUnrunDefaultVersionKeepsTheLabelAtOneOfOne)
+test('test_invalid_json_keeps_the_edited_label', validateInvalidJsonKeepsTheEditedLabel)
+test('test_moving_away_and_back_with_two_versions_keeps_the_overwriting_text', validateMovingAwayAndBackWithTwoVersionsKeepsTheOverwritingText)
 test('test_arrow_keys_map_to_steps', validateArrowKeysMapToSteps)
 test('test_typing_targets_are_skipped', validateTypingTargetsAreSkipped)
 test('test_edit_marks_dirty_but_fill_does_not', validateEditMarksDirtyButFillDoesNot)

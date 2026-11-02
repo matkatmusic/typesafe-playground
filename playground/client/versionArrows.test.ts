@@ -12,8 +12,9 @@ const ISO_TIME = '2026-03-04T05:06:07.000Z'
 
 function installFakeDom() {
     const elements: Record<string, { textContent: string, disabled?: boolean }> = {
-        versionLabel: { textContent: '' }, costLabel: { textContent: '' }, tokensLabel: { textContent: '' }, graphContainerBox: { textContent: '' }, winnerBox: { textContent: '' },
+        versionLabel: { textContent: '' }, costLabel: { textContent: '' }, totalCostLabel: { textContent: '' }, tokensLabel: { textContent: '' }, graphContainerBox: { textContent: '' }, winnerBox: { textContent: '' },
         prevVersionButton: { textContent: '', disabled: false }, nextVersionButton: { textContent: '', disabled: false },
+        deleteVersionButton: { textContent: '', disabled: false },
         pinButton: { textContent: '', disabled: false }, unpinButton: { textContent: '', disabled: false },
     }
     Object.assign(globalThis, { document: { getElementById: (id: string) => elements[id] ?? null }, HTMLButtonElement: Object, Element: Object })
@@ -25,7 +26,7 @@ function buildStubEditor(text: string) {
 }
 
 function makeVersion(id: number) {
-    return { id: id, time: ISO_TIME, state: {}, questions: {}, calls: id, outputs: [] }
+    return { time: ISO_TIME, state: {}, questions: {}, calls: id, outputs: [] }
 }
 
 function installRenderStubs() {
@@ -66,6 +67,31 @@ function validateOneVersionDisablesBothButtonsAndTwoEnablesThem() {
     expect(elements.nextVersionButton.disabled).toBe(false)
 }
 
+function validateDeleteButtonFollowsTheVersionCount() {
+    const elements = installFakeDom()
+    installRenderStubs()
+    pageState.versions = [makeVersion(1)]
+    updateVersionArrows()
+    expect(elements.deleteVersionButton.disabled).toBe(true)
+    pageState.versions = [makeVersion(1), makeVersion(2)]
+    updateVersionArrows()
+    expect(elements.deleteVersionButton.disabled).toBe(false)
+}
+
+function validateDeleteButtonIgnoresEditsAndStaysDisabledWithOneVersion() {
+    const elements = installFakeDom()
+    installRenderStubs()
+    spyOn(editors, 'getStateEditor').mockReturnValue(buildStubEditor('{"a": 1}'))
+    pageState.versions = [makeVersion(1)]
+    updateVersionArrows()
+    expect(elements.prevVersionButton.disabled).toBe(false)
+    expect(elements.nextVersionButton.disabled).toBe(false)
+    expect(elements.deleteVersionButton.disabled).toBe(true)
+    pageState.versions = [makeVersion(1), makeVersion(2)]
+    updateVersionArrows()
+    expect(elements.deleteVersionButton.disabled).toBe(false)
+}
+
 function validateArrowKeysDoNothingWithOneVersion() {
     installFakeDom()
     installRenderStubs()
@@ -97,6 +123,8 @@ function validateUpdateWithoutDocChangeDoesNothing() {
 }
 
 test('test_one_version_disables_both_buttons_and_two_enables_them', validateOneVersionDisablesBothButtonsAndTwoEnablesThem)
+test('test_delete_button_follows_the_version_count', validateDeleteButtonFollowsTheVersionCount)
+test('test_delete_button_ignores_edits_and_stays_disabled_with_one_version', validateDeleteButtonIgnoresEditsAndStaysDisabledWithOneVersion)
 test('test_arrow_keys_do_nothing_with_one_version', validateArrowKeysDoNothingWithOneVersion)
 test('test_arrow_keys_move_and_enable_buttons_with_two_versions', validateArrowKeysMoveAndEnableButtonsWithTwoVersions)
 test('test_update_without_doc_change_does_nothing', validateUpdateWithoutDocChangeDoesNothing)

@@ -7,8 +7,8 @@ import { buildEmptyPendingNotes, pageState } from './state'
 
 const realFetch = globalThis.fetch
 
-function buildVersion(id: number, stateNote: string | undefined): Version {
-  return { id: id, time: 't', state: { a: 1 }, questions: {}, calls: 0, outputs: [], stateNote: stateNote }
+function buildVersion(stateNote: string | undefined): Version {
+  return { time: 't', state: { a: 1 }, questions: {}, calls: 0, outputs: [], stateNote: stateNote }
 }
 
 function buildStubEditor(text: string) {
@@ -26,9 +26,9 @@ function installPage(stateText: string, versions: Version[]) {
   async function stubFetch(path: string | URL | Request, init?: RequestInit) {
     const body = JSON.parse(String(init?.body))
     seen.push({ path: String(path), body: body })
-    const existing = pageState.versions.find((version) => version.id === body.id)
+    const existing = pageState.versions[body.index]
     const resultNotes = body.resultNotes === undefined ? undefined : { ...existing?.resultNotes, ...body.resultNotes }
-    return Response.json({ ...buildVersion(body.id, body.stateNote), questionsNote: body.questionsNote, resultNotes: resultNotes })
+    return Response.json({ ...buildVersion(body.stateNote), questionsNote: body.questionsNote, resultNotes: resultNotes })
   }
   globalThis.fetch = stubFetch as unknown as typeof fetch
   return { seen, label }
@@ -47,9 +47,9 @@ function removeFakeState() {
 }
 
 async function validateSavingWithoutEditsPostsAndStoresOnTheShownVersion() {
-  const { seen, label } = installPage('{"a":1}', [buildVersion(7, undefined)])
+  const { seen, label } = installPage('{"a":1}', [buildVersion(undefined)])
   await saveShownNote({ kind: 'state' }, 'about state')
-  expect(seen).toEqual([{ path: '/note', body: { id: 7, stateNote: 'about state' } }])
+  expect(seen).toEqual([{ path: '/note', body: { index: 0, stateNote: 'about state' } }])
   expect(pageState.versions[0].stateNote).toBe('about state')
   expect(pageState.pendingNotes.state).toBeNull()
   expect(pageState.isDirty).toBe(true)
@@ -57,7 +57,7 @@ async function validateSavingWithoutEditsPostsAndStoresOnTheShownVersion() {
 }
 
 async function validateSavingWithEditsOnlyKeepsThePendingText() {
-  const { seen } = installPage('{"a":2}', [buildVersion(7, 'old')])
+  const { seen } = installPage('{"a":2}', [buildVersion('old')])
   await saveShownNote({ kind: 'state' }, 'waiting')
   expect(seen).toEqual([])
   expect(pageState.pendingNotes.state).toBe('waiting')
@@ -65,23 +65,23 @@ async function validateSavingWithEditsOnlyKeepsThePendingText() {
 }
 
 async function validateInheritedPendingNoteWinsAndIsReset() {
-  const { seen } = installPage('{"a":1}', [buildVersion(2, undefined)])
+  const { seen } = installPage('{"a":1}', [buildVersion(undefined)])
   pageState.pendingNotes.state = 'pending'
   await saveInheritedNote('state', 'base', true, pageState.versions[0])
-  expect(seen).toEqual([{ path: '/note', body: { id: 2, stateNote: 'pending' } }])
+  expect(seen).toEqual([{ path: '/note', body: { index: 0, stateNote: 'pending' } }])
   expect(pageState.versions[0].stateNote).toBe('pending')
   expect(pageState.pendingNotes.state).toBeNull()
 }
 
 async function validateInheritedUnchangedStateCopiesTheBaseNote() {
-  const { seen } = installPage('{"a":1}', [buildVersion(2, undefined)])
+  const { seen } = installPage('{"a":1}', [buildVersion(undefined)])
   await saveInheritedNote('state', 'base', true, pageState.versions[0])
-  expect(seen).toEqual([{ path: '/note', body: { id: 2, stateNote: 'base' } }])
+  expect(seen).toEqual([{ path: '/note', body: { index: 0, stateNote: 'base' } }])
   expect(pageState.versions[0].stateNote).toBe('base')
 }
 
 async function validateInheritedChangedStateGetsNoNoteAndResetsPending() {
-  const { seen } = installPage('{"a":1}', [buildVersion(2, undefined)])
+  const { seen } = installPage('{"a":1}', [buildVersion(undefined)])
   await saveInheritedNote('state', 'base', false, pageState.versions[0])
   expect(seen).toEqual([])
   expect(pageState.versions[0].stateNote).toBeUndefined()
@@ -89,23 +89,23 @@ async function validateInheritedChangedStateGetsNoNoteAndResetsPending() {
 }
 
 async function validateQuestionsNoteFollowsTheSameRules() {
-  const { seen } = installPage('{"a":1}', [buildVersion(7, undefined)])
+  const { seen } = installPage('{"a":1}', [buildVersion(undefined)])
   await saveShownNote({ kind: 'questions' }, 'about questions')
-  expect(seen).toEqual([{ path: '/note', body: { id: 7, questionsNote: 'about questions' } }])
+  expect(seen).toEqual([{ path: '/note', body: { index: 0, questionsNote: 'about questions' } }])
   expect(pageState.versions[0].questionsNote).toBe('about questions')
   pageState.pendingNotes.questions = 'pending'
   await saveInheritedNote('questions', 'base', false, pageState.versions[0])
-  expect(seen[1]).toEqual({ path: '/note', body: { id: 7, questionsNote: 'pending' } })
+  expect(seen[1]).toEqual({ path: '/note', body: { index: 0, questionsNote: 'pending' } })
   expect(pageState.pendingNotes.questions).toBeNull()
   await saveInheritedNote('questions', 'base', true, pageState.versions[0])
-  expect(seen[2]).toEqual({ path: '/note', body: { id: 7, questionsNote: 'base' } })
+  expect(seen[2]).toEqual({ path: '/note', body: { index: 0, questionsNote: 'base' } })
 }
 
 async function validateResultNoteWritesTheQuestionKeyOnTheShownVersionEvenWithUnrunEdits() {
-  const { seen } = installPage('{"a":2}', [buildVersion(6, undefined), { ...buildVersion(7, undefined), resultNotes: { other: 'kept' } }])
+  const { seen } = installPage('{"a":2}', [buildVersion(undefined), { ...buildVersion(undefined), resultNotes: { other: 'kept' } }])
   pageState.index = 1
   await saveShownNote({ kind: 'result', question: 'needsTask' }, 'result words')
-  expect(seen).toEqual([{ path: '/note', body: { id: 7, resultNotes: { needsTask: 'result words' } } }])
+  expect(seen).toEqual([{ path: '/note', body: { index: 1, resultNotes: { needsTask: 'result words' } } }])
   expect(pageState.versions[1].resultNotes).toEqual({ other: 'kept', needsTask: 'result words' })
   expect(pageState.versions[0].resultNotes).toBeUndefined()
   expect(pageState.pendingNotes).toEqual({ state: null, questions: null })

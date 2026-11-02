@@ -1,4 +1,5 @@
 import { readTypedKey, refreshSubmitAvailability } from './apiKey';
+import { SINGLE_ARRAY_ERROR } from './batchPlan';
 import { getButton, getElement, getInput } from './dom';
 import type { EditorView } from '@codemirror/view';
 import { getQuestionsEditor, getStateEditor, setEditorLocked } from './editors';
@@ -14,7 +15,8 @@ export const SUBMIT_TEXT = 'Submit (paid)';
 export const RUNNING_TEXT = 'running…';
 
 export function buildRunBody(state: unknown, questions: unknown): RunBody {
-  return { id: getShownVersion().id, calls: Number(getInput('callsPicker').value), apiKey: readTypedKey(), state: state, questions: questions };
+  // return { id: getShownVersion().id, calls: Number(getInput('callsPicker').value), apiKey: readTypedKey(), state: state, questions: questions };
+  return { index: pageState.index, calls: Number(getInput('callsPicker').value), apiKey: readTypedKey(), state: state, questions: questions };
 }
 
 export function sendRun(runBody: RunBody): Promise<Response> {
@@ -43,6 +45,11 @@ export async function executeSubmit(): Promise<void> {
     errorLine.textContent = stateResult.errorMessage;
     return;
   }
+  const isStateArray = Array.isArray(stateResult.value);
+  if (isStateArray) {
+    errorLine.textContent = SINGLE_ARRAY_ERROR;
+    return;
+  }
   const questionsResult = computeJsonParseResult('questions', getQuestionsEditor().state.doc.toString());
   if (!questionsResult.isValid) {
     errorLine.textContent = questionsResult.errorMessage;
@@ -63,13 +70,16 @@ export async function executeSubmit(): Promise<void> {
       return;
     }
     const result: RunResult = await response.json();
-    pageState.versions[result.version.id - 1] = result.version;
-    const isNewVersion = result.version.id !== baseVersion.id;
-    if (isNewVersion) {
+    // pageState.versions[result.version.id - 1] = result.version;
+    pageState.versions[result.index] = result.version;
+    // const isNewVersion = result.version.id !== baseVersion.id;
+    const isInputUnchanged = isStateUnchanged && isQuestionsUnchanged;
+    pageState.index = result.index;
+    if (!isInputUnchanged) {
       await saveInheritedNote('state', baseVersion.stateNote, isStateUnchanged, result.version);
       await saveInheritedNote('questions', baseVersion.questionsNote, isQuestionsUnchanged, result.version);
     }
-    pageState.index = result.version.id - 1;
+    // pageState.index = result.version.id - 1;
     pageState.editedDraft = null;
     markPageChanged('last run');
     renderShownVersion();

@@ -13,8 +13,8 @@ class FakeBox { textContent = '' }
 
 const realFetch = globalThis.fetch
 
-function buildVersion(id: number, stateNote: string | undefined): Version {
-    return { id: id, time: 't', state: { a: 1 }, questions: {}, calls: 1, outputs: [], stateNote: stateNote, questionsNote: stateNote && 'questions of ' + stateNote }
+function buildVersion(stateNote: string | undefined): Version {
+    return { time: 't', state: { a: 1 }, questions: {}, calls: 1, outputs: [], stateNote: stateNote, questionsNote: stateNote && 'questions of ' + stateNote }
 }
 
 function buildStubEditor(text: string) {
@@ -24,21 +24,21 @@ function buildStubEditor(text: string) {
 function installFakeDom() {
     const data = new FakeBox()
     data.textContent = JSON.stringify({ versions: [], hasEnvKey: true })
-    const elements = { data: data, errorLine: new FakeBox(), lastEditedLabel: new FakeBox(), submitButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput() }
+    const elements = { data: data, errorLine: new FakeBox(), lastEditedLabel: new FakeBox(), deleteVersionButton: new FakeButton(), submitButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput() }
     function getElementById(id: string) {
         return (elements as Record<string, unknown>)[id] ?? null
     }
     Object.assign(globalThis, { document: { getElementById }, HTMLButtonElement: FakeButton, HTMLInputElement: FakeInput })
 }
 
-function installSubmit(stateText: string, resultVersion: Version) {
+function installSubmit(stateText: string, questionsText: string, resultVersion: Version, resultIndex: number) {
     installFakeDom()
     spyOn(editors, 'getStateEditor').mockReturnValue(buildStubEditor(stateText))
-    spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubEditor('{}'))
+    spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubEditor(questionsText))
     spyOn(editors, 'setEditorLocked').mockImplementation(() => {})
     spyOn(versionBox, 'renderShownVersion').mockImplementation(() => {})
     const saveSpy = spyOn(saveVersionNote, 'saveInheritedNote').mockResolvedValue(undefined)
-    globalThis.fetch = (async () => Response.json({ outputs: [], version: resultVersion })) as unknown as typeof fetch
+    globalThis.fetch = (async () => Response.json({ outputs: [], version: resultVersion, index: resultIndex })) as unknown as typeof fetch
     return saveSpy
 }
 
@@ -53,33 +53,32 @@ function removeFakeState() {
     pageState.index = 0
 }
 
-async function validateANewVersionFromASubmitGetsTheInheritedNote() {
-    const base = buildVersion(1, 'base note')
-    const created = buildVersion(2, undefined)
-    const saveSpy = installSubmit('{"a":1}', created)
-    pageState.versions = [base]
+async function validateAChangedQuestionsTextIsReportedAsChanged() {
+    const created = buildVersion(undefined)
+    const saveSpy = installSubmit('{"a":1}', '{"q":2}', created, 1)
+    pageState.versions = [buildVersion('base note')]
     await executeSubmit()
     expect(saveSpy).toHaveBeenCalledWith('state', 'base note', true, created)
-    expect(saveSpy).toHaveBeenCalledWith('questions', 'questions of base note', true, created)
+    expect(saveSpy).toHaveBeenCalledWith('questions', 'questions of base note', false, created)
 }
 
 async function validateAChangedStateIsReportedAsChanged() {
-    const created = buildVersion(2, undefined)
-    const saveSpy = installSubmit('{"a":2}', created)
-    pageState.versions = [buildVersion(1, 'base note')]
+    const created = buildVersion(undefined)
+    const saveSpy = installSubmit('{"a":2}', '{}', created, 1)
+    pageState.versions = [buildVersion('base note')]
     await executeSubmit()
     expect(saveSpy).toHaveBeenCalledWith('state', 'base note', false, created)
     expect(saveSpy).toHaveBeenCalledWith('questions', 'questions of base note', true, created)
 }
 
 async function validateARunOnTheSameVersionLeavesTheNotesAlone() {
-    const base = buildVersion(1, 'base note')
-    const saveSpy = installSubmit('{"a":1}', base)
+    const base = buildVersion('base note')
+    const saveSpy = installSubmit('{"a":1}', '{}', base, 0)
     pageState.versions = [base]
     await executeSubmit()
     expect(saveSpy).not.toHaveBeenCalled()
 }
 
-test('test_a_new_version_from_a_submit_gets_the_inherited_note', validateANewVersionFromASubmitGetsTheInheritedNote)
+test('test_a_changed_questions_text_is_reported_as_changed', validateAChangedQuestionsTextIsReportedAsChanged)
 test('test_a_changed_state_is_reported_as_changed', validateAChangedStateIsReportedAsChanged)
 test('test_a_run_on_the_same_version_leaves_the_notes_alone', validateARunOnTheSameVersionLeavesTheNotesAlone)

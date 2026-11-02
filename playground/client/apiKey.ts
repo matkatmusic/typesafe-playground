@@ -1,5 +1,6 @@
 import { getButton, getElement, getInput } from './dom';
 import { readPageData } from './pageData';
+import { pageState } from './state';
 
 export const ENV_KEY_PLACEHOLDER = 'Using key from .env';
 export const TYPED_KEY_PLACEHOLDER = 'TypeSafe API key';
@@ -44,7 +45,8 @@ export function readTypedKey(): string {
 
 export function refreshSubmitAvailability(): void {
   const isMissing = isKeyMissing(readPageData().hasEnvKey, readTypedKey());
-  getButton('submitButton').disabled = isMissing;
+  // getButton('submitButton').disabled = isMissing;
+  getButton('submitButton').disabled = isMissing || pageState.batchRun !== null;
   getElement('errorLine').textContent = isMissing ? SUBMIT_KEY_MESSAGE : '';
 }
 

@@ -26,7 +26,7 @@ function buildDraftGetRequest(id: string) {
 
 async function validateDraftPostWritesTheRawTextInASessionFileBesideTheHistoryFile() {
   const historyPath = await buildTempHistoryPath()
-  const body = { state: '{"a": ', questions: '[1,' }
+  const body = { state: '{"a": ', questions: '[1,', isBatch: true }
   const response = await dispatchRequest(buildDraftRequest({ id: SESSION_ID, ...body }), PORT, historyPath)
   expect(response.status).toBe(200)
   expect(computeDraftPath(historyPath, SESSION_ID)).toBe(historyPath.replace('playground-history.json', `.currentSession-${SESSION_ID}.json`))
@@ -35,10 +35,12 @@ async function validateDraftPostWritesTheRawTextInASessionFileBesideTheHistoryFi
 
 async function validateDraftPostRejectsNonStringFields() {
   const historyPath = await buildTempHistoryPath()
-  const badState = await dispatchRequest(buildDraftRequest({ id: SESSION_ID, state: {}, questions: '' }), PORT, historyPath)
+  const badState = await dispatchRequest(buildDraftRequest({ id: SESSION_ID, state: {}, questions: '', isBatch: false }), PORT, historyPath)
   expect(badState.status).toBe(400)
-  const badQuestions = await dispatchRequest(buildDraftRequest({ id: SESSION_ID, state: '', questions: 3 }), PORT, historyPath)
+  const badQuestions = await dispatchRequest(buildDraftRequest({ id: SESSION_ID, state: '', questions: 3, isBatch: false }), PORT, historyPath)
   expect(badQuestions.status).toBe(400)
+  const badBatch = await dispatchRequest(buildDraftRequest({ id: SESSION_ID, state: '', questions: '', isBatch: 'yes' }), PORT, historyPath)
+  expect(badBatch.status).toBe(400)
   expect(await readDraft(historyPath, SESSION_ID)).toBeNull()
 }
 
@@ -62,9 +64,9 @@ async function validateDraftGetReturnsNullForAMissingFileAndTheFileJsonOtherwise
   const missing = await dispatchRequest(buildDraftGetRequest(SESSION_ID), PORT, historyPath)
   expect(missing.status).toBe(200)
   expect(await missing.json()).toBeNull()
-  await dispatchRequest(buildDraftRequest({ id: SESSION_ID, state: 's', questions: 'q' }), PORT, historyPath)
+  await dispatchRequest(buildDraftRequest({ id: SESSION_ID, state: 's', questions: 'q', isBatch: false }), PORT, historyPath)
   const found = await dispatchRequest(buildDraftGetRequest(SESSION_ID), PORT, historyPath)
-  expect(await found.json()).toEqual({ state: 's', questions: 'q' })
+  expect(await found.json()).toEqual({ state: 's', questions: 'q', isBatch: false })
 }
 
 // async function validatePageDataHoldsTheDraftOnlyWhenOneWasWritten() {

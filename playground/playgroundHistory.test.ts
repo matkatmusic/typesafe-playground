@@ -2,6 +2,7 @@ import { test, expect } from 'bun:test'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { buildBlankVersion, initHistory, loadHistory, writeHistory } from './playgroundHistory'
+import { NOT_RUN_TIME } from './notRunTime'
 import { HARD_CODED_QUESTIONS, HARD_CODED_STATE } from './typeSafeQuery'
 
 function buildTempHistoryPath() {
@@ -10,11 +11,12 @@ function buildTempHistoryPath() {
 
 function validateBlankVersionHoldsTheHardCodedQuery() {
     const version = buildBlankVersion()
-    expect(version.id).toBe(1)
+    expect('id' in version).toBe(false)
     expect(version.state).toEqual(HARD_CODED_STATE)
     expect(version.questions).toEqual(HARD_CODED_QUESTIONS)
     expect(version.calls).toBe(0)
     expect(version.outputs).toEqual([])
+    expect(version.time).toBe(NOT_RUN_TIME)
 }
 
 async function validateInitHistoryCreatesAMissingFileWithOneBlankVersion() {
@@ -22,13 +24,12 @@ async function validateInitHistoryCreatesAMissingFileWithOneBlankVersion() {
     await initHistory(historyPath)
     const history = await loadHistory(historyPath)
     expect(history.length).toBe(1)
-    expect(history[0].id).toBe(1)
     expect(history[0].state).toEqual(HARD_CODED_STATE)
 }
 
 async function validateInitHistoryKeepsAnExistingFile() {
     const historyPath = buildTempHistoryPath()
-    const existing = { id: 5, time: 'now', state: {}, questions: {}, calls: 1, outputs: [] }
+    const existing = { time: 'now', state: {}, questions: {}, calls: 1, outputs: [] }
     await writeHistory(historyPath, [existing])
     await initHistory(historyPath)
     expect(await loadHistory(historyPath)).toEqual([existing])

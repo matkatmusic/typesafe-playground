@@ -7,7 +7,10 @@ import type { EditorState, Extension } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
 import type { ViewUpdate } from '@codemirror/view';
 import { getQuestionsEditor, getStateEditor } from './editors';
+import { computeJsonParseResult } from './jsonParse';
 import { findEditorValueText, listEditorChildNames, listEditorNames, mergeNames, splitKeyPath } from './propertyNames';
+import { findPathValue } from './references';
+import { pageState } from './state';
 
 const NAME_TYPING = /^[^`\s]*$/;
 const KEY_PATH_TYPING = /`([^`\s.]+(?:\.[^`\s.]+)*)\.$/;
@@ -111,13 +114,46 @@ export function isNameDefined(states: EditorState[], keyName: string): boolean {
   return false;
 }
 
+export function listBatchItems(states: EditorState[]): unknown[] | null {
+  if (!pageState.isBatchOn)
+    return null;
+  const stateParse = computeJsonParseResult('state', states[0].doc.toString());
+  if (!stateParse.isValid)
+    return null;
+  const items = stateParse.value;
+  if (!Array.isArray(items))
+    return null;
+  if (items.length === 0)
+    return null;
+  return items;
+}
+
+export function isNameDefinedInBatch(questionsState: EditorState, items: unknown[], keyName: string): boolean {
+  const isDefinedByQuestions = isNameDefined([questionsState], keyName);
+  if (isDefinedByQuestions)
+    return true;
+  for (const item of items) {
+    const isInItem = findPathValue(item, keyName).isFound;
+    if (!isInItem)
+      return false;
+  }
+  return true;
+}
+
+export function relintBothEditors(): void {
+  for (const view of listBothEditorViews())
+    view.dispatch({ effects: OTHER_EDITOR_CHANGED.of(null) });
+}
+
 export function buildUndefinedNameSource(listStates: () => EditorState[]): LintSource {
   function findUndefinedNames(view: EditorView): Diagnostic[] {
     const states = listStates();
+    const batchItems = listBatchItems(states);
     const diagnostics: Diagnostic[] = [];
     for (const match of view.state.doc.toString().matchAll(BACKTICKED_NAME)) {
       const keyName = match[1];
-      const isDefined = isNameDefined(states, keyName);
+      // const isDefined = isNameDefined(states, keyName);
+      const isDefined = batchItems === null ? isNameDefined(states, keyName) : isNameDefinedInBatch(states[1], batchItems, keyName);
       if (isDefined)
         continue;
       diagnostics.push({

@@ -60,6 +60,10 @@ button:disabled { opacity: 0.5; cursor: default; }
 #notesDialog p { margin: 0; }
 #notesDialogText { width: 100%; resize: vertical; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
 #notesDialogButtons { display: flex; gap: 8px; justify-content: flex-end; }
+#sessionPathDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; width: min(640px, 90vw); }
+#sessionPathDialog form { display: flex; flex-direction: column; gap: 12px; }
+#sessionPathField { width: 100%; box-sizing: border-box; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+#sessionPathDialogButtons { display: flex; gap: 8px; justify-content: flex-end; }
 /* #reportDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; width: min(800px, 90vw); max-height: 85vh; padding: 12px; } */
 #reportDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; inset: 40px; margin: 0; width: auto; height: auto; max-width: none; max-height: none; padding: 12px; }
 #reportDialog[open] { display: flex; flex-direction: column; gap: 12px; }

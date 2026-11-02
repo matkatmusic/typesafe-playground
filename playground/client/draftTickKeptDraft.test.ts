@@ -40,7 +40,7 @@ async function validateTickSendsTheKeptDraftTextsWhenARealVersionIsShown() {
   pageState.editedDraft = { state: '{"a": 2}', questions: '{"q": 1}', baseIndex: 0 }
   syncDraftOnTick()
   await new Promise((resolve) => setTimeout(resolve, 0))
-  expect(seenBodies).toEqual([{ id: SESSION_ID, state: '{"a": 2}', questions: '{"q": 1}' }])
+  expect(seenBodies).toEqual([{ id: SESSION_ID, state: '{"a": 2}', questions: '{"q": 1}', isBatch: false }])
   syncDraftOnTick()
   await new Promise((resolve) => setTimeout(resolve, 0))
   expect(seenBodies.length).toBe(1)

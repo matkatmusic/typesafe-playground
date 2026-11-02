@@ -12,13 +12,13 @@ class FakeInput { value = ''; type = 'password' }
 class FakeBox { textContent = '' }
 
 const ISO_TIME = '2026-03-04T05:06:07.000Z'
-const VERSION = { id: 1, time: ISO_TIME, state: { a: 1 }, questions: {}, calls: 1, outputs: [{ usage: { input_tokens: 1000000, output_tokens: 1 } }] } as unknown as Version
+const VERSION = { time: ISO_TIME, state: { a: 1 }, questions: {}, calls: 1, outputs: [{ usage: { input_tokens: 1000000, output_tokens: 1 } }] } as unknown as Version
 const realFetch = globalThis.fetch
 
 function installFakeDom(hasEnvKey: boolean) {
     const elements = {
-        data: new FakeBox(), graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
-        submitButton: new FakeButton(), prevVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), pinButton: new FakeButton(), unpinButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(), noteText: new FakeInput(),
+        data: new FakeBox(), graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), totalCostLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
+        submitButton: new FakeButton(), prevVersionButton: new FakeButton(), deleteVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), pinButton: new FakeButton(), unpinButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(), noteText: new FakeInput(),
     }
     elements.data.textContent = JSON.stringify({ versions: [VERSION], hasEnvKey })
     function getElementById(id: string) {
@@ -46,9 +46,9 @@ function validateRunBodyHoldsCallsTheTrimmedTypedKeyTheStateAndTheQuestions() {
     const elements = installFakeDom(true)
     elements.callsPicker.value = '3'
     elements.typeSafeKeyEditor.value = ' typed '
-    pageState.versions = [VERSION, { ...VERSION, id: 2 }]
+    pageState.versions = [VERSION, { ...VERSION }]
     pageState.index = 1
-    expect(buildRunBody({ a: 1 }, { q: 1 })).toEqual({ id: 2, calls: 3, apiKey: 'typed', state: { a: 1 }, questions: { q: 1 } })
+    expect(buildRunBody({ a: 1 }, { q: 1 })).toEqual({ index: 1, calls: 3, apiKey: 'typed', state: { a: 1 }, questions: { q: 1 } })
 }
 
 function validateRunFailureNamesTheStatusAndText() {
@@ -67,7 +67,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     const renderStateSpy = spyOn(editors, 'renderStateJson').mockImplementation(recordShownValue)
     const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'))
     const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubStateEditor('{}'))
-    const newVersion = { ...VERSION, id: 2 }
+    const newVersion = { ...VERSION }
     pageState.versions = [VERSION]
     pageState.index = 0
     let seenBody = ''
@@ -77,7 +77,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
         wasDisabledWhileRunning = elements.submitButton.disabled
         textWhileRunning = elements.submitButton.textContent
         seenBody = String(init?.body)
-        return Response.json({ outputs: VERSION.outputs, version: newVersion })
+        return Response.json({ outputs: VERSION.outputs, version: newVersion, index: 1 })
     }
     globalThis.fetch = stubFetch as unknown as typeof fetch
     elements.callsPicker.value = '3'
@@ -89,7 +89,7 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     renderStateSpy.mockRestore()
     stateSpy.mockRestore()
     questionsSpy.mockRestore()
-    expect(JSON.parse(seenBody)).toEqual({ id: 1, calls: 3, apiKey: '', state: { a: 1 }, questions: {} })
+    expect(JSON.parse(seenBody)).toEqual({ index: 0, calls: 3, apiKey: '', state: { a: 1 }, questions: {} })
     expect(wasDisabledWhileRunning).toBe(true)
     expect(textWhileRunning).toBe(RUNNING_TEXT)
     expect(elements.submitButton.disabled).toBe(false)

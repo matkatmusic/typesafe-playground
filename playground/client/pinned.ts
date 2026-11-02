@@ -3,12 +3,10 @@ import type { PinnedData } from './graphTypes';
 import type { PinnedValues } from './infoTypes';
 import { listAnswers, listOptionKeys, listValues } from './graphValues';
 
-export function findPinned(versions: Version[], pinnedId: number | null): Version | null {
-  for (const version of versions) {
-    if (version.id === pinnedId)
-      return version;
-  }
-  return null;
+export function findPinned(versions: Version[], pinnedIndex: number | null): Version | null {
+  if (pinnedIndex === null)
+    return null;
+  return versions[pinnedIndex] ?? null;
 }
 
 export function readPinnedData(pinnedVersion: Version | null, name: string): PinnedData | null {
@@ -21,7 +19,8 @@ export function readPinnedData(pinnedVersion: Version | null, name: string): Pin
   if (!hasQuestion)
     return null;
   const answers = listAnswers(pinnedVersion, name);
-  return { id: pinnedVersion.id, answers: answers, keys: listOptionKeys(answers[0]) };
+  // return { id: pinnedVersion.id, answers: answers, keys: listOptionKeys(answers[0]) };
+  return { answers: answers, keys: listOptionKeys(answers[0]) };
 }
 
 export function readPinnedValues(pinned: PinnedData | null, key: string): PinnedValues | null {
@@ -30,5 +29,6 @@ export function readPinnedValues(pinned: PinnedData | null, key: string): Pinned
   const hasKey = pinned.keys.includes(key);
   if (!hasKey)
     return null;
-  return { id: pinned.id, values: listValues(pinned.answers, key) };
+  // return { id: pinned.id, values: listValues(pinned.answers, key) };
+  return { values: listValues(pinned.answers, key) };
 }

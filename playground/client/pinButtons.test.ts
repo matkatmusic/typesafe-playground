@@ -7,20 +7,20 @@ afterEach(removeFakeState)
 function removeFakeState() {
   Reflect.deleteProperty(globalThis, 'document')
   Reflect.deleteProperty(globalThis, 'HTMLButtonElement')
-  pageState.pinnedId = null
+  pageState.pinnedIndex = null
   pageState.versions = []
   pageState.index = 0
 }
 
 class FakeButton { disabled = false; textContent = '' }
 
-function installFakeButtons(pinnedId: number | null, shownIndex: number) {
+function installFakeButtons(pinnedIndex: number | null, shownIndex: number) {
   const buttons = { pinButton: new FakeButton(), unpinButton: new FakeButton() }
   const getById = (id: string) => buttons[id as keyof typeof buttons]
   Object.assign(globalThis, { document: { getElementById: getById }, HTMLButtonElement: FakeButton })
-  pageState.versions = [{ id: 5, time: 't', state: {}, questions: {}, calls: 0, outputs: [] }, { id: 6, time: 't', state: {}, questions: {}, calls: 0, outputs: [] }]
+  pageState.versions = [{ time: 't', state: {}, questions: {}, calls: 0, outputs: [] }, { time: 't', state: {}, questions: {}, calls: 0, outputs: [] }]
   pageState.index = shownIndex
-  pageState.pinnedId = pinnedId
+  pageState.pinnedIndex = pinnedIndex
   return buttons
 }
 
@@ -33,7 +33,7 @@ function validateNothingPinnedEnablesPinAndDisablesUnpin() {
 }
 
 function validateShownVersionPinnedDisablesPinAndEnablesUnpin() {
-  const buttons = installFakeButtons(5, 0)
+  const buttons = installFakeButtons(0, 0)
   applyPinButtons()
   expect(buttons.pinButton.disabled).toBe(true)
   expect(buttons.pinButton.textContent).toBe(PIN_TEXT)
@@ -41,7 +41,7 @@ function validateShownVersionPinnedDisablesPinAndEnablesUnpin() {
 }
 
 function validateOtherVersionPinnedEnablesPinInsteadAndUnpin() {
-  const buttons = installFakeButtons(5, 1)
+  const buttons = installFakeButtons(0, 1)
   applyPinButtons()
   expect(buttons.pinButton.disabled).toBe(false)
   expect(buttons.pinButton.textContent).toBe(PIN_INSTEAD_TEXT)

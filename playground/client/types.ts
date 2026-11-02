@@ -4,7 +4,8 @@ export type ThemeName = 'dark' | 'light';
 export type UnsavedStep = 'save' | 'continue' | 'stop';
 
 // export type PageData = { versions: Version[]; draft: { state: string; questions: string } | null; hasEnvKey: boolean };
-export type PageData = { versions: Version[]; hasEnvKey: boolean };
+// export type PageData = { versions: Version[]; hasEnvKey: boolean };
+export type PageData = { versions: Version[]; historyPath: string; hasEnvKey: boolean };
 
 export type EditedDraft = { state: string; questions: string; baseIndex: number };
 
@@ -12,11 +13,16 @@ export type EditedDraft = { state: string; questions: string; baseIndex: number 
 export type PendingNotes = { state: string | null; questions: string | null };
 
 // export type PageState = { versions: Version[]; index: number; fileHandle: FileSystemFileHandle | null; isDirty: boolean; pinnedId: number | null; editedDraft: EditedDraft | null };
-export type PageState = { versions: Version[]; index: number; fileHandle: FileSystemFileHandle | null; isDirty: boolean; pinnedId: number | null; editedDraft: EditedDraft | null; pendingNotes: PendingNotes };
+// export type PageState = { versions: Version[]; index: number; fileHandle: FileSystemFileHandle | null; isDirty: boolean; pinnedId: number | null; editedDraft: EditedDraft | null; pendingNotes: PendingNotes };
+// export type PageState = { versions: Version[]; index: number; fileHandle: FileSystemFileHandle | null; isDirty: boolean; pinnedIndex: number | null; editedDraft: EditedDraft | null; pendingNotes: PendingNotes };
+export type BatchRun = { item: number; count: number };
+export type PageState = { versions: Version[]; index: number; fileHandle: FileSystemFileHandle | null; isDirty: boolean; pinnedIndex: number | null; editedDraft: EditedDraft | null; pendingNotes: PendingNotes; isBatchOn: boolean; batchRun: BatchRun | null };
 
-export type RunBody = { id: number; calls: number; apiKey: string; state: unknown; questions: unknown };
+// export type RunBody = { id: number; calls: number; apiKey: string; state: unknown; questions: unknown };
+export type RunBody = { index: number; calls: number; apiKey: string; state: unknown; questions: unknown };
 
-export type RunResult = { outputs: RunOutput[]; version: Version };
+// export type RunResult = { outputs: RunOutput[]; version: Version };
+export type RunResult = { outputs: RunOutput[]; version: Version; index: number };
 
 // Minimal File System Access API members (Chromium only)
 declare global {

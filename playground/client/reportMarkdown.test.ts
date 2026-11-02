@@ -3,7 +3,7 @@ import type { Version } from '../playgroundHistory';
 import { buildReportMarkdown } from './reportMarkdown';
 
 function buildVersion(id: number, extra: Partial<Version>): Version {
-  return { id, time: `t${id}`, state: {}, questions: {}, calls: 0, outputs: [], ...extra };
+  return { time: `t${id}`, state: {}, questions: {}, calls: 0, outputs: [], ...extra };
 }
 
 function validateNoVersionsGivesNoNotesYet() {

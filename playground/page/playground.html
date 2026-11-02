@@ -27,6 +27,16 @@
         </div>
     </form>
 </dialog>
+<dialog id="sessionPathDialog">
+    <form method="dialog">
+        <label for="sessionPathField">Session file</label>
+        <input id="sessionPathField" type="text" readonly>
+        <div id="sessionPathDialogButtons">
+            <button type="button" id="sessionPathCopyButton">Copy</button>
+            <button type="button" id="sessionPathCloseButton">Close</button>
+        </div>
+    </form>
+</dialog>
 <dialog id="reportDialog">
     <div id="reportDialogHeader">
         <span id="reportDialogTitle">Report</span>
@@ -43,13 +53,16 @@
         <button id="saveButton">Save</button>
         <button id="resetButton">Reset</button>
         <button id="reportButton">Report</button>
+        <button id="copyPathButton">copy path</button>
         <label id="typeSafeKeyLabel" for="typeSafeKeyEditor">TypeSafe API key</label>
         <input id="typeSafeKeyEditor" type="password" autocomplete="off" spellcheck="false" placeholder="TypeSafe API key">
         <button id="showKeyButton">Show</button>
+        <span id="totalCostLabel">total cost: $0.000000</span>
         <span id="lastEditedLabel"></span>
         <button id="lightDarkModeButton">light</button>
     </div>
     <div id="versionBox">
+        <button id="deleteVersionButton">Delete Version</button>
         <button id="prevVersionButton" aria-label="previous version">&lt;</button>
         <span id="versionLabel"></span>
         <button id="nextVersionButton" aria-label="next version">&gt;</button>
@@ -70,7 +83,7 @@
             </div>
             <div id="errorLine"></div>
             <div id="stateAndQuestionsBox">
-                <div id="stateJsonEditor"><div id="stateTitleRow"><span class="other-label">state</span><button class="format-json-button" id="stateUndoButton">Undo</button><button class="format-json-button" id="stateRedoButton">Redo</button><button class="format-json-button" id="stateFormatJsonButton">Format JSON</button></div></div>
+                <div id="stateJsonEditor"><div id="stateTitleRow"><span class="other-label">state</span><label id="batchToggle"><input type="checkbox" id="batchCheckbox"> batch</label><button class="format-json-button" id="stateUndoButton">Undo</button><button class="format-json-button" id="stateRedoButton">Redo</button><button class="format-json-button" id="stateFormatJsonButton">Format JSON</button></div></div>
                 <div class="row-resizer" id="rowResizer"></div>
                 <div id="questionsJsonEditor"><div id="questionsTitleRow"><span class="other-label">questions</span><div id="questionsAddQuestion"></div><button class="format-json-button" id="questionsUndoButton">Undo</button><button class="format-json-button" id="questionsRedoButton">Redo</button><button class="format-json-button" id="questionsFormatJsonButton">Format JSON</button></div></div>
             </div>

@@ -20,7 +20,7 @@ class StubElement {
 
 function installFakeDom() {
     const elements: Record<string, { textContent: string }> = {
-        versionLabel: { textContent: '' }, costLabel: { textContent: '' }, tokensLabel: { textContent: '' }, lastEditedLabel: { textContent: '' },
+        versionLabel: { textContent: '' }, costLabel: { textContent: '' }, totalCostLabel: { textContent: '' }, tokensLabel: { textContent: '' }, lastEditedLabel: { textContent: '' },
         graphContainerBox: { textContent: '' }, winnerBox: { textContent: '' },
     }
     spyOn(versionArrows, 'updateVersionArrows').mockImplementation(() => {})

@@ -11,13 +11,13 @@ class FakeButton { disabled = false; textContent = SUBMIT_TEXT }
 class FakeInput { value = ''; type = 'password' }
 class FakeBox { textContent = '' }
 
-const VERSION = { id: 1, time: '2026-03-04T05:06:07.000Z', state: { a: 1 }, questions: {}, calls: 1, outputs: [] } as unknown as Version
+const VERSION = { time: '2026-03-04T05:06:07.000Z', state: { a: 1 }, questions: {}, calls: 1, outputs: [] } as unknown as Version
 const realFetch = globalThis.fetch
 
 function installFakeDom() {
     const elements = {
-        data: new FakeBox(), graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
-        submitButton: new FakeButton(), prevVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), pinButton: new FakeButton(), unpinButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(), noteText: new FakeInput(),
+        data: new FakeBox(), graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), totalCostLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
+        submitButton: new FakeButton(), prevVersionButton: new FakeButton(), deleteVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), pinButton: new FakeButton(), unpinButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(), noteText: new FakeInput(),
     }
     elements.data.textContent = JSON.stringify({ versions: [VERSION], hasEnvKey: true })
     function getElementById(id: string) {
@@ -78,7 +78,7 @@ async function validateEditorsAreLockedWhileTheRunIsInFlightAndUnlockedAfterSucc
     let locksWhileRunning: boolean[] = []
     async function stubFetch() {
         locksWhileRunning = [...lockCalls]
-        return Response.json({ outputs: [], version: { ...VERSION, id: 2 } })
+        return Response.json({ outputs: [], version: { ...VERSION }, index: 1 })
     }
     globalThis.fetch = stubFetch as unknown as typeof fetch
     await executeSubmit()

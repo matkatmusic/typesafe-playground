@@ -1,6 +1,7 @@
 import { dirname } from 'node:path';
 
-export type Draft = { state: string; questions: string };
+// export type Draft = { state: string; questions: string };
+export type Draft = { state: string; questions: string; isBatch: boolean };
 
 const SESSION_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -36,8 +37,8 @@ export async function readDraft(historyPath: string, id: string): Promise<Draft 
 }
 
 export async function executeDraftRequest(request: Request, historyPath: string): Promise<Response> {
-  const body = (await request.json()) as { id?: unknown; state?: unknown; questions?: unknown };
-  const { id, state, questions } = body;
+  const body = (await request.json()) as { id?: unknown; state?: unknown; questions?: unknown; isBatch?: unknown };
+  const { id, state, questions, isBatch } = body;
   const isIdValid = isSessionId(id);
   if (!isIdValid)
     return new Response('id must be a lowercase uuid', { status: 400 });
@@ -47,7 +48,11 @@ export async function executeDraftRequest(request: Request, historyPath: string)
   const isQuestionsString = typeof questions === 'string';
   if (!isQuestionsString)
     return new Response('questions must be a string', { status: 400 });
-  const draft: Draft = { state, questions };
+  const isBatchBoolean = typeof isBatch === 'boolean';
+  if (!isBatchBoolean)
+    return new Response('isBatch must be a boolean', { status: 400 });
+  // const draft: Draft = { state, questions };
+  const draft: Draft = { state, questions, isBatch };
   await Bun.write(computeDraftPath(historyPath, id), JSON.stringify(draft));
   return new Response('ok');
 }

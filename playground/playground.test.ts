@@ -72,11 +72,19 @@ async function validatePageDataHoldsVersionsAndWhetherAnEnvKeyExists() {
     const historyPath = await buildTempHistoryPath()
     Bun.env.TYPESAFE_API_KEY = 'env-key'
     const page = await buildPage(historyPath)
-    expect(page.includes('{"versions":[{"id":1,')).toBe(true)
+    expect(page.includes('{"versions":[{"time":')).toBe(true)
     expect(page.includes('"hasEnvKey":true}')).toBe(true)
     Bun.env.TYPESAFE_API_KEY = '  '
     expect((await buildPage(historyPath)).includes('"hasEnvKey":false}')).toBe(true)
     expect((await buildPage(historyPath)).includes('__DATA_JSON__')).toBe(false)
+}
+
+async function validatePageDataHoldsTheHistoryPathAndTheCopyPathButtonFollowsReport() {
+    const historyPath = await buildTempHistoryPath()
+    const page = await buildPage(historyPath)
+    expect(page.includes(`"historyPath":${JSON.stringify(historyPath)}`)).toBe(true)
+    expect(page.indexOf('id="copyPathButton"')).toBeGreaterThan(page.indexOf('id="reportButton"'))
+    expect(page.indexOf('id="copyPathButton"')).toBeLessThan(page.indexOf('id="typeSafeKeyLabel"'))
 }
 
 async function validateKeyEditorIsAPasswordInputWithAutocompleteAndSpellcheckOff() {
@@ -109,6 +117,7 @@ test('test_page_get_returns_200_html_with_css_filled_in', validatePageGetReturns
 test('test_page_holds_header_version_and_input_results_boxes_in_order', validatePageHoldsThreeBoxesInsidePlaygroundComponentBoxInOrder)
 test('test_page_holds_header_buttons_in_order_and_the_client_script',validatePageHoldsHeaderButtonsInOrderAndTheClientScript)
 test('test_page_data_holds_versions_and_whether_an_env_key_exists', validatePageDataHoldsVersionsAndWhetherAnEnvKeyExists)
+test('test_page_data_holds_the_history_path_and_the_copy_path_button_follows_report', validatePageDataHoldsTheHistoryPathAndTheCopyPathButtonFollowsReport)
 test('test_key_editor_is_a_password_input_with_autocomplete_and_spellcheck_off', validateKeyEditorIsAPasswordInputWithAutocompleteAndSpellcheckOff)
 test('test_cost_token_submit_box_holds_four_items_in_order_and_error_line_follows', validateCostTokenSubmitBoxHoldsFourItemsInOrderAndErrorLineFollows)
 test('test_unknown_path_returns_404', validateUnknownPathReturns404)

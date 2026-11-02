@@ -4,8 +4,10 @@ import type { EditorState, Extension } from '@codemirror/state';
 import { listBothEditorStates } from './backtickCompletion';
 import { computeJsonParseResult } from './jsonParse';
 import { REFERENCE_PATTERN, findPathValue, formatReferenceValue } from './references';
+import { pageState } from './state';
 
 const BACKTICKED_NAME = /`([^`\s]+)`/g;
+export const BATCH_HOVER_TEXT = 'hover text replacement not active in batch mode';
 let openTooltip: HTMLElement | null = null;
 
 export function findReferenceTooltipText(name: string, state: unknown, questions: unknown): string | null {
@@ -35,6 +37,8 @@ export function buildBacktickHoverSource(listStates: () => EditorState[]): (view
       const isOverName = pos >= from && pos <= to;
       if (!isOverName)
         continue;
+      if (pageState.isBatchOn)
+        return { pos: from, end: to, above: true, create: () => ({ dom: createReferenceTooltipElement(BATCH_HOVER_TEXT) }) };
       const states = listStates();
       const stateParse = computeJsonParseResult('State', states[0].doc.toString());
       const questionsParse = computeJsonParseResult('Questions', states[1].doc.toString());

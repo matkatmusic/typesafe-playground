@@ -21,11 +21,11 @@ async function replaceVersions(path: string, body: object): Promise<void> {
   const replaced: { versions: Version[] } = await response.json();
   pageState.versions = replaced.versions;
   pageState.editedDraft = null;
-  pageState.pinnedId = null;
+  pageState.pinnedIndex = null;
   pageState.pendingNotes = buildEmptyPendingNotes();
   pageState.isDirty = false;
   renderLastVersion();
-  applyPinInfo(pageState.pinnedId);
+  applyPinInfo(pageState.pinnedIndex);
 }
 
 export async function executePicker<T>(pick: () => Promise<T>): Promise<T | null> {

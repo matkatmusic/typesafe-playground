@@ -1,5 +1,6 @@
 import { test, expect, afterEach, mock, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
+import * as batchControls from './batchControls'
 import { applyDraft, sendDraft, launchDraftSession, syncDraftOnTick } from './draftSync'
 import * as editors from './editors'
 import { pageState } from './state'
@@ -94,7 +95,7 @@ async function validateTickSendsOnlyWhenEditorTextChangedSinceTheLastSend() {
   stateTexts.value = '{"a": '
   syncDraftOnTick()
   await sendDraft()
-  expect(seen[0]).toEqual({ path: '/draft', method: 'POST', body: { id: SESSION_ID, state: '{"a": ', questions: 'q' } })
+  expect(seen[0]).toEqual({ path: '/draft', method: 'POST', body: { id: SESSION_ID, state: '{"a": ', questions: 'q', isBatch: false } })
   const sentCount = seen.length
   syncDraftOnTick()
   expect(seen.length).toBe(sentCount)
@@ -117,7 +118,7 @@ function validateApplyDraftDoesNothingForNullOrEqualText() {
   const replaceSpy = spyOn(editors, 'fillEditorText').mockImplementation(() => {})
   const refreshSpy = spyOn(versionBox, 'refreshVersionBox').mockImplementation(() => {})
   applyDraft(null)
-  applyDraft({ state: 's', questions: 'q' })
+  applyDraft({ state: 's', questions: 'q', isBatch: false })
   expect(replaceSpy).not.toHaveBeenCalled()
   expect(refreshSpy).not.toHaveBeenCalled()
   expect(pageState.isDirty).toBe(false)
@@ -128,7 +129,7 @@ function validateApplyDraftReplacesOnlyTheDifferingEditorAndMarksTheChangeOnce()
   const label = installFakeLabel()
   const replaceSpy = spyOn(editors, 'fillEditorText').mockImplementation(() => {})
   const refreshSpy = spyOn(versionBox, 'refreshVersionBox').mockImplementation(() => {})
-  applyDraft({ state: 's', questions: 'q draft' })
+  applyDraft({ state: 's', questions: 'q draft', isBatch: false })
   expect(replaceSpy).toHaveBeenCalledTimes(1)
   expect(replaceSpy).toHaveBeenCalledWith(questionsEditor, 'q draft')
   expect(replaceSpy).not.toHaveBeenCalledWith(stateEditor, 's')
@@ -137,6 +138,54 @@ function validateApplyDraftReplacesOnlyTheDifferingEditorAndMarksTheChangeOnce()
   expect(label.textContent).toContain('last edited: ')
 }
 
+async function validateBatchToggleIsSentWithTheDraftAndTriggersTheNextTick() {
+  // Step: the draft session starts with batch off and nothing to send.
+  installStubEditors('[{"a": 1}]', 'q')
+  installFakeSessionStorage({ playgroundSessionId: SESSION_ID })
+  const seen = installFetchRecorder(null)
+  spyOn(globalThis, 'setInterval').mockImplementation((() => 0) as unknown as typeof setInterval)
+  await launchDraftSession()
+  seen.length = 0
+  syncDraftOnTick()
+  expect(seen).toEqual([])
+  // Step: turning batch on sends the draft with isBatch true, though the text did not change.
+  pageState.isBatchOn = true
+  syncDraftOnTick()
+  await sendDraft()
+  expect(seen[0].body).toEqual({ id: SESSION_ID, state: '[{"a": 1}]', questions: 'q', isBatch: true })
+  const sentCount = seen.length
+  syncDraftOnTick()
+  expect(seen.length).toBe(sentCount)
+  pageState.isBatchOn = false
+}
+
+async function validateApplyDraftWithBatchOnRestoresTheToggleAndTheText() {
+  // Step: the saved draft holds an array text and isBatch true.
+  const { stateEditor } = installStubEditors('{"a": 1}', 'q')
+  installFakeLabel()
+  const fillSpy = spyOn(editors, 'fillEditorText').mockImplementation(() => {})
+  spyOn(versionBox, 'refreshVersionBox').mockImplementation(() => {})
+  const batchSpy = spyOn(batchControls, 'applyBatchMode').mockImplementation(() => {})
+  applyDraft({ state: '[{"a": 1}]', questions: 'q', isBatch: true })
+  // Step: the text is filled in and the toggle is switched on.
+  expect(fillSpy).toHaveBeenCalledWith(stateEditor, '[{"a": 1}]')
+  expect(batchSpy).toHaveBeenCalledWith(true)
+  expect(pageState.isDirty).toBe(true)
+}
+
+function validateApplyDraftWithOnlyTheToggleDifferentStillRestoresIt() {
+  installStubEditors('s', 'q')
+  installFakeLabel()
+  spyOn(editors, 'fillEditorText').mockImplementation(() => {})
+  spyOn(versionBox, 'refreshVersionBox').mockImplementation(() => {})
+  const batchSpy = spyOn(batchControls, 'applyBatchMode').mockImplementation(() => {})
+  applyDraft({ state: 's', questions: 'q', isBatch: true })
+  expect(batchSpy).toHaveBeenCalledWith(true)
+}
+
+test('test_batch_toggle_is_sent_with_the_draft_and_triggers_the_next_tick', validateBatchToggleIsSentWithTheDraftAndTriggersTheNextTick)
+test('test_apply_draft_with_batch_on_restores_the_toggle_and_the_text', validateApplyDraftWithBatchOnRestoresTheToggleAndTheText)
+test('test_apply_draft_with_only_the_toggle_different_still_restores_it', validateApplyDraftWithOnlyTheToggleDifferentStillRestoresIt)
 test('test_start_draft_session_creates_and_stores_an_id_without_restoring', validateStartDraftSessionCreatesAndStoresAnIdWithoutRestoring)
 test('test_start_draft_session_restores_the_draft_of_an_existing_id', validateStartDraftSessionRestoresTheDraftOfAnExistingId)
 test('test_tick_sends_only_when_editor_text_changed_since_the_last_send', validateTickSendsOnlyWhenEditorTextChangedSinceTheLastSend)

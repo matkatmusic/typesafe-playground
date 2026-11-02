@@ -15,7 +15,7 @@ class FakeInput { value = ''; type = 'password' }
 class FakeBox { textContent = '' }
 
 const ISO_TIME = '2026-03-04T05:06:07.000Z'
-const VERSION = { id: 1, time: ISO_TIME, state: { a: 1 }, questions: { q: 1 }, calls: 1, outputs: [] }
+const VERSION = { time: ISO_TIME, state: { a: 1 }, questions: { q: 1 }, calls: 1, outputs: [] }
 const realFetch = globalThis.fetch
 
 afterEach(() => {
@@ -31,8 +31,8 @@ afterEach(() => {
 
 function installOneVersionWithAnEditedState() {
     const elements = {
-        data: new FakeBox(), versionLabel: new FakeBox(), costLabel: new FakeBox(), tokensLabel: new FakeBox(), graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), lastEditedLabel: new FakeBox(), errorLine: new FakeBox(),
-        prevVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), submitButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(),
+        data: new FakeBox(), versionLabel: new FakeBox(), costLabel: new FakeBox(), totalCostLabel: new FakeBox(), tokensLabel: new FakeBox(), graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), lastEditedLabel: new FakeBox(), errorLine: new FakeBox(),
+        prevVersionButton: new FakeButton(), deleteVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), submitButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(),
     }
     elements.data.textContent = JSON.stringify({ versions: [], hasEnvKey: true })
     elements.callsPicker.value = '1'
@@ -83,7 +83,7 @@ async function validateARunClearsTheKeptDraft() {
     const { elements } = installOneVersionWithAnEditedState()
     moveToPreviousVersion()
     expect(pageState.editedDraft).toEqual({ state: '{"a": 2}', questions: '{"q": 1}', baseIndex: 0 })
-    globalThis.fetch = (async () => Response.json({ outputs: [], version: { ...VERSION, id: 2 } })) as unknown as typeof fetch
+    globalThis.fetch = (async () => Response.json({ outputs: [], version: { ...VERSION }, index: 1 })) as unknown as typeof fetch
     await executeSubmit()
     expect(pageState.editedDraft).toBeNull()
     expect(pageState.versions.length).toBe(2)

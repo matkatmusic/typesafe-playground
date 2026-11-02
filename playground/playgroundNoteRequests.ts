@@ -1,7 +1,9 @@
-import { loadHistory, writeHistory, type Version } from './playgroundHistory';
+// import { loadHistory, writeHistory, type Version } from './playgroundHistory';
+import { findVersionByIndex, loadHistory, writeHistory, type Version } from './playgroundHistory';
 import { isPlainObject } from './playgroundVersionRequests';
 
-type NoteBody = { id?: unknown; note?: unknown; stateNote?: unknown; questionsNote?: unknown; resultNotes?: unknown };
+// type NoteBody = { id?: unknown; note?: unknown; stateNote?: unknown; questionsNote?: unknown; resultNotes?: unknown };
+type NoteBody = { index?: unknown; note?: unknown; stateNote?: unknown; questionsNote?: unknown; resultNotes?: unknown };
 
 const STRING_NOTE_FIELDS = ['note', 'stateNote', 'questionsNote'] as const;
 
@@ -27,15 +29,17 @@ export function findInvalidNoteField(body: NoteBody): string | undefined {
 
 export async function executeNoteRequest(request: Request, historyPath: string): Promise<Response> {
   const body = (await request.json()) as NoteBody;
-  const { id, note, stateNote, questionsNote, resultNotes } = body;
+  // const { id, note, stateNote, questionsNote, resultNotes } = body;
+  const { index, note, stateNote, questionsNote, resultNotes } = body;
   const history: Version[] = await loadHistory(historyPath);
-  let foundVersion: Version | undefined;
-  for (const version of history) {
-    if (version.id === id)
-      foundVersion = version;
-  }
+  // let foundVersion: Version | undefined;
+  // for (const version of history) {
+  //   if (version.id === id)
+  //     foundVersion = version;
+  // }
+  const foundVersion = findVersionByIndex(history, index);
   if (foundVersion === undefined)
-    return new Response('id must be the integer id of an existing version', { status: 400 });
+    return new Response('index must be the integer index of an existing version', { status: 400 });
   let isAnyNotePresent = false;
   for (const value of [note, stateNote, questionsNote, resultNotes]) {
     const isValuePresent = value !== undefined;
