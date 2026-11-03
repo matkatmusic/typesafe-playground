@@ -34,6 +34,7 @@ Questions:
 `state` holds the data that the questions are about.
 
 - It must be a JSON object. The server rejects a string, an array, or `null` with status 400, although the SDK accepts them.
+- With the **batch** checkbox on, the `state` editor holds an array of these objects. See [Batch: an array of states](#batch-an-array-of-states).
 - Values can be any JSON value: text, number, boolean, `null`, array, or object. They can be nested.
 - There are no required keys.
 - To refer to a key from a question, do not use spaces or dots in the key name. See [Back-ticked names](#back-ticked-names).
@@ -143,6 +144,52 @@ Back-ticked names are a feature of the page only. The page shows their values in
 
 A name that the page cannot find gets a red squiggle. The squiggle does not stop Submit.
 
+## Batch: an array of states
+
+Use batch to run the same questions on many states. Turn on the **batch** checkbox beside the state title. Then write the `state` editor as an array, where each item is one state.
+
+State:
+
+```json
+[
+  { "message": { "text": "Please send me the report by Friday." } },
+  { "message": { "text": "I enjoyed the party last night." } }
+]
+```
+
+Questions:
+
+```json
+{
+  "requestsAction": {
+    "type": "noul",
+    "instructions": "Does `message.text` ask the reader to do something?"
+  }
+}
+```
+
+### Rules for the array
+
+- The array must have at least one item.
+- Each item must be a JSON object. An item cannot be text, a number, a boolean, `null`, or an array.
+- An item can hold an array as a value: `{ "messages": ["Hello", "Goodbye"] }`.
+- The `questions` editor holds one object, and all items use it.
+- Write a back-ticked name as a path inside one item: `` `message.text` ``, not `` `[0].message.text` ``.
+- Each item must have the back-ticked name, or the questions must define it. If not, the name gets a red squiggle. The squiggle does not stop Submit.
+- While batch is on, a back-ticked name does not show its value in a tooltip.
+- The array works only in the editor. In a versions file, `state` must be an object, so write one version for each state.
+
+### What Submit does
+
+- The button text changes to **Submit Batch (paid)**.
+- Each item gets one run, in array order. The total number of calls is the number of items multiplied by the calls value. For example, 5 items with 3 calls make 15 calls.
+- Each item gets its own version:
+  - The first item uses the normal rule for the shown version. If the state and questions are the same, the page keeps that version. If that version has no results and has the default state or the default questions, the page overwrites it. In all other cases, the page makes a new version.
+  - Each other item gets a new version at the end of the list.
+- When the run starts, the batch checkbox turns off and the page shows the version of the first item. To run a different batch, turn the checkbox on again and write the array again.
+- If one run fails, the other runs continue. At the end, an alert that starts with `Some runs failed:` lists the versions that failed.
+- While batch is on, the buttons for new, open, save, report, reset runs, and notes do not work.
+
 ## Load the data into the playground
 
 Use one of these two methods.
@@ -189,3 +236,7 @@ Use this method to load more than one version. Write a JSON file with an array o
 | `state is not valid JSON` or `questions is not valid JSON` | The editor text does not parse. |
 | `TypeSafeError`: at least one question | `questions` is empty. |
 | `TypeSafeError`: score criteria | The `criteria` of a `score` question is not an array with at least two items. |
+| `state must be an array of objects while batch is on` | Batch is on and `state` is not an array. |
+| `the state array is empty: add at least one object` | Batch is on and the array is empty. |
+| `item N of the state array must be a JSON object` | Batch is on and item N is not an object. |
+| `state must be one JSON object: turn on batch to submit an array` | Batch is off and `state` is an array. |
