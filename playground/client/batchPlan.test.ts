@@ -1,8 +1,13 @@
 import { test, expect } from 'bun:test'
+import type { Questions } from '@typesafe-ai/sdk'
 import type { Version } from '../playgroundHistory'
 import { NOT_RUN_TIME } from '../notRunTime'
 import { HARD_CODED_STATE } from '../typeSafeQuery'
 import { buildBatchVersions, computeBatchStateError, formatBatchFailures } from './batchPlan'
+
+function asQuestions(value: unknown): Questions {
+    return value as Questions
+}
 
 function buildVersion(state: unknown, questions: unknown, outputCount: number): Version {
     const outputs = []
@@ -12,8 +17,7 @@ function buildVersion(state: unknown, questions: unknown, outputCount: number): 
 }
 
 function validateStateThatIsNotAnArrayGivesAnError() {
-    // Step: give an object, a number and null to the check.
-    // Step: each one gives the not-an-array error.
+    // Step: give an object, a number and null to the check.  Step: each one gives the not-an-array error.
     expect(computeBatchStateError({ a: 1 })).toBe('state must be an array of objects while batch is on')
     expect(computeBatchStateError(3)).toBe('state must be an array of objects while batch is on')
     expect(computeBatchStateError(null)).toBe('state must be an array of objects while batch is on')
@@ -24,8 +28,7 @@ function validateEmptyArrayGivesAnError() {
 }
 
 function validateItemThatIsNotAPlainObjectGivesAnErrorNamingTheItem() {
-    // Step: an array item can be a number, null, an array or a string.
-    // Step: the error names the item number, counting from 1.
+    // Step: give a number, null, an array or a string.  Step: the error names the item number from 1.
     expect(computeBatchStateError([{ a: 1 }, 2])).toBe('item 2 of the state array must be a JSON object')
     expect(computeBatchStateError([null])).toBe('item 1 of the state array must be a JSON object')
     expect(computeBatchStateError([{}, {}, [1]])).toBe('item 3 of the state array must be a JSON object')
@@ -37,9 +40,8 @@ function validateArrayOfObjectsGivesNoError() {
 }
 
 function validateKeepUsesTheShownVersionForTheFirstItemAndAppendsTheRest() {
-    // Step: version 4 has results and the state {"a":1}.
-    // Step: the batch is [{"a":1},{"a":2}] with the same questions.
-    const questions = { q: 1 }
+    // Step: version 4 has results and the state {"a":1}.  Step: the batch is [{"a":1},{"a":2}] with the same questions.
+    const questions = asQuestions({ q: 1 })
     const versions = [buildVersion({ z: 1 }, questions, 1), buildVersion({ z: 2 }, questions, 1), buildVersion({ z: 3 }, questions, 1), buildVersion({ a: 1 }, questions, 2)]
     const plan = buildBatchVersions(versions, 3, [{ a: 1 }, { a: 2 }], questions)
     // Step: the results for {"a":1} go on version 4, and {"a":2} becomes version 5.
@@ -54,12 +56,13 @@ function validateOverwriteReplacesStateAndQuestionsOnTheShownVersion() {
     const shown = buildVersion(HARD_CODED_STATE, { oldQ: 1 }, 0)
     shown.questionsNote = 'keep me'
     const versions = [shown]
-    const plan = buildBatchVersions(versions, 0, [{ a: 1 }, { a: 2 }], { newQ: 1 })
+    const newQuestions = asQuestions({ newQ: 1 })
+    const plan = buildBatchVersions(versions, 0, [{ a: 1 }, { a: 2 }], newQuestions)
     // Step: the first item replaces the shown version and keeps its notes.
     expect(plan.itemIndexes).toEqual([0, 1])
-    expect(plan.versions[0]).toEqual({ ...shown, state: { a: 1 }, questions: { newQ: 1 } })
+    expect(plan.versions[0]).toEqual({ ...shown, state: { a: 1 }, questions: newQuestions })
     expect(plan.versions[1].state).toEqual({ a: 2 })
-    expect(plan.versions[1].questions).toEqual({ newQ: 1 })
+    expect(plan.versions[1].questions).toEqual(newQuestions)
 }
 
 function validateCreateMakesTheFirstItemANewVersionAtTheEnd() {
@@ -67,7 +70,7 @@ function validateCreateMakesTheFirstItemANewVersionAtTheEnd() {
     const shown = buildVersion({ old: 1 }, { q: 1 }, 2)
     const other = buildVersion({ other: 1 }, { q: 1 }, 1)
     const versions = [shown, other]
-    const plan = buildBatchVersions(versions, 0, [{ a: 1 }, { a: 2 }, { a: 3 }], { q: 1 })
+    const plan = buildBatchVersions(versions, 0, [{ a: 1 }, { a: 2 }, { a: 3 }], asQuestions({ q: 1 }))
     // Step: all three items are new versions at the end, in array order.
     expect(plan.itemIndexes).toEqual([2, 3, 4])
     expect(plan.versions.length).toBe(5)
@@ -78,7 +81,7 @@ function validateCreateMakesTheFirstItemANewVersionAtTheEnd() {
 }
 
 function validateLaterItemsAreAlwaysNewEvenWhenTheyMatchAnotherVersion() {
-    const questions = { q: 1 }
+    const questions = asQuestions({ q: 1 })
     const versions = [buildVersion({ a: 1 }, questions, 1), buildVersion({ a: 2 }, questions, 1)]
     const plan = buildBatchVersions(versions, 0, [{ a: 1 }, { a: 2 }], questions)
     expect(plan.itemIndexes).toEqual([0, 2])
@@ -86,7 +89,7 @@ function validateLaterItemsAreAlwaysNewEvenWhenTheyMatchAnotherVersion() {
 }
 
 function validateEveryItemGetsItsOwnCopyOfTheQuestions() {
-    const questions = { q: { r: 1 } }
+    const questions = asQuestions({ q: { r: 1 } })
     const plan = buildBatchVersions([buildVersion({ a: 1 }, { q: 0 }, 1)], 0, [{ a: 2 }, { a: 3 }], questions)
     expect(plan.versions[1].questions).toEqual(questions)
     expect(plan.versions[1].questions).not.toBe(plan.versions[2].questions)

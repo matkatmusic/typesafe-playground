@@ -38,7 +38,8 @@ function buildStubStateEditor(text: string) {
 }
 
 function makeVersion(id: number, state: unknown) {
-    return { id: id, time: ISO_TIME, state: state, questions: {}, calls: id, outputs: [] }
+    // return { id: id, time: ISO_TIME, state: state, questions: {}, calls: id, outputs: [] }
+    return { id: id, time: ISO_TIME, state: state as never, questions: {}, calls: id, outputs: [] }
 }
 
 function installQuestionsStub(questionsText: string) {
@@ -190,7 +191,7 @@ function validateMovingAwayAndBackWithTwoVersionsKeepsTheOverwritingText() {
 }
 
 function validateEveryRenderOfAVersionShowsTheTotalCostOfAllVersions() {
-    // Step: the page holds two versions, each with 1000000 input tokens (page load, New, Open, Reset, Delete and reset-runs all end in a render).
+    // Step: two versions, each with 1000000 input tokens; every render shows their combined cost.
     const elements = installFakeDom()
     spyOn(editors, 'renderStateJson').mockImplementation(() => {})
     spyOn(editors, 'renderResultJson').mockImplementation(() => {})

@@ -4,6 +4,7 @@ import type { GraphBlock, RenderCallback } from './graphTypes';
 import { graphState } from './graphState';
 import { formatValueText } from './graphValues';
 import { createNotesButton } from './notesButton';
+import { moveQuestionIntoView } from './questionQuickNav';
 import { appendReferenceText } from './backtickTooltip';
 import { replaceReferences } from './references';
 
@@ -43,9 +44,22 @@ export function createCollapseButton(name: string, onChange: RenderCallback): HT
   return button;
 }
 
+export function createQuestionLink(label: string, name: string): HTMLButtonElement {
+  const link = document.createElement('button');
+  link.type = 'button';
+  link.className = 'graph-question-link';
+  link.textContent = label;
+  function moveToQuestion(): void {
+    moveQuestionIntoView(name);
+  }
+  link.addEventListener('click', moveToQuestion);
+  return link;
+}
+
 export function createGraphBlock(questionNumber: number, name: string, question: Question, onChange: RenderCallback, version: Version): GraphBlock {
-  const formattedTitle = formatGraphTitle(questionNumber, name, question);
-  const titleText = graphState.isReferencesReplaced ? replaceReferences(formattedTitle, version.state, version.questions) : formattedTitle;
+  const questionLabel = 'Q' + questionNumber + ' ' + name;
+  const formattedInstructions = formatGraphTitle(questionNumber, name, question).slice(questionLabel.length);
+  const instructionsText = graphState.isReferencesReplaced ? replaceReferences(formattedInstructions, version.state, version.questions) : formattedInstructions;
   const block = document.createElement('div');
   block.className = 'graph-block';
   if (graphState.collapsedByName[name] === true)
@@ -55,8 +69,9 @@ export function createGraphBlock(questionNumber: number, name: string, question:
   const title = document.createElement('div');
   title.className = 'graph-title';
   // title.textContent = titleText;
-  appendReferenceText(title, titleText, version.state, version.questions);
-  title.title = titleText;
+  title.appendChild(createQuestionLink(questionLabel, name));
+  appendReferenceText(title, instructionsText, version.state, version.questions);
+  title.title = questionLabel + instructionsText;
   titleRow.appendChild(createCollapseButton(name, onChange));
   titleRow.appendChild(title);
   const isRunCompleted = version.outputs.length > 0;

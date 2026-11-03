@@ -3,7 +3,7 @@ import type { Version } from '../playgroundHistory';
 import { listChangeBlocks } from './reportChanges';
 
 function buildVersion(extra: Partial<Version>): Version {
-  return { id: 1, time: 't', state: {}, questions: {}, calls: 0, outputs: [], ...extra };
+  return { time: 't', state: {}, questions: {}, calls: 0, outputs: [], ...extra };
 }
 
 function validateFirstVersionHasNoChanges() {
@@ -17,8 +17,10 @@ function validateNothingChangedGivesNoBlocks() {
 }
 
 function validateAddedRemovedAndChangedLeavesAreListed() {
-  const before = buildVersion({ state: { gone: 1, same: 2, nested: { x: 'a' } }, questions: { q: { criteria: { 1: 'low', 2: 'high' } } } });
-  const after = buildVersion({ state: { same: 2, fresh: 3, nested: { x: 'b' } }, questions: { q: { criteria: { 1: 'changed', 2: 'high' } } } });
+  // const before = buildVersion({ state: { gone: 1, same: 2, nested: { x: 'a' } }, questions: { q: { criteria: { 1: 'low', 2: 'high' } } } });
+  // const after = buildVersion({ state: { same: 2, fresh: 3, nested: { x: 'b' } }, questions: { q: { criteria: { 1: 'changed', 2: 'high' } } } });
+  const before = buildVersion({ state: { gone: 1, same: 2, nested: { x: 'a' } }, questions: { q: { criteria: { 1: 'low', 2: 'high' } } } } as never);
+  const after = buildVersion({ state: { same: 2, fresh: 3, nested: { x: 'b' } }, questions: { q: { criteria: { 1: 'changed', 2: 'high' } } } } as never);
   const expected = [
     '- state: `gone` removed',
     '- state: `nested.x` changed',

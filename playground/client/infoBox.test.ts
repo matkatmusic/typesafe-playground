@@ -58,7 +58,8 @@ function removeFakeDocument() {
 
 const usage = { input_tokens: 1, output_tokens: 1 };
 const noulVersion: Version = {
-  time: 'now', state: null, calls: 1, questions: { q: { type: 'noul', criteria: { true: 'is yes' } } },
+  // time: 'now', state: null, calls: 1, questions: { q: { type: 'noul', criteria: { true: 'is yes' } } },
+  time: 'now', state: {}, calls: 1, questions: { q: { type: 'noul', criteria: { true: 'is yes' } } },
   outputs: [{ model: 'm', answers: { q: { type: 'noul', noul: 0.8 } }, usage }],
 };
 

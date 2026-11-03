@@ -15,7 +15,8 @@ class FakeInput { value = ''; type = 'password' }
 class FakeBox { textContent = '' }
 
 const ISO_TIME = '2026-03-04T05:06:07.000Z'
-const VERSION = { time: ISO_TIME, state: { a: 1 }, questions: { q: 1 }, calls: 1, outputs: [] }
+// const VERSION = { time: ISO_TIME, state: { a: 1 }, questions: { q: 1 }, calls: 1, outputs: [] }
+const VERSION = { time: ISO_TIME, state: { a: 1 }, questions: { q: 1 } as never, calls: 1, outputs: [] }
 const realFetch = globalThis.fetch
 
 afterEach(() => {

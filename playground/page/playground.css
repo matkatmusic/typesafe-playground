@@ -103,6 +103,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 #stateNotesButton, #questionsNotesButton { margin-left: 0; }
 #stateUndoButton, #questionsUndoButton { margin-left: auto; }
 #questionsTitleRow .add-question { padding: 0; }
+#questionsTitleRow .question-quick-nav { flex: 1 1 100px; min-width: 100px; max-width: 200px; background: var(--panel); color: var(--text); border: 1px solid var(--button-border); border-radius: 999px; padding: 3px 12px; font-size: 13px; cursor: pointer; }
 .row-resizer { flex: none; height: 8px; border-top: 3px solid transparent; border-bottom: 3px solid transparent; background-color: var(--grid); background-clip: content-box; cursor: row-resize; touch-action: none; }
 .row-resizer:hover { background-color: var(--text-muted); }
 .column-resizer { flex: none; width: 12px; border-left: 5px solid transparent; border-right: 5px solid transparent; background-color: var(--grid); background-clip: content-box; cursor: col-resize; touch-action: none; }
@@ -131,6 +132,8 @@ button:disabled { opacity: 0.5; cursor: default; }
 .graph-title-row { grid-column: 1 / -1; grid-row: 1; height: 21px; display: flex; gap: 6px; align-items: center; }
 button.graph-toggle { flex: none; width: 20px; height: 20px; padding: 0; font-size: 11px; line-height: 1; }
 .graph-title { flex: 1; min-width: 0; color: var(--label-other); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.graph-question-link { background: none; border: none; padding: 0; font: inherit; color: inherit; cursor: pointer; }
+.graph-question-link:hover { text-decoration: underline; }
 .graph-title-row .format-json-button { flex: none; margin-left: 0; height: 20px; padding: 0 8px; line-height: 1; }
 .avg-toggle { flex: none; font-size: 12px; color: var(--text-muted); }
 .graph-block .chart-box { grid-column: 1; grid-row: 2; contain: size; overflow-x: auto; overflow-y: hidden; background: var(--panel); border: 1px solid var(--grid); border-radius: 6px; }

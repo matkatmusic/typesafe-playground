@@ -3,7 +3,7 @@ import type { Version } from '../playgroundHistory'
 import { buildNoteBody, readSavedNote, storeSavedNote } from './noteLocation'
 
 function buildVersion(): Version {
-  return { id: 1, time: 't', state: {}, questions: {}, calls: 0, outputs: [], stateNote: 's', questionsNote: 'q', resultNotes: { a: 'ra' } }
+  return { time: 't', state: {}, questions: {}, calls: 0, outputs: [], stateNote: 's', questionsNote: 'q', resultNotes: { a: 'ra' } }
 }
 
 function validateReadSavedNotePicksTheFieldOrTheQuestionKey() {

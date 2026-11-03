@@ -90,6 +90,17 @@ async function validateIssue32FindReplaceButtonsAreStyledInAllThreeEditors() {
     expect(rule).toContain('border: 1px solid var(--button-border);')
 }
 
+async function validateQuestionQuickNavStartsSmallAndGrowsOnlyIntoFreeSpace() {
+    const page = await buildPage(await buildTempHistoryPath())
+    const selector = '#questionsTitleRow .question-quick-nav {'
+    const rule = page.split('\n').find((line) => line.startsWith(selector))
+    expect(rule).toBeDefined()
+    expect(rule).toContain('flex: 1 1 100px;')
+    expect(rule).toContain('min-width: 100px;')
+    expect(rule).toContain('max-width: 200px;')
+}
+
+test('test_question_quick_nav_starts_small_and_grows_only_into_free_space_so_header_items_do_not_wrap', validateQuestionQuickNavStartsSmallAndGrowsOnlyIntoFreeSpace)
 test('test_issue_26_dark_mode_hover_box_rule_beats_codemirrors_light_tooltip_rule', validateIssue26DarkModeHoverBoxRuleBeatsCodeMirrorsLightTooltipRule)
 test('test_issue_32_find_replace_buttons_are_styled_in_all_three_editors', validateIssue32FindReplaceButtonsAreStyledInAllThreeEditors)
 test('test_placeholder_highlight_does_not_change_the_text_box', validatePlaceholderHighlightDoesNotChangeTheTextBox)

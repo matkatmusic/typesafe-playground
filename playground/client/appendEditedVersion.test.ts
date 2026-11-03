@@ -1,5 +1,6 @@
 import { test, expect, afterEach, mock, spyOn } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
+import type { Questions } from '@typesafe-ai/sdk'
 import { appendEditedVersion } from './appendEditedVersion'
 import * as costTokens from './costTokens'
 import * as editors from './editors'
@@ -24,7 +25,8 @@ afterEach(() => {
 })
 
 function buildVersion() {
-  return { time: 't', state: { a: 1 }, questions: { q: 1 }, calls: 2, outputs: [], note: 'old note' }
+  // return { time: 't', state: { a: 1 }, questions: { q: 1 }, calls: 2, outputs: [], note: 'old note' }
+  return { time: 't', state: { a: 1 }, questions: { q: 1 } as unknown as Questions, calls: 2, outputs: [], note: 'old note' }
 }
 
 function installPage(stateText: string, questionsText: string) {
@@ -101,6 +103,32 @@ async function validateInvalidJsonSendsNothingAndShowsTheError() {
   expect(refreshSpy).not.toHaveBeenCalled()
 }
 
+async function validateBadStateTextShowsTheMessageAndSendsNothing() {
+  for (const stateText of ['[1]', '3']) {
+    const { errorLine, refreshSpy } = installPage(stateText, '{"q": 1}')
+    const seen = installOpenFetch()
+    expect(await appendEditedVersion()).toBe(false)
+    expect(errorLine.textContent).toBe('state must be a JSON object')
+    expect(seen).toEqual([])
+    expect(pageState.versions.length).toBe(1)
+    expect(refreshSpy).not.toHaveBeenCalled()
+    mock.restore()
+  }
+}
+
+async function validateBadQuestionsTextShowsTheMessageAndSendsNothing() {
+  for (const questionsText of ['[]', '3']) {
+    const { errorLine, refreshSpy } = installPage('{"a": 2}', questionsText)
+    const seen = installOpenFetch()
+    expect(await appendEditedVersion()).toBe(false)
+    expect(errorLine.textContent).toBe('questions must be a JSON object')
+    expect(seen).toEqual([])
+    expect(pageState.versions.length).toBe(1)
+    expect(refreshSpy).not.toHaveBeenCalled()
+    mock.restore()
+  }
+}
+
 async function validateUneditedTextSendsNothing() {
   installPage('{"a": 1}', '{ "q": 1 }')
   const seen = installOpenFetch()
@@ -167,6 +195,8 @@ async function validateOverwriteKeepsThePinOnTheSamePlace() {
 test('test_appended_version_gets_the_inherited_state_note', validateAppendedVersionGetsTheInheritedStateNote)
 test('test_edited_text_appends_one_unrun_version_with_the_parsed_text',validateEditedTextAppendsOneUnrunVersionWithTheParsedText)
 test('test_invalid_json_sends_nothing_and_shows_the_error', validateInvalidJsonSendsNothingAndShowsTheError)
+test('test_bad_state_text_shows_the_message_and_sends_nothing', validateBadStateTextShowsTheMessageAndSendsNothing)
+test('test_bad_questions_text_shows_the_message_and_sends_nothing', validateBadQuestionsTextShowsTheMessageAndSendsNothing)
 test('test_unedited_text_sends_nothing', validateUneditedTextSendsNothing)
 test('test_edited_state_of_an_unrun_default_version_overwrites_it_in_place', validateEditedStateOfAnUnrunDefaultVersionOverwritesItInPlace)
 test('test_edited_questions_of_an_unrun_default_version_overwrites_it_in_place', validateEditedQuestionsOfAnUnrunDefaultVersionOverwritesItInPlace)

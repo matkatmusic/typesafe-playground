@@ -47,7 +47,7 @@ function installFakeDom() {
 function installPage(stateText: string) {
   spyOn(editors, 'getStateEditor').mockReturnValue({ state: { doc: { toString: () => stateText } } } as unknown as EditorView)
   spyOn(editors, 'getQuestionsEditor').mockReturnValue({ state: { doc: { toString: () => '{}' } } } as unknown as EditorView)
-  pageState.versions = [{ id: 1, time: 't', state: { a: 1 }, questions: {}, calls: 0, outputs: [], stateNote: 'saved' }]
+  pageState.versions = [{ time: 't', state: { a: 1 }, questions: {}, calls: 0, outputs: [], stateNote: 'saved' }]
   pageState.index = 0
 }
 

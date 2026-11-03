@@ -1,3 +1,4 @@
+import type { JsonValue, Questions } from '@typesafe-ai/sdk';
 import type { Version } from '../playgroundHistory';
 import { NOT_RUN_TIME } from '../notRunTime';
 import { computeVersionStep } from '../playgroundVersionStep';
@@ -24,11 +25,13 @@ export function computeBatchStateError(value: unknown): string | null {
   return null;
 }
 
-function buildNotRunVersion(state: unknown, questions: unknown): Version {
+// function buildNotRunVersion(state: unknown, questions: unknown): Version {
+function buildNotRunVersion(state: Record<string, JsonValue>, questions: Questions): Version {
   return { time: NOT_RUN_TIME, state: state, questions: structuredClone(questions), calls: 0, outputs: [] };
 }
 
-export function buildBatchVersions(versions: Version[], shownIndex: number, states: unknown[], questions: unknown): BatchVersions {
+// export function buildBatchVersions(versions: Version[], shownIndex: number, states: unknown[], questions: unknown): BatchVersions {
+export function buildBatchVersions(versions: Version[], shownIndex: number, states: Record<string, JsonValue>[], questions: Questions): BatchVersions {
   const shownVersion = versions[shownIndex];
   const step = computeVersionStep(shownVersion, states[0], questions);
   const batchVersions = [...versions];

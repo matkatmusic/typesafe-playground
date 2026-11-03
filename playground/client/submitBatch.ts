@@ -5,7 +5,9 @@ import { renderTotalCost } from './costTokens';
 import { getElement } from './dom';
 import { sendDraft } from './draftSync';
 import { getQuestionsEditor, getStateEditor } from './editors';
+import type { JsonValue } from '@typesafe-ai/sdk';
 import { computeJsonParseResult } from './jsonParse';
+import { isQuestionsObject } from './jsonObjectGuards';
 import { isKindTextEdited } from './noteKind';
 import { markPageChanged } from './pageChanged';
 import { saveVersionNote } from './saveVersionNote';
@@ -33,7 +35,12 @@ export async function executeSubmitBatch(): Promise<void> {
     errorLine.textContent = questionsResult.errorMessage;
     return;
   }
-  const states = stateResult.value as unknown[];
+  if (!isQuestionsObject(questionsResult.value)) {
+    errorLine.textContent = 'questions must be a JSON object';
+    return;
+  }
+  // const states = stateResult.value as unknown[];
+  const states = stateResult.value as Record<string, JsonValue>[];
   const questions = questionsResult.value;
   const shownVersion = getShownVersion();
   const isQuestionsUnchanged = !isKindTextEdited('questions');

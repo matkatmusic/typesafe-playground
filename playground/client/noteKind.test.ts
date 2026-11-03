@@ -14,7 +14,7 @@ function removeFakeState() {
 
 function installState(stateText: string) {
   spyOn(editors, 'getStateEditor').mockReturnValue({ state: { doc: { toString: () => stateText } } } as unknown as EditorView)
-  pageState.versions = [{ id: 1, time: 't', state: { a: 1 }, questions: {}, calls: 0, outputs: [] }]
+  pageState.versions = [{ time: 't', state: { a: 1 }, questions: {}, calls: 0, outputs: [] }]
   pageState.index = 0
 }
 
@@ -32,7 +32,8 @@ function validateQuestionsTextIsComparedToTheQuestions() {
   installState('{ "a": 1 }')
   spyOn(editors, 'getQuestionsEditor').mockReturnValue({ state: { doc: { toString: () => '{ "q": 1 }' } } } as unknown as EditorView)
   expect(isKindTextEdited('questions')).toBe(true)
-  pageState.versions[0].questions = { q: 1 }
+  // pageState.versions[0].questions = { q: 1 }
+  pageState.versions[0].questions = { q: 1 } as never
   expect(isKindTextEdited('questions')).toBe(false)
 }
 

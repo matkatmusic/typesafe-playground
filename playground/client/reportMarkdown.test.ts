@@ -1,4 +1,5 @@
 import { test, expect } from 'bun:test';
+import type { Questions } from '@typesafe-ai/sdk';
 import type { Version } from '../playgroundHistory';
 import { buildReportMarkdown } from './reportMarkdown';
 
@@ -50,7 +51,8 @@ function validateCopiedForwardStateAndQuestionsNotesAreSkipped() {
   expect(markdown).not.toContain('Questions notes\n\nsame q\n\n### Run comments');
 }
 
-const taskQuestions = { needsTask: { type: 'noul', instructions: 'Is it a task?', criteria: { true: 'a task', false: 'not a task' } } };
+// const taskQuestions = { needsTask: { type: 'noul', instructions: 'Is it a task?', criteria: { true: 'a task', false: 'not a task' } } };
+const taskQuestions: Questions = { needsTask: { type: 'noul', instructions: 'Is it a task?', criteria: { true: 'a task', false: 'not a task' } } };
 
 function buildTaskOutputs(noul: number) {
   return [{ answers: { needsTask: { type: 'noul', noul: noul } } }] as never;

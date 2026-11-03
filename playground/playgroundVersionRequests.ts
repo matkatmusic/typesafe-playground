@@ -1,9 +1,12 @@
 // import { buildBlankVersion, loadHistory, writeHistory, type Version } from './playgroundHistory';
 import { buildBlankVersion, findVersionByIndex, loadHistory, writeHistory } from './playgroundHistory';
 
-export function isPlainObject(value: unknown): boolean {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+import { isPlainObject } from './isPlainObject';
+
+export { isPlainObject };
+// export function isPlainObject(value: unknown): boolean {
+//   return typeof value === 'object' && value !== null && !Array.isArray(value);
+// }
 
 export function isVersionShape(item: unknown): boolean {
   const isItemObject = isPlainObject(item);

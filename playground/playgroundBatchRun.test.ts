@@ -1,7 +1,8 @@
 import { test, expect } from 'bun:test'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import type { Questions } from '@typesafe-ai/sdk'
+// import type { Questions } from '@typesafe-ai/sdk'
+import type { JsonValue, Questions } from '@typesafe-ai/sdk'
 import { buildBatchVersions } from './client/batchPlan'
 import { dispatchRequest } from './playground'
 import { initHistory, loadHistory, type RunOutput, type Version } from './playgroundHistory'
@@ -34,7 +35,8 @@ function buildCountingClientFactory(failOnCall: number | null) {
     return { seenStates, createClient: () => ({ systemOne }) }
 }
 
-async function openBatchAndRunEachItem(historyPath: string, shownIndex: number, states: unknown[], questions: unknown, createClient: () => { systemOne: (request: never) => Promise<RunOutput> }) {
+// async function openBatchAndRunEachItem(historyPath: string, shownIndex: number, states: unknown[], questions: unknown, createClient: () => { systemOne: (request: never) => Promise<RunOutput> }) {
+async function openBatchAndRunEachItem(historyPath: string, shownIndex: number, states: Record<string, JsonValue>[], questions: Questions, createClient: () => { systemOne: (request: never) => Promise<RunOutput> }) {
     const history = await loadHistory(historyPath)
     const plan = buildBatchVersions(history, shownIndex, states, questions)
     const openResponse = await dispatchRequest(buildPost('/open', { versions: plan.versions }), PORT, historyPath, createClient as never)
@@ -109,7 +111,7 @@ async function validateOneFailedCallInsideARunLosesTheEarlierPaidCallsOfThatRun(
     await expect(dispatchRequest(buildPost('/run', runBodies[0]), PORT, historyPath, createClient as never)).rejects.toThrow('call failed')
     const secondResponse = await dispatchRequest(buildPost('/run', runBodies[1]), PORT, historyPath, createClient as never)
     expect(secondResponse.status).toBe(200)
-    // Step: the 1 call that worked before the failure is not stored: version 1 has no results and still has no run time.
+    // Step: the 1 successful call is not stored: version 1 has no results or run time.
     expect(seenStates.length).toBe(5)
     const history = await loadHistory(historyPath)
     expect(history[0].outputs.length).toBe(0)

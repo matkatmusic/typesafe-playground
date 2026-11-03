@@ -21,7 +21,8 @@ function buildStubEditor(text: string) {
 }
 
 async function validateTickSendsTheKeptDraftTextsWhenARealVersionIsShown() {
-  pageState.versions = [{ id: 1, time: 't', state: { a: 1 }, questions: { q: 1 }, calls: 1, outputs: [] }]
+  // old: fixture had questions { q: 1 } without the as never cast
+  pageState.versions = [{ time: 't', state: { a: 1 }, questions: { q: 1 } as never, calls: 1, outputs: [] }]
   pageState.index = 0
   spyOn(editors, 'getStateEditor').mockReturnValue(buildStubEditor('{"a":1}'))
   spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubEditor('{"q":1}'))

@@ -6,6 +6,7 @@ import { getQuestionsEditor, getStateEditor, renderResultJson } from './editors'
 import { renderGraphs } from './graphs';
 import { attachInfoBox } from './infoBox';
 import { computeJsonParseResult } from './jsonParse';
+import { isJsonObject, isQuestionsObject } from './jsonObjectGuards';
 import { applyNoteBox } from './noteBox';
 import { applyPinButtons } from './pinButtons';
 import { saveInheritedNote } from './saveVersionNote';
@@ -33,6 +34,14 @@ export async function appendEditedVersion(): Promise<boolean> {
   const questionsResult = computeJsonParseResult('questions', questionsText);
   if (!questionsResult.isValid) {
     getElement('errorLine').textContent = questionsResult.errorMessage;
+    return false;
+  }
+  if (!isJsonObject(stateResult.value)) {
+    getElement('errorLine').textContent = 'state must be a JSON object';
+    return false;
+  }
+  if (!isQuestionsObject(questionsResult.value)) {
+    getElement('errorLine').textContent = 'questions must be a JSON object';
     return false;
   }
   const step = computeVersionStep(shownVersion, stateResult.value, questionsResult.value);

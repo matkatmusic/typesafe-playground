@@ -1,5 +1,6 @@
 import { test, expect, afterEach, spyOn, mock } from 'bun:test'
 import type { EditorView } from '@codemirror/view'
+import type { Questions } from '@typesafe-ai/sdk'
 import type { Version } from '../playgroundHistory'
 import * as editors from './editors'
 import * as graphs from './graphs'
@@ -17,7 +18,8 @@ class FakeBox { textContent = '' }
 
 const realFetch = globalThis.fetch
 const OUTPUT = { answers: {}, usage: { input_tokens: 1000000, output_tokens: 1 } }
-const QUESTIONS = { q: { type: 'noul', instructions: 'x' } }
+// const QUESTIONS = { q: { type: 'noul', instructions: 'x' } }
+const QUESTIONS = { q: { type: 'noul', instructions: 'x' } } as unknown as Questions
 
 type RunSnapshot = { index: number; calls: number; state: unknown; questions: unknown; buttonText: string; isButtonDisabled: boolean; isToggleDisabled: boolean; isNewDisabled: boolean; areEditorsLocked: boolean; shownIndex: number }
 type Harness = { elements: Record<string, FakeButton & FakeInput & FakeBox>; history: Version[]; runs: RunSnapshot[]; notes: { index: number; body: Record<string, unknown> }[]; drafts: Record<string, unknown>[]; alerts: string[]; openBodies: Version[][]; locks: boolean[]; stateText: { value: string }; questionsText: { value: string }; fetchOrder: string[] }
@@ -147,6 +149,16 @@ async function validateBadQuestionsShowTheTodayErrorAndChangeNothing() {
     expect(pageState.isBatchOn).toBe(true)
 }
 
+async function validateQuestionsArrayShowsTheMessageAndSendsNothing() {
+    const harness = installHarness([buildVersion({ a: 1 }, QUESTIONS, 1, 't')], 0, '[{"a": 1}]', '[]', [])
+    startBatchOn()
+    await executeSubmitBatch()
+    expect(harness.elements.errorLine.textContent).toBe('questions must be a JSON object')
+    expect(harness.fetchOrder).toEqual([])
+    expect(pageState.isBatchOn).toBe(true)
+    expect(pageState.versions.length).toBe(1)
+}
+
 async function validateVersionFourExampleKeepsTheFirstItemOnVersionFourAndAppendsTheSecond() {
     // Step: version 4 has results and the state {"a":1}, the same questions are in the editor.
     const versions = [buildVersion({ z: 1 }, QUESTIONS, 1, 't'), buildVersion({ z: 2 }, QUESTIONS, 1, 't'), buildVersion({ z: 3 }, QUESTIONS, 1, 't'), buildVersion({ a: 1 }, QUESTIONS, 2, 't')]
@@ -192,7 +204,7 @@ async function validateFiveStatesWithCallsThreeSendFiveRunsOfThreeCallsEachInOrd
     const harness = installHarness([buildVersion({ a: 0 }, QUESTIONS, 1, 't')], 0, '[{"a":1},{"a":2},{"a":3},{"a":4},{"a":5}]', JSON.stringify(QUESTIONS), [])
     startBatchOn()
     await executeSubmitBatch()
-    // Step: 5 runs of 3 calls each, which is 15 calls, go to versions 2 to 6 in array order.
+    // Step: 15 calls (5 runs of 3) go to versions 2 to 6 in array order.
     expect(harness.runs.length).toBe(5)
     expect(harness.runs.map((run) => run.calls)).toEqual([3, 3, 3, 3, 3])
     expect(harness.runs.map((run) => run.index)).toEqual([1, 2, 3, 4, 5])
@@ -218,7 +230,7 @@ async function validateAfterTheLastRunTheToggleIsOffTheControlsAreNormalAndTheDr
     expect(harness.elements.newButton.disabled).toBe(false)
     expect(harness.locks[harness.locks.length - 1]).toBe(false)
     expect(pageState.editedDraft).toBeNull()
-    // Step: the draft was sent with the toggle off and the first item state in the editor, before the first run.
+    // Step: before the first run, the draft was sent with toggle off and the editor's first item state.
     expect(harness.drafts.length).toBe(1)
     expect(harness.drafts[0].isBatch).toBe(false)
     expect(harness.drafts[0].state).toBe(JSON.stringify({ a: 1 }))
@@ -339,6 +351,7 @@ async function validateDispatcherSendsBatchOffArrayTextToAnErrorAndNoRun() {
 
 test('test_every_validation_error_shows_an_error_and_changes_nothing', validateEveryValidationErrorShowsAnErrorAndChangesNothing)
 test('test_bad_questions_show_the_today_error_and_change_nothing', validateBadQuestionsShowTheTodayErrorAndChangeNothing)
+test('test_questions_array_shows_the_message_and_sends_nothing', validateQuestionsArrayShowsTheMessageAndSendsNothing)
 test('test_version_four_example_keeps_the_first_item_on_version_four_and_appends_the_second', validateVersionFourExampleKeepsTheFirstItemOnVersionFourAndAppendsTheSecond)
 test('test_first_item_overwrite_replaces_the_shown_version_and_makes_no_new_version', validateFirstItemOverwriteReplacesTheShownVersionAndMakesNoNewVersion)
 test('test_first_item_create_makes_a_new_version_at_the_end_and_shows_it', validateFirstItemCreateMakesANewVersionAtTheEndAndShowsIt)

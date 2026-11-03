@@ -32,7 +32,7 @@ afterEach(removeFakeDom)
 
 function validateOpenFillsTheBodyAndShowsTheDialog() {
   const { dialog, body } = installFakeDom()
-  pageState.versions = [{ id: 1, time: 't1', state: {}, questions: {}, calls: 0, outputs: [], note: 'hello <b>' }]
+  pageState.versions = [{ time: 't1', state: {}, questions: {}, calls: 0, outputs: [], note: 'hello <b>' }]
   openReportDialog()
   expect(dialog.isOpen).toBe(true)
   expect(body.innerHTML).toContain('<h2>Version 1 (t1)</h2>')
@@ -53,7 +53,7 @@ async function validateCopyWritesTheMarkdownToTheClipboard() {
     written.push(text)
   }
   Object.defineProperty(globalThis, 'navigator', { value: { clipboard: { writeText } }, configurable: true })
-  pageState.versions = [{ id: 1, time: 't1', state: {}, questions: {}, calls: 0, outputs: [], note: 'kept' }]
+  pageState.versions = [{ time: 't1', state: {}, questions: {}, calls: 0, outputs: [], note: 'kept' }]
   await copyReport()
   expect(written).toEqual(['# Notes report\n\n## Version 1 (t1)\n\n### Run comments\n\nkept\n'])
   if (original !== undefined)

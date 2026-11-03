@@ -37,7 +37,7 @@ afterEach(removeFakeState)
 function validateEditedVersionDisablesTheNoteBoxAndRevertRestoresIt() {
   const noteText = new FakeTextArea()
   installFakeDom(noteText)
-  pageState.versions = [{ id: 1, time: '2026-03-04T05:06:07.000Z', state: { a: 1 }, questions: {}, calls: 1, outputs: [{}] as never, note: 'kept' }]
+  pageState.versions = [{ time: '2026-03-04T05:06:07.000Z', state: { a: 1 }, questions: {}, calls: 1, outputs: [{}] as never, note: 'kept' }]
   pageState.index = 0
   installEditors('{"a":2}')
   refreshVersionBox()

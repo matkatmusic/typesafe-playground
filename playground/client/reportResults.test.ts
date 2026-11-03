@@ -21,7 +21,8 @@ function buildVersion(id: number, answerSets: ReturnType<typeof buildAnswers>[],
   const outputs = [];
   for (const answers of answerSets)
     outputs.push({ answers: answers });
-  return { id: id, time: `t${id}`, state: {}, questions: questions, calls: outputs.length, outputs: outputs as never, ...extra };
+  // return { id: id, time: `t${id}`, state: {}, questions: questions, calls: outputs.length, outputs: outputs as never, ...extra };
+  return { time: `t${id}`, state: {}, questions: questions as never, calls: outputs.length, outputs: outputs as never, ...extra };
 }
 
 function pickMetricLine(blocks: string[], name: string): string {

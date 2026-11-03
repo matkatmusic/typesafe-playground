@@ -4,8 +4,8 @@ import { parsePageData, readPageData } from './pageData'
 function validateParsePageDataReadsVersionsAndHasEnvKey() {
     // expect(parsePageData('{"versions":[],"draft":null,"hasEnvKey":true}')).toEqual({ versions: [], draft: null, hasEnvKey: true })
     // expect(parsePageData('{"versions":[],"draft":{"state":"s","questions":"q"},"hasEnvKey":false}')).toEqual({ versions: [], draft: { state: 's', questions: 'q' }, hasEnvKey: false })
-    expect(parsePageData('{"versions":[],"hasEnvKey":true}')).toEqual({ versions: [], hasEnvKey: true })
-    expect(parsePageData('{"versions":[],"hasEnvKey":false}')).toEqual({ versions: [], hasEnvKey: false })
+    expect(parsePageData('{"versions":[],"historyPath":"h.json","hasEnvKey":true}')).toEqual({ versions: [], historyPath: 'h.json', hasEnvKey: true })
+    expect(parsePageData('{"versions":[],"historyPath":"h.json","hasEnvKey":false}')).toEqual({ versions: [], historyPath: 'h.json', hasEnvKey: false })
 }
 
 function validateReadPageDataThrowsWithoutADocument() {

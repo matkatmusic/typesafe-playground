@@ -13,7 +13,8 @@ afterEach(() => {
 })
 
 function installEditorTexts(stateText: string, questionsText: string) {
-  pageState.versions = [{ id: 1, time: 't', state: { a: 1 }, questions: { q: 1 }, calls: 1, outputs: [] }]
+  // old: fixture version had questions q=1 without the never cast
+  pageState.versions = [{ time: 't', state: { a: 1 }, questions: { q: 1 } as never, calls: 1, outputs: [] }]
   pageState.index = 0
   spyOn(editors, 'getStateEditor').mockReturnValue({ state: { doc: { toString: () => stateText } } } as unknown as EditorView)
   spyOn(editors, 'getQuestionsEditor').mockReturnValue({ state: { doc: { toString: () => questionsText } } } as unknown as EditorView)
