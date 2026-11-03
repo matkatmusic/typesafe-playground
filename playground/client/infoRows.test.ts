@@ -53,6 +53,17 @@ function validateNoulRowsDoNotThrow() {
   expect(blankRows[1].parts.length).toBe(1);
 }
 
+function validateLowNoulShowsTheNoChoice() {
+  const lowAnswers: Answer[] = [{ type: 'noul', noul: 0.07 }];
+  for (const callIndex of [0, -1]) {
+    const rows = buildBarInfoRows({ question: noulQuestion, answers: lowAnswers, key: 'yes', keys: ['yes'], callIndex, pinned: null });
+    expect(rows[0].parts[0][0]).toBe('no');
+    expect(rows[1].parts[0][0]).toBe('0.070');
+    expect(rows[3].parts[0][0]).toBe('1');
+    expect(rows[4].parts[0][0]).toBe('is no');
+  }
+}
+
 function validateScoreTopRunsUseTheProbabilities() {
   const scoreQuestion: Question = { type: 'score', criteria: ['low', 'high'] };
   const scoreAnswers: Answer[] = [
@@ -106,3 +117,4 @@ test('test_call_bar_info_holds_score_and_confidence', validateCallRowsHoldTheCal
 test('test_average_bar_info_holds_averages', validateAverageRowsHoldTheAverages);
 test('test_noul_bar_info_has_no_confidence_and_does_not_throw', validateNoulRowsDoNotThrow);
 test('test_score_top_runs_use_the_probabilities', validateScoreTopRunsUseTheProbabilities);
+test('test_low_noul_shows_the_no_choice', validateLowNoulShowsTheNoChoice);

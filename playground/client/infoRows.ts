@@ -52,6 +52,7 @@ function countTopRuns(answers: Answer[], keys: string[], key: string): number {
 export function buildBarInfoRows(request: BarInfoRequest): InfoRow[] {
   const { question, answers, key, keys, callIndex, pinned } = request;
   const isBarShown = callIndex !== null;
+  let shownKey = '';
   let messageText = '';
   let scoreText = '';
   let confidenceText: string | null = answers[0].type === 'noul' ? null : '';
@@ -62,16 +63,22 @@ export function buildBarInfoRows(request: BarInfoRequest): InfoRow[] {
   if (isBarShown) {
     const values = listValues(answers, key);
     const stat = computeSummary(values);
-    messageText = buildTextFormatter(getShownVersion())(readDescription(question, key));
+    const scoreValue = callIndex === -1 ? stat.average : values[callIndex];
+    shownKey = answers[0].type === 'noul' ? readTopKey({ type: 'noul', noul: scoreValue }, keys) : key;
+    // messageText = buildTextFormatter(getShownVersion())(readDescription(question, key));
+    messageText = buildTextFormatter(getShownVersion())(readDescription(question, shownKey));
     lowText = formatThreeDecimals(stat.low);
     highText = formatThreeDecimals(stat.high);
     averageText = formatThreeDecimals(stat.average);
-    scoreText = formatThreeDecimals(callIndex === -1 ? stat.average : values[callIndex]);
+    // scoreText = formatThreeDecimals(callIndex === -1 ? stat.average : values[callIndex]);
+    scoreText = formatThreeDecimals(scoreValue);
     confidenceText = formatConfidenceText(answers, callIndex);
-    topCountText = String(countTopRuns(answers, keys, key));
+    // topCountText = String(countTopRuns(answers, keys, key));
+    topCountText = String(countTopRuns(answers, keys, shownKey));
   }
   const rows: InfoRow[] = [];
-  rows.push({ label: 'Choice:', parts: [[isBarShown ? key : '', VALUE]] });
+  // rows.push({ label: 'Choice:', parts: [[isBarShown ? key : '', VALUE]] });
+  rows.push({ label: 'Choice:', parts: [[shownKey, VALUE]] });
   rows.push({ label: 'Score:', parts: listScoreParts(scoreText, confidenceText) });
   rows.push({ label: 'Range:', parts: listRangeParts(lowText, highText, averageText) });
   if (isBarShown)
