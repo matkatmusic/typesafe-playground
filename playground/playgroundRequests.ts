@@ -61,7 +61,8 @@ export async function collectOutputs(client: RunClient, calls: number, state: Re
 //   return undefined;
 // }
 
-export function addRunToHistory(history: Version[], shownVersion: Version, outputs: RunOutput[], state: unknown, questions: unknown): Version {
+// export function addRunToHistory(history: Version[], shownVersion: Version, outputs: RunOutput[], state: unknown, questions: unknown): Version {
+export function addRunToHistory(history: Version[], shownVersion: Version, outputs: RunOutput[], state: Record<string, JsonValue>, questions: Questions): Version {
   // const lastVersion = history[history.length - 1];
   // const isUnchanged = isInputUnchanged(shownVersion, state, questions);
   // const isOnlyVersionNeverRun = history.length === 1 && shownVersion.calls === 0;

@@ -62,12 +62,20 @@ const noulVersion: Version = {
   outputs: [{ model: 'm', answers: { q: { type: 'noul', noul: 0.8 } }, usage }],
 };
 
-function drawNoulBlock(): FakeElement {
+const lowNoulVersion: Version = {
+  ...noulVersion,
+  outputs: [{ model: 'm', answers: { q: { type: 'noul', noul: 0.07 } }, usage }],
+};
+
+// function drawNoulBlock(): FakeElement {
+function drawNoulBlock(version: Version = noulVersion): FakeElement {
   Object.assign(globalThis, { document: { createElementNS: createFakeElementNamed, createElement: createFakeTag, createTextNode: createFakeText } });
-  pageState.versions = [noulVersion];
+  // pageState.versions = [noulVersion];
+  pageState.versions = [version];
   pageState.index = 0;
   const container = new FakeElement();
-  renderGraphs(noulVersion, container as unknown as HTMLElement, attachInfoBox);
+  // renderGraphs(noulVersion, container as unknown as HTMLElement, attachInfoBox);
+  renderGraphs(version, container as unknown as HTMLElement, attachInfoBox);
   return container.children[0];
 }
 
@@ -104,6 +112,20 @@ function validateNoulHoverDoesNotThrowAndShowsTheValue() {
   expect(shownBox.children[9].children[0].children[0].textContent).toBe('is yes');
 }
 
+function validateLowNoulChoiceShowsNoBeforeAndAfterHover() {
+  const block = drawNoulBlock(lowNoulVersion);
+  const svg = block.children[1].children[0];
+  const hits: FakeElement[] = [];
+  for (const child of svg.children) {
+    if (child.attrs.fill === 'transparent')
+      hits.push(child);
+  }
+  const defaultBox = block.children[2];
+  expect(defaultBox.children[1].children[0].textContent).toBe('no');
+  hits[0].listeners.mouseenter();
+  expect(defaultBox.children[1].children[0].textContent).toBe('no');
+}
+
 function validateAverageAddsAnAverageHitRectFirst() {
   graphState.averageShownByName.q = true;
   const block = drawNoulBlock();
@@ -118,4 +140,5 @@ function validateAverageAddsAnAverageHitRectFirst() {
 
 afterEach(removeFakeDocument);
 test('test_noul_hover_does_not_throw_and_shows_the_value', validateNoulHoverDoesNotThrowAndShowsTheValue);
+test('test_low_noul_choice_shows_no_before_and_after_hover', validateLowNoulChoiceShowsNoBeforeAndAfterHover);
 test('test_average_adds_an_average_hit_rect', validateAverageAddsAnAverageHitRectFirst);

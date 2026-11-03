@@ -114,7 +114,8 @@ async function validateResetRunsClearsOutputsAndCallsOfOneVersionAndKeepsTheRest
     const response = await dispatchRequest(buildPostRequest('/reset-runs', { index: 1 }), PORT, historyPath)
     expect(response.status).toBe(200)
     const cleared = (await response.json()) as Version
-    expect(cleared).toEqual({ time: 't', state: { a: 2 }, questions: { q: 2 }, calls: 0, outputs: [], note: 'kept' })
+    // expect(cleared).toEqual({ time: 't', state: { a: 2 }, questions: { q: 2 }, calls: 0, outputs: [], note: 'kept' })
+    expect(cleared).toEqual({ time: 't', state: { a: 2 }, questions: { q: 2 }, calls: 0, outputs: [], note: 'kept' } as unknown as Version)
     const saved = (await (await executeSaveRequest(historyPath)).json()) as { versions: Version[] }
     expect(saved.versions[1]).toEqual(cleared)
     expect(saved.versions[0]).toEqual(ranVersion(1) as unknown as Version)

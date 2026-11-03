@@ -1,10 +1,12 @@
 import { test, expect } from 'bun:test'
+import type { Questions } from '@typesafe-ai/sdk'
 import type { RunOutput, Version } from './playgroundHistory'
 import { computeVersionStep, isInputUnchanged } from './playgroundVersionStep'
 import { HARD_CODED_QUESTIONS, HARD_CODED_STATE } from './typeSafeQuery'
 
 const OTHER_STATE = { message: { text: 'changed' } }
-const OTHER_QUESTIONS = { other: { type: 'noul', instructions: 'x', criteria: { true: 'a', false: 'b' } } }
+// const OTHER_QUESTIONS = { other: { type: 'noul', instructions: 'x', criteria: { true: 'a', false: 'b' } } }
+const OTHER_QUESTIONS = { other: { type: 'noul', instructions: 'x', criteria: { true: 'a', false: 'b' } } } as Questions
 const OUTPUT = { answers: {}, usage: { input_tokens: 1, output_tokens: 1 } } as unknown as RunOutput
 
 function buildShown(isStateDefault: boolean, isQuestionsDefault: boolean, hasResults: boolean): Version {

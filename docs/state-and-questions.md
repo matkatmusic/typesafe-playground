@@ -205,7 +205,6 @@ Use this method to load more than one version. Write a JSON file with an array o
 ```json
 [
   {
-    "id": 1,
     "time": "2026-11-02T00:00:00.000Z",
     "state": { "message": { "text": "Please send me the report by Friday." } },
     "questions": {
@@ -221,7 +220,6 @@ Use this method to load more than one version. Write a JSON file with an array o
 ```
 
 - The array must not be empty.
-- `id` values must be 1, 2, 3, and so on, in order. The page uses `id` to find the position of a version in the array.
 - `state` and `questions` must be objects.
 - `calls` must be an integer and `outputs` must be an array. For a version that has no runs, use `0` and `[]`.
 - `time` is the time of the version in ISO 8601 format. The page shows it in the version label.

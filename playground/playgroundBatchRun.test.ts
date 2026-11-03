@@ -1,6 +1,7 @@
 import { test, expect } from 'bun:test'
 import { mkdtempSync } from 'node:fs'
 import { tmpdir } from 'node:os'
+import type { Questions } from '@typesafe-ai/sdk'
 import { buildBatchVersions } from './client/batchPlan'
 import { dispatchRequest } from './playground'
 import { initHistory, loadHistory, type RunOutput, type Version } from './playgroundHistory'
@@ -74,7 +75,8 @@ async function validateVersionFourExampleAddsResultsToVersionFourAndStampsVersio
     // Step: write 4 versions, version 4 holds results and the state {"a":1}.
     const historyPath = await buildTempHistoryPath()
     const output = { answers: {}, usage: { input_tokens: 7, output_tokens: 1 } }
-    const questions = { q: { type: 'noul', instructions: 'x' } }
+    // const questions = { q: { type: 'noul', instructions: 'x' } }
+    const questions = { q: { type: 'noul', instructions: 'x' } } as unknown as Questions
     const versions: Version[] = []
     for (let i = 0; i < 3; i++)
         versions.push({ time: 't', state: { z: i }, questions, calls: 1, outputs: [output as never] })

@@ -20,7 +20,8 @@ export function readQuestions(version: Version): Questions {
   const isPlainObject = isObject && !isArray;
   if (!isPlainObject)
     throw new Error('version questions must be a JSON object');
-  return questions as Questions;
+  // return questions as Questions;
+  return questions;
 }
 
 export function listOptionKeys(firstAnswer: Answer): string[] {
