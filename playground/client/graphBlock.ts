@@ -1,6 +1,7 @@
 import type { Question } from '@typesafe-ai/sdk';
 import type { Version } from '../playgroundHistory';
 import type { GraphBlock, RenderCallback } from './graphTypes';
+import { getElement } from './dom';
 import { graphState } from './graphState';
 import { formatValueText } from './graphValues';
 import { createNotesButton } from './notesButton';
@@ -19,8 +20,11 @@ export function createAverageToggle(name: string, onChange: RenderCallback): HTM
   checkbox.type = 'checkbox';
   checkbox.checked = graphState.averageShownByName[name] === true;
   function updateAverageShown(): void {
+    const container = getElement('graphContainerBox');
+    const scrollTopBeforeRender = container.scrollTop;
     graphState.averageShownByName[name] = checkbox.checked;
     onChange();
+    container.scrollTop = scrollTopBeforeRender;
   }
   checkbox.addEventListener('change', updateAverageShown);
   const text = document.createElement('span');
@@ -37,8 +41,13 @@ export function createCollapseButton(name: string, onChange: RenderCallback): HT
   button.textContent = isCollapsed ? '▶' : '▼';
   button.setAttribute('aria-label', isCollapsed ? 'expand graph' : 'collapse graph');
   function updateCollapsed(): void {
+    const container = getElement('graphContainerBox');
+    const scrollTopBeforeRender = container.scrollTop;
     graphState.collapsedByName[name] = !isCollapsed;
     onChange();
+    container.scrollTop = scrollTopBeforeRender;
+    if (isCollapsed)
+      getElement('graphBlock' + name).scrollIntoView({ block: 'nearest' });
   }
   button.addEventListener('click', updateCollapsed);
   return button;
@@ -62,6 +71,7 @@ export function createGraphBlock(questionNumber: number, name: string, question:
   const instructionsText = graphState.isReferencesReplaced ? replaceReferences(formattedInstructions, version.state, version.questions) : formattedInstructions;
   const block = document.createElement('div');
   block.className = 'graph-block';
+  block.id = 'graphBlock' + name;
   if (graphState.collapsedByName[name] === true)
     block.classList.add('collapsed');
   const titleRow = document.createElement('div');

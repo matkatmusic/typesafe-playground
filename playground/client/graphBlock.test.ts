@@ -6,12 +6,13 @@ import type { EditorView } from '@codemirror/view';
 import type { Version } from '../playgroundHistory';
 import * as editors from './editors';
 import { graphState } from './graphState';
-import { createCollapseButton, createGraphBlock, formatGraphTitle } from './graphBlock';
+import { createAverageToggle, createCollapseButton, createGraphBlock, formatGraphTitle } from './graphBlock';
 
 function createFakeElement() {
   const element = {
-    className: '', textContent: '', title: '', type: '', checked: false,
+    id: '', scrollTop: 0, className: '', textContent: '', title: '', type: '', checked: false,
     children: [] as unknown[], classes: [] as string[], attrs: {} as Record<string, string>, listeners: {} as Record<string, () => void>,
+    scrollIntoView(_options: unknown) {},
     classList: { add(name: string) { element.classes.push(name); } },
     setAttribute(key: string, value: string) { element.attrs[key] = value; },
     appendChild(child: unknown) { element.children.push(child); },
@@ -26,13 +27,22 @@ function createFakeText(text: string) {
   return element;
 }
 
+const fakeElementsById: Record<string, ReturnType<typeof createFakeElement>> = {};
+
+function getFakeElementById(id: string) {
+  fakeElementsById[id] ??= createFakeElement();
+  return fakeElementsById[id];
+}
+
 function installFakeDocument() {
-  Object.assign(globalThis, { document: { createElement: createFakeElement, createTextNode: createFakeText, getElementById: createFakeElement } });
+  Object.assign(globalThis, { document: { createElement: createFakeElement, createTextNode: createFakeText, getElementById: getFakeElementById } });
 }
 
 function removeFakeDocument() {
   mock.restore();
   Reflect.deleteProperty(globalThis, 'document');
+  for (const id of Object.keys(fakeElementsById))
+    Reflect.deleteProperty(fakeElementsById, id);
   graphState.collapsedByName = {};
   graphState.isReferencesReplaced = false;
 }
@@ -59,6 +69,59 @@ function validateCollapseButtonShowsStateAndFlipsIt() {
   button.listeners.click();
   expect(graphState.collapsedByName.q).toBe(true);
   expect(renderCount).toBe(1);
+}
+
+function validateExpandingScrollsTheRebuiltBlockIntoViewAndCollapsingDoesNot() {
+  installFakeDocument();
+  const events: unknown[] = [];
+  function recordRender() {
+    events.push('onChange');
+  }
+  function recordScroll(options: unknown) {
+    events.push(options);
+  }
+  getFakeElementById('graphBlockq').scrollIntoView = recordScroll;
+  graphState.collapsedByName.q = true;
+  const expandButton = createCollapseButton('q', recordRender) as unknown as FakeElement;
+  expandButton.listeners.click();
+  expect(events).toEqual(['onChange', { block: 'nearest' }]);
+  const collapseButton = createCollapseButton('q', recordRender) as unknown as FakeElement;
+  collapseButton.listeners.click();
+  expect(events).toEqual(['onChange', { block: 'nearest' }, 'onChange']);
+}
+
+function validateCollapsingKeepsTheScrollPositionThatTheRedrawResets() {
+  installFakeDocument();
+  const container = getFakeElementById('graphContainerBox');
+  container.scrollTop = 500;
+  let scrollIntoViewCount = 0;
+  function resetScrollLikeTheRedraw() {
+    container.scrollTop = 0;
+  }
+  function countScrollIntoView() {
+    scrollIntoViewCount++;
+  }
+  getFakeElementById('graphBlockq').scrollIntoView = countScrollIntoView;
+  const collapseButton = createCollapseButton('q', resetScrollLikeTheRedraw) as unknown as FakeElement;
+  collapseButton.listeners.click();
+  expect(container.scrollTop).toBe(500);
+  expect(scrollIntoViewCount).toBe(0);
+}
+
+function validateChangingTheAverageCheckboxKeepsTheScrollPositionThatTheRedrawResets() {
+  installFakeDocument();
+  const container = getFakeElementById('graphContainerBox');
+  container.scrollTop = 500;
+  function resetScrollLikeTheRedraw() {
+    container.scrollTop = 0;
+  }
+  const toggle = createAverageToggle('q', resetScrollLikeTheRedraw) as unknown as FakeElement;
+  const checkbox = toggle.children[0] as FakeElement;
+  checkbox.checked = true;
+  checkbox.listeners.change();
+  expect(container.scrollTop).toBe(500);
+  expect(graphState.averageShownByName.q).toBe(true);
+  graphState.averageShownByName = {};
 }
 
 function validateBlockHoldsTitleRowThenChartBox() {
@@ -150,5 +213,8 @@ test('test_title_reference_shows_the_replaced_text_in_a_tooltip', validateTitleR
 test('test_title_references_are_replaced_only_when_the_toggle_is_on', validateTitleReferencesAreReplacedOnlyWhenTheToggleIsOn);
 test('test_graph_title_holds_number_name_and_instructions', validateGraphTitleHoldsNumberNameAndInstructions);
 test('test_collapse_button_shows_state_and_flips_it', validateCollapseButtonShowsStateAndFlipsIt);
+test('test_expanding_scrolls_the_rebuilt_block_into_view_and_collapsing_does_not', validateExpandingScrollsTheRebuiltBlockIntoViewAndCollapsingDoesNot);
+test('test_collapsing_keeps_the_scroll_position_that_the_redraw_resets', validateCollapsingKeepsTheScrollPositionThatTheRedrawResets);
+test('test_changing_the_average_checkbox_keeps_the_scroll_position_that_the_redraw_resets', validateChangingTheAverageCheckboxKeepsTheScrollPositionThatTheRedrawResets);
 test('test_block_holds_title_row_then_chart_box', validateBlockHoldsTitleRowThenChartBox);
 test('test_result_notes_button_shows_only_for_a_version_with_a_run', validateResultNotesButtonShowsOnlyForAVersionWithARun);

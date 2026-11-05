@@ -40,7 +40,7 @@ function createFakeText(text: string) {
 }
 
 function installFakeDocument() {
-  Object.assign(globalThis, { document: { createElementNS: createFakeElementNamed, createElement: createFakeTag, createTextNode: createFakeText } });
+  Object.assign(globalThis, { document: { createElementNS: createFakeElementNamed, createElement: createFakeTag, createTextNode: createFakeText, getElementById: createFakeTag } });
 }
 
 function removeFakeDocument() {
