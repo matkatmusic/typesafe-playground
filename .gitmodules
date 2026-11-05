@@ -1,0 +1,3 @@
+[submodule "playground/typesafe-checks"]
+	path = playground/typesafe-checks
+	url = https://github.com/matkatmusic/typesafe-checks.git
