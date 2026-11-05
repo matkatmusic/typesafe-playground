@@ -35,6 +35,24 @@ async function validateInitHistoryKeepsAnExistingFile() {
     expect(await loadHistory(historyPath)).toEqual([existing])
 }
 
+async function validateNoTestFileUsesTheRealHistoryFile() {
+    // Step: a fresh clone has no results folder, so a test must never use the real history file.
+    const realHistoryPathPattern = /HISTORY_PATH|import\.meta\.dir\}\/results/
+    const testFilesUsingRealPath: string[] = []
+    for await (const testFilePath of new Bun.Glob('**/*.test.ts').scan({ cwd: import.meta.dir })) {
+        if (testFilePath.startsWith('node_modules'))
+            continue
+        if (testFilePath === import.meta.file)
+            continue
+        const testFileText = await Bun.file(`${import.meta.dir}/${testFilePath}`).text()
+        if (realHistoryPathPattern.test(testFileText))
+            testFilesUsingRealPath.push(testFilePath)
+    }
+    // Step: no test file may name the real path.
+    expect(testFilesUsingRealPath).toEqual([])
+}
+
 test('test_blank_version_holds_the_hard_coded_query', validateBlankVersionHoldsTheHardCodedQuery)
 test('test_init_history_creates_a_missing_file_with_one_blank_version', validateInitHistoryCreatesAMissingFileWithOneBlankVersion)
 test('test_init_history_keeps_an_existing_file', validateInitHistoryKeepsAnExistingFile)
+test('test_no_test_file_uses_the_real_history_file', validateNoTestFileUsesTheRealHistoryFile)
