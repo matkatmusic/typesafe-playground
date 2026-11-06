@@ -20,7 +20,8 @@ import { findEnclosingQuestionName, findEnclosingQuestionProperty, findTopLevelO
 import { pageState } from './state';
 
 const NAME_TYPING = /^[^`\s]*$/;
-const KEY_PATH_TYPING = /`([^`\s.]+(?:\.[^`\s.]+)*)\.$/;
+// const KEY_PATH_TYPING = /`([^`\s.]+(?:\.[^`\s.]+)*)\.$/;
+const KEY_PATH_TYPING = /(?<!\\)`([^`\s.]+(?:\.[^`\s.]+)*)\.$/;
 // const BACKTICKED_NAME = /`([^`\s]+)`/g;
 const BACKTICKED_NAME = /(?<!\\)`([^`\s]+)`/g;
 const OTHER_EDITOR_CHANGED = StateEffect.define<null>();

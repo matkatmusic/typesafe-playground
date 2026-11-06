@@ -281,6 +281,19 @@ function validateNamePointingToEscapedBackticksGetsNoError() {
   expect(lintQuestionsEditor(stateText, '{"q":{"type":"noul","instructions":"Is `banana` ripe?"}}')).toEqual([]);
 }
 
+function validateDotAfterAnEscapedBacktickListsNothing() {
+  // Step: the state has a message key with a text child.
+  const stateText = '{ "message": { "text": "hi" } }';
+  // Step: the questions text has an escaped backtick, then message and a dot.
+  const questionsText = '{"q": {"instructions": "Use \\\\`message."}}';
+  const questionsState = createQuestionsState(questionsText);
+  const source = buildBacktickSource(() => [createJsonState(stateText), questionsState]);
+  // Step: the cursor is right after the dot.
+  const pos = questionsText.indexOf('message.') + 'message.'.length;
+  // Step: the backtick is plain text, so no list opens.
+  expect(source(new CompletionContext(questionsState, pos, false))).toBe(null);
+}
+
 function validateBatchBacktickListsOnlyKeysEveryItemHas() {
   // Step: batch is on, and the second item has no b.
   pageState.isBatchOn = true;
@@ -296,6 +309,7 @@ afterEach(() => {
 test('test_escaped_backticked_name_in_questions_gets_no_name_error', validateEscapedBacktickedNameInQuestionsGetsNoNameError);
 test('test_name_pointing_to_escaped_backticks_gets_no_error', validateNamePointingToEscapedBackticksGetsNoError);
 test('test_batch_backtick_lists_only_keys_every_item_has', validateBatchBacktickListsOnlyKeysEveryItemHas);
+test('test_dot_after_an_escaped_backtick_lists_nothing', validateDotAfterAnEscapedBacktickListsNothing);
 
 test('test_backtick_in_cross_name_lists_state_names_but_not_other_question_names', validateBacktickInCrossNameListsStateNamesButNotOtherQuestionNames);
 test('test_backtick_in_own_name_lists_its_own_names', validateBacktickInOwnNameListsItsOwnNames);
