@@ -68,7 +68,8 @@ export function createQuestionLink(label: string, name: string): HTMLButtonEleme
 export function createGraphBlock(questionNumber: number, name: string, question: Question, onChange: RenderCallback, version: Version): GraphBlock {
   const questionLabel = 'Q' + questionNumber + ' ' + name;
   const formattedInstructions = formatGraphTitle(questionNumber, name, question).slice(questionLabel.length);
-  const instructionsText = graphState.isReferencesReplaced ? replaceReferences(formattedInstructions, version.state, version.questions) : formattedInstructions;
+  // const instructionsText = graphState.isReferencesReplaced ? replaceReferences(formattedInstructions, version.state, version.questions) : formattedInstructions;
+  const instructionsText = graphState.isReferencesReplaced ? replaceReferences(formattedInstructions, version.state, question) : formattedInstructions;
   const block = document.createElement('div');
   block.className = 'graph-block';
   block.id = 'graphBlock' + name;
@@ -80,7 +81,8 @@ export function createGraphBlock(questionNumber: number, name: string, question:
   title.className = 'graph-title';
   // title.textContent = titleText;
   title.appendChild(createQuestionLink(questionLabel, name));
-  appendReferenceText(title, instructionsText, version.state, version.questions);
+  // appendReferenceText(title, instructionsText, version.state, version.questions);
+  appendReferenceText(title, instructionsText, version.state, question);
   title.title = questionLabel + instructionsText;
   titleRow.appendChild(createCollapseButton(name, onChange));
   titleRow.appendChild(title);

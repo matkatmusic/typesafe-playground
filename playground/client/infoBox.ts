@@ -46,7 +46,8 @@ export function attachChartInfoBox(chart: ChartLayout): void {
   }
   if (winningHit === null)
     throw new Error('the winning key has no column');
-  updateShownInfo(tracker, createBarInfoBox(buildBarInfoRows(winningHit.request)), winningHit.hit);
+  // updateShownInfo(tracker, createBarInfoBox(buildBarInfoRows(winningHit.request)), winningHit.hit);
+  updateShownInfo(tracker, createBarInfoBox(buildBarInfoRows(winningHit.request), winningHit.request.question), winningHit.hit);
 }
 
 export function attachInfoBox(charts: ChartLayout[]): void {

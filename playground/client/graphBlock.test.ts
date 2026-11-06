@@ -204,9 +204,36 @@ function validateTitleLinkMovesTheQuestionsEditorToTheGraphsQuestion() {
   expect(dispatchedEffects).toEqual([{ from: doc.indexOf('"q"'), y: 'start' }]);
 }
 
+const OWN_NAME_QUESTION = { type: 'noul', instructions: { task: 'Is `secretWord` the word banana?', secretWord: 'banana' } } as const;
+const CROSS_NAME_QUESTION = { type: 'noul', instructions: 'Is `secretWord` the word banana?' } as const;
+
+function listTitleClasses(name: string, question: typeof OWN_NAME_QUESTION | typeof CROSS_NAME_QUESTION): string[] {
+  installFakeDocument();
+  const scopeVersion = { ...version, state: { fruit: 'apple' }, questions: { ownName: OWN_NAME_QUESTION, crossName: CROSS_NAME_QUESTION } };
+  const graphBlock = createGraphBlock(1, name, question, noop, scopeVersion);
+  const titleRow = (graphBlock.block as unknown as FakeElement).children[0] as FakeElement;
+  return ((titleRow.children[1] as FakeElement).children as FakeElement[]).map((part) => part.className);
+}
+
+function validateCrossNameTitleGetsNoHoverTextFromAnotherQuestion() {
+  // Step: crossName uses secretWord but only ownName declares it.
+  const classes = listTitleClasses('crossName', CROSS_NAME_QUESTION);
+  // Step: the title holds no hover-text span.
+  expect(classes).not.toContain('backtick-ref');
+}
+
+function validateOwnNameTitleGetsHoverTextFromItsOwnQuestion() {
+  // Step: ownName declares secretWord in its own instructions.
+  const classes = listTitleClasses('ownName', OWN_NAME_QUESTION);
+  // Step: the title holds a hover-text span.
+  expect(classes).toContain('backtick-ref');
+}
+
 type FakeElement = ReturnType<typeof createFakeElement>;
 
 afterEach(removeFakeDocument);
+test('test_cross_name_title_gets_no_hover_text_from_another_question', validateCrossNameTitleGetsNoHoverTextFromAnotherQuestion);
+test('test_own_name_title_gets_hover_text_from_its_own_question', validateOwnNameTitleGetsHoverTextFromItsOwnQuestion);
 test('test_title_link_moves_the_questions_editor_to_the_graphs_question', validateTitleLinkMovesTheQuestionsEditorToTheGraphsQuestion);
 test('test_replaced_references_keep_the_instructions_whole_when_the_name_has_a_reference', validateReplacedReferencesKeepTheInstructionsWholeWhenTheNameHasAReference);
 test('test_title_reference_shows_the_replaced_text_in_a_tooltip', validateTitleReferenceShowsTheReplacedTextInATooltip);

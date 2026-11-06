@@ -11,6 +11,7 @@ import { executeSubmitBatch, executeSubmitForMode } from './submitBatch'
 import { SUBMIT_TEXT } from './submit'
 import { NOT_RUN_TIME } from '../notRunTime'
 import { HARD_CODED_STATE } from '../typeSafeQuery'
+import { listQuestionsErrors } from '../typesafe-checks/typesafeChecks'
 
 class FakeButton { disabled = false; textContent = SUBMIT_TEXT }
 class FakeInput { value = ''; type = 'password'; checked = false; disabled = false; placeholder = '' }
@@ -157,6 +158,30 @@ async function validateQuestionsArrayShowsTheMessageAndSendsNothing() {
     expect(harness.fetchOrder).toEqual([])
     expect(pageState.isBatchOn).toBe(true)
     expect(pageState.versions.length).toBe(1)
+}
+
+async function validateItemWithoutAUsedNameShowsTheItemErrorAndSendsNothing() {
+    // Step: the question uses `tone`; item 1 has it, item 2 does not.
+    const questionsText = '{"q":{"type":"noul","instructions":"Is `tone` calm?"}}'
+    const harness = installHarness([buildVersion({ a: 1 }, QUESTIONS, 1, 't')], 0, '[{"tone":"calm"},{"a":1}]', questionsText, [])
+    startBatchOn()
+    await executeSubmitBatch()
+    // Step: the error line names item 2, nothing was sent, and no version was added.
+    expect(harness.elements.errorLine.textContent).toBe('item 2: q: `tone` is not in state or in this question')
+    expect(harness.fetchOrder).toEqual([])
+    expect(harness.locks).toEqual([])
+    expect(pageState.versions.length).toBe(1)
+}
+
+async function validateQuestionShapeErrorShowsOnceForTheWholeBatch() {
+    // Step: two batch items share questions with a wrong type.
+    const questionsText = '{"q":{"type":"wrong"}}'
+    const harness = installHarness([buildVersion({ a: 1 }, QUESTIONS, 1, 't')], 0, '[{"a":1},{"a":2}]', questionsText, [])
+    startBatchOn()
+    await executeSubmitBatch()
+    // Step: the error line holds the shape error once, with no item prefix.
+    expect(harness.elements.errorLine.textContent).toBe(listQuestionsErrors(JSON.parse(questionsText)).join('; '))
+    expect(harness.fetchOrder).toEqual([])
 }
 
 async function validateVersionFourExampleKeepsTheFirstItemOnVersionFourAndAppendsTheSecond() {
@@ -352,6 +377,8 @@ async function validateDispatcherSendsBatchOffArrayTextToAnErrorAndNoRun() {
 test('test_every_validation_error_shows_an_error_and_changes_nothing', validateEveryValidationErrorShowsAnErrorAndChangesNothing)
 test('test_bad_questions_show_the_today_error_and_change_nothing', validateBadQuestionsShowTheTodayErrorAndChangeNothing)
 test('test_questions_array_shows_the_message_and_sends_nothing', validateQuestionsArrayShowsTheMessageAndSendsNothing)
+test('test_item_without_a_used_name_shows_the_item_error_and_sends_nothing', validateItemWithoutAUsedNameShowsTheItemErrorAndSendsNothing)
+test('test_question_shape_error_shows_once_for_the_whole_batch', validateQuestionShapeErrorShowsOnceForTheWholeBatch)
 test('test_version_four_example_keeps_the_first_item_on_version_four_and_appends_the_second', validateVersionFourExampleKeepsTheFirstItemOnVersionFourAndAppendsTheSecond)
 test('test_first_item_overwrite_replaces_the_shown_version_and_makes_no_new_version', validateFirstItemOverwriteReplacesTheShownVersionAndMakesNoNewVersion)
 test('test_first_item_create_makes_a_new_version_at_the_end_and_shows_it', validateFirstItemCreateMakesANewVersionAtTheEndAndShowsIt)

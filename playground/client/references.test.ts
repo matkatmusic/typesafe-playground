@@ -107,9 +107,24 @@ function validateMissingReferencesStayAsTyped() {
   expect(replaceReferences('no references here', state, {})).toBe('no references here');
 }
 
+const CROSS_NAME_QUESTIONS = {
+  ownName: { type: 'noul', instructions: { task: 'Is `secretWord` the word banana?', secretWord: 'banana' } },
+  crossName: { type: 'noul', instructions: 'Is `secretWord` the word banana?' },
+};
+
+function validateNameResolvesOnlyFromStateOrItsOwnQuestion() {
+  // Step: the state has no secretWord; only ownName's own object holds it.
+  const fruitState = { fruit: 'apple' };
+  // Step: crossName's text keeps `secretWord`, because ownName's value is not visible to crossName.
+  expect(replaceReferences('Is `secretWord` the word banana?', fruitState, CROSS_NAME_QUESTIONS.crossName)).toBe('Is `secretWord` the word banana?');
+  // Step: ownName's text gets 'banana' from its own instructions, at any depth.
+  expect(replaceReferences('Is `secretWord` the word banana?', fruitState, CROSS_NAME_QUESTIONS.ownName)).toBe("Is 'banana' the word banana?");
+}
+
 test('test_path_lookup_walks_object_keys_and_array_indexes', validatePathLookupWalksObjectKeysAndArrayIndexes);
 test('test_bracket_indexes_only_step_into_arrays', validateBracketIndexesOnlyStepIntoArrays);
 test('test_path_lookup_reports_missing_paths', validatePathLookupReportsMissingPaths);
 test('test_non_string_values_are_written_as_json', validateNonStringValuesAreWrittenAsJson);
 test('test_title_references_are_replaced_from_state_then_questions', validateTitleReferencesAreReplacedFromStateThenQuestions);
 test('test_missing_references_stay_as_typed', validateMissingReferencesStayAsTyped);
+test('test_name_resolves_only_from_state_or_its_own_question', validateNameResolvesOnlyFromStateOrItsOwnQuestion);

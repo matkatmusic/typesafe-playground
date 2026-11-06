@@ -16,8 +16,10 @@ function validateShortValueIsReplaced() {
 
 function validateQuestionsAreUsedAfterState() {
   // const version = buildVersion(1, { state: { a: 'S' }, questions: { a: 'Q', b: ['x', 'y'] } });
-  const version = buildVersion(1, { state: { a: 'S' }, questions: { a: 'Q', b: ['x', 'y'] } } as never);
-  expect(replaceVersionReferences(['`a` `b[1]`'], version)).toEqual(["'S' 'y'"]);
+  // const version = buildVersion(1, { state: { a: 'S' }, questions: { a: 'Q', b: ['x', 'y'] } } as never);
+  // expect(replaceVersionReferences(['`a` `b[1]`'], version)).toEqual(["'S' 'y'"]);
+  const version = buildVersion(1, { state: { a: 'S' }, questions: { q: { type: 'noul', a: 'Q', b: ['x', 'y'] } } } as never);
+  expect(replaceVersionReferences(['#### q', '`a` `b[1]`'], version)).toEqual(['#### q', "'S' 'y'"]);
 }
 
 function validateLongValueIsKeptAndDefined() {
@@ -80,6 +82,20 @@ function validateNoPlaceholderNoteForShortValues() {
   expect(buildReportMarkdown(versions)).not.toContain(PLACEHOLDER_NOTE_TEXT);
 }
 
+function validateResultBlocksResolveNamesOnlyFromTheirOwnQuestion() {
+  // Step: the state has no secretWord; only ownName's own object holds it.
+  const questions = {
+    ownName: { type: 'noul', instructions: { task: 'Is `secretWord` the word banana?', secretWord: 'banana' } },
+    crossName: { type: 'noul', instructions: 'Is `secretWord` the word banana?' },
+  };
+  const version = buildVersion(1, { state: { fruit: 'apple' }, questions } as never);
+  // Step: each question's text follows its `#### name` heading, as listResultBlocks writes it.
+  const blocks = ['#### ownName', 'Is `secretWord` the word banana?', '#### crossName', 'Is `secretWord` the word banana?'];
+  // Step: ownName's text gets 'banana'; crossName's text keeps `secretWord`.
+  expect(replaceVersionReferences(blocks, version)).toEqual(['#### ownName', "Is 'banana' the word banana?", '#### crossName', 'Is `secretWord` the word banana?']);
+}
+
+test('test_result_blocks_resolve_names_only_from_their_own_question', validateResultBlocksResolveNamesOnlyFromTheirOwnQuestion);
 test('test_short_value_is_replaced', validateShortValueIsReplaced);
 test('test_questions_are_used_after_state', validateQuestionsAreUsedAfterState);
 test('test_long_value_is_kept_and_defined', validateLongValueIsKeptAndDefined);

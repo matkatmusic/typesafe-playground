@@ -3,6 +3,7 @@ import { json } from '@codemirror/lang-json';
 import { EditorState } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
 import { pageState } from './state';
+import { IS_QUESTIONS_EDITOR } from './questionNames';
 import { appendReferenceText, buildBacktickHoverSource, findReferenceTooltipText } from './backtickTooltip';
 
 interface FakeNode {
@@ -159,6 +160,37 @@ function validateMouseEnterAddsOneTooltipAndMouseLeaveRemovesIt() {
   nodes[3].listeners.mouseleave();
   expect(bodyChildren.length).toBe(0);
 }
+
+const SCOPE_QUESTIONS = '{"ownName":{"type":"noul","instructions":{"task":"Is `secretWord` the word banana?","secretWord":"banana"}},"crossName":{"type":"noul","instructions":"Is `secretWord` the word banana?"},"stateName":{"type":"noul","instructions":"Is `fruit` the word apple?"}}';
+
+function createQuestionsState(text: string): EditorState {
+  return EditorState.create({ doc: text, extensions: [json(), IS_QUESTIONS_EDITOR.of(true)] });
+}
+
+function hoverInQuestionsEditor(pos: number) {
+  const questionsState = createQuestionsState(SCOPE_QUESTIONS);
+  const source = buildBacktickHoverSource(() => [createJsonState('{"fruit": "apple"}'), questionsState]);
+  return source({ state: questionsState } as unknown as EditorView, pos);
+}
+
+function validateHoverInOwnNameShowsItsOwnValue() {
+  installFakeDocument();
+  // Step: hover secretWord inside ownName, which declares it.
+  const tooltip = hoverInQuestionsEditor(SCOPE_QUESTIONS.indexOf('`secretWord`') + 2);
+  // Step: the tooltip shows ownName's value.
+  const dom = tooltip?.create({} as EditorView).dom as unknown as FakeNode;
+  expect(dom.textContent).toBe("'banana'");
+}
+
+function validateHoverInCrossNameShowsNothing() {
+  // Step: hover secretWord inside crossName, which does not declare it.
+  const pos = SCOPE_QUESTIONS.indexOf('`secretWord`', SCOPE_QUESTIONS.indexOf('"crossName"')) + 2;
+  // Step: another question's value is not shown.
+  expect(hoverInQuestionsEditor(pos)).toBe(null);
+}
+
+test('test_hover_in_own_name_shows_its_own_value', validateHoverInOwnNameShowsItsOwnValue);
+test('test_hover_in_cross_name_shows_nothing', validateHoverInCrossNameShowsNothing);
 
 afterEach(removeFakeDocument);
 afterEach(() => {

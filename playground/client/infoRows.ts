@@ -66,7 +66,8 @@ export function buildBarInfoRows(request: BarInfoRequest): InfoRow[] {
     const scoreValue = callIndex === -1 ? stat.average : values[callIndex];
     shownKey = answers[0].type === 'noul' ? readTopKey({ type: 'noul', noul: scoreValue }, keys) : key;
     // messageText = buildTextFormatter(getShownVersion())(readDescription(question, key));
-    messageText = buildTextFormatter(getShownVersion())(readDescription(question, shownKey));
+    // messageText = buildTextFormatter(getShownVersion())(readDescription(question, shownKey));
+    messageText = buildTextFormatter(getShownVersion(), question)(readDescription(question, shownKey));
     lowText = formatThreeDecimals(stat.low);
     highText = formatThreeDecimals(stat.high);
     averageText = formatThreeDecimals(stat.average);

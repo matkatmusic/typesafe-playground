@@ -2,6 +2,7 @@ import { syntaxTree } from '@codemirror/language';
 import type { EditorState } from '@codemirror/state';
 import type { SyntaxNode, Tree } from '@lezer/common';
 import { listTopLevelProperties, readPropertyName } from './questionNames';
+export { splitKeyPath } from '../typesafe-checks/typesafeChecks';
 
 // export function readKeyName(text: string, nameNode: SyntaxNode): string {
 //   const afterQuote = text.slice(nameNode.from + 1, nameNode.to);
@@ -84,12 +85,12 @@ export function listChildNames(tree: Tree, text: string, path: string[]): string
   return names;
 }
 
-const KEY_PATH_STEP = /\[\d+\]|[^.[\]]+/g;
+// const KEY_PATH_STEP = /\[\d+\]|[^.[\]]+/g;
 const INDEX_STEP = /^\[(\d+)\]$/;
-export function splitKeyPath(keyName: string): string[] {
-  const steps = keyName.match(KEY_PATH_STEP);
-  return steps === null ? [] : steps;
-}
+// export function splitKeyPath(keyName: string): string[] {
+//   const steps = keyName.match(KEY_PATH_STEP);
+//   return steps === null ? [] : steps;
+// }
 
 export function collectStepValues(scopes: SyntaxNode[], text: string, step: string): SyntaxNode[] {
   const values: SyntaxNode[] = [];

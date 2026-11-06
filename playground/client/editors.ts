@@ -7,11 +7,13 @@ import { Annotation, Compartment, EditorState, Transaction, type Extension } fro
 import { keymap, type ViewUpdate } from '@codemirror/view';
 import { createAddQuestion } from './addQuestion';
 import { createBacktickKeyNames } from './backtickCompletion';
+import { findBacktickedKeys } from './backtickKeys';
 import { createBacktickHover } from './backtickTooltip';
 import { getElement } from './dom';
 import { findDuplicateKeys } from './duplicateKeys';
 import { jsonHighlight } from './editorHighlight';
 import { createPlaceholders } from './placeholders';
+import { findQuestionsShapeErrors, findStateShapeErrors, IS_QUESTIONS_EDITOR } from './questionNames';
 import { createPlaceholderTab } from './placeholderTab';
 import { clearQuestionsJsonError, clearStateJsonError } from './stateErrorClear';
 
@@ -48,6 +50,7 @@ export function buildJsonExtensions(): Extension[] {
     EditorView.theme(EDITOR_THEME_RULES),
     linter(jsonParseLinter()),
     linter(findDuplicateKeys),
+    linter(findBacktickedKeys),
     lintGutter(),
     createBacktickKeyNames(),
     createBacktickHover(),
@@ -77,7 +80,8 @@ function buildInputEditor(parentId: string, clearError: (update: ViewUpdate) => 
 }
 
 export function createStateEditor(onEditorChange: (update: ViewUpdate) => void): EditorView {
-  stateEditor = buildInputEditor('stateJsonEditor', clearStateJsonError, onEditorChange, []);
+  // stateEditor = buildInputEditor('stateJsonEditor', clearStateJsonError, onEditorChange, []);
+  stateEditor = buildInputEditor('stateJsonEditor', clearStateJsonError, onEditorChange, [linter(findStateShapeErrors)]);
   return stateEditor;
 }
 
@@ -88,7 +92,8 @@ export function getStateEditor(): EditorView {
 }
 
 export function createQuestionsEditor(onEditorChange: (update: ViewUpdate) => void): EditorView {
-  questionsEditor = buildInputEditor('questionsJsonEditor', clearQuestionsJsonError, onEditorChange, [createAddQuestion(), createPlaceholders(), createPlaceholderTab()]);
+  // questionsEditor = buildInputEditor('questionsJsonEditor', clearQuestionsJsonError, onEditorChange, [createAddQuestion(), createPlaceholders(), createPlaceholderTab()]);
+  questionsEditor = buildInputEditor('questionsJsonEditor', clearQuestionsJsonError, onEditorChange, [createAddQuestion(), createPlaceholders(), createPlaceholderTab(), IS_QUESTIONS_EDITOR.of(true), linter(findQuestionsShapeErrors)]);
   return questionsEditor;
 }
 

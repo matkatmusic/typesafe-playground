@@ -11,7 +11,9 @@ export function listPinLineParts(pinnedIndex: number | null): InfoPart[] {
 export function applyPinInfo(pinnedIndex: number | null): void {
   const pinInfo = getElement('pinInfo');
   pinInfo.replaceChildren();
-  addParts(pinInfo, listPinLineParts(pinnedIndex));
+  // addParts(pinInfo, listPinLineParts(pinnedIndex));
+  // The pin line has no message parts, so no question.
+  addParts(pinInfo, listPinLineParts(pinnedIndex), undefined);
   // getButton('pinButton').disabled = pinnedId !== null;
   // getButton('unpinButton').disabled = pinnedId === null;
 }

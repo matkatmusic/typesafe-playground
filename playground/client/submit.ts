@@ -2,6 +2,7 @@ import { readTypedKey, refreshSubmitAvailability } from './apiKey';
 import { SINGLE_ARRAY_ERROR } from './batchPlan';
 import { getButton, getElement, getInput } from './dom';
 import type { EditorView } from '@codemirror/view';
+import { listQuestionsErrors, listStateErrors, listUndefinedReferences } from '../typesafe-checks/typesafeChecks';
 import { getQuestionsEditor, getStateEditor, setEditorLocked } from './editors';
 import { computeJsonParseResult } from './jsonParse';
 import { markPageChanged } from './pageChanged';
@@ -36,6 +37,14 @@ export function setEditorsLocked(isLocked: boolean): void {
     setEditorLocked(editor, isLocked);
 }
 
+export function listSubmitErrors(state: unknown, questions: unknown): string[] {
+  const shapeErrors = [...listStateErrors(state), ...listQuestionsErrors(questions)];
+  const hasShapeErrors = shapeErrors.length > 0;
+  if (hasShapeErrors)
+    return shapeErrors;
+  return listUndefinedReferences(state, questions as Record<string, unknown>);
+}
+
 export async function executeSubmit(): Promise<void> {
   const submitButton = getButton('submitButton');
   const errorLine = getElement('errorLine');
@@ -53,6 +62,12 @@ export async function executeSubmit(): Promise<void> {
   const questionsResult = computeJsonParseResult('questions', getQuestionsEditor().state.doc.toString());
   if (!questionsResult.isValid) {
     errorLine.textContent = questionsResult.errorMessage;
+    return;
+  }
+  const submitErrors = listSubmitErrors(stateResult.value, questionsResult.value);
+  const hasSubmitErrors = submitErrors.length > 0;
+  if (hasSubmitErrors) {
+    errorLine.textContent = submitErrors.join('; ');
     return;
   }
   const baseVersion = getShownVersion();

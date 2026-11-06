@@ -20,7 +20,8 @@ export function updateShownInfo(tracker: HoverTracker, info: HTMLElement, hit: E
 export function attachHover(context: HoverContext): void {
   const { tracker, svg, hit, request, values, slotX, plotH, isAverageShown, baseline } = context;
   function updateOnEnter(): void {
-    const info = createBarInfoBox(buildBarInfoRows(request));
+    // const info = createBarInfoBox(buildBarInfoRows(request));
+    const info = createBarInfoBox(buildBarInfoRows(request), request.question);
     updateShownInfo(tracker, info, hit);
     renderValueLabels(svg, values, slotX, plotH, isAverageShown, baseline);
   }

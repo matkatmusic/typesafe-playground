@@ -12,7 +12,10 @@ import { isKindTextEdited } from './noteKind';
 import { markPageChanged } from './pageChanged';
 import { saveVersionNote } from './saveVersionNote';
 import { buildEmptyPendingNotes, getShownVersion, pageState } from './state';
+// import { buildRunBody, executeSubmit, formatRunFailure, sendRun, setEditorsLocked } from './submit';
+// import { buildRunBody, executeSubmit, formatRunFailure, listSubmitErrors, sendRun, setEditorsLocked } from './submit';
 import { buildRunBody, executeSubmit, formatRunFailure, sendRun, setEditorsLocked } from './submit';
+import { listQuestionsErrors, listStateErrors, listUndefinedReferences } from '../typesafe-checks/typesafeChecks';
 import type { RunResult } from './types';
 import { sendJson } from './versionActions';
 import { renderShownVersion } from './versionBox';
@@ -42,6 +45,30 @@ export async function executeSubmitBatch(): Promise<void> {
   // const states = stateResult.value as unknown[];
   const states = stateResult.value as Record<string, JsonValue>[];
   const questions = questionsResult.value;
+  // const itemErrors: string[] = [];
+  // for (let i = 0; i < states.length; i++) {
+  //   for (const error of listSubmitErrors(states[i], questions))
+  //     itemErrors.push(`item ${i + 1}: ${error}`);
+  // }
+  const questionsErrors = listQuestionsErrors(questions);
+  const itemErrors: string[] = [...questionsErrors];
+  for (let i = 0; i < states.length; i++) {
+    const stateErrors = listStateErrors(states[i]);
+    for (const error of stateErrors)
+      itemErrors.push(`item ${i + 1}: ${error}`);
+    // Names are checked only when the state and questions have no shape errors.
+    if (stateErrors.length === 0) {
+      if (questionsErrors.length === 0) {
+        for (const error of listUndefinedReferences(states[i], questions))
+          itemErrors.push(`item ${i + 1}: ${error}`);
+      }
+    }
+  }
+  const hasItemErrors = itemErrors.length > 0;
+  if (hasItemErrors) {
+    errorLine.textContent = itemErrors.join('; ');
+    return;
+  }
   const shownVersion = getShownVersion();
   const isQuestionsUnchanged = !isKindTextEdited('questions');
   const oldVersionCount = pageState.versions.length;

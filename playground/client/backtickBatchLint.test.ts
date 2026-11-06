@@ -5,6 +5,7 @@ import { EditorState } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
 import { buildUndefinedNameSource, isOtherEditorChanged, relintBothEditors } from './backtickCompletion'
 import * as editors from './editors'
+import { IS_QUESTIONS_EDITOR } from './questionNames'
 import { pageState } from './state'
 
 function createJsonState(text: string): EditorState {
@@ -15,8 +16,12 @@ afterEach(() => {
     pageState.isBatchOn = false
 })
 
+// Updated: names must point to text, questions read only state and themselves, library messages.
+const NOT_FOUND_MESSAGE = '`name` is not in state or in this question'
+
 function lintQuestions(stateText: string, questionsText: string): string[] {
-    const questionsState = createJsonState(questionsText)
+    // const questionsState = createJsonState(questionsText)
+    const questionsState = EditorState.create({ doc: questionsText, extensions: [json(), IS_QUESTIONS_EDITOR.of(true)] })
     const source = buildUndefinedNameSource(() => [createJsonState(stateText), questionsState])
     const diagnostics = source({ state: questionsState } as unknown as EditorView) as Diagnostic[]
     return diagnostics.map((diagnostic) => diagnostic.message)
@@ -25,7 +30,8 @@ function lintQuestions(stateText: string, questionsText: string): string[] {
 function validateBatchOnNameIsDefinedWhenEveryItemHasIt() {
     // Step: batch is on and the state text is an array where both items have `name`.
     pageState.isBatchOn = true
-    const messages = lintQuestions('[{"name": 1}, {"name": 2}]', '{"q": "`name`"}')
+    // const messages = lintQuestions('[{"name": 1}, {"name": 2}]', '{"q": "`name`"}')
+    const messages = lintQuestions('[{"name": "a"}, {"name": "b"}]', '{"q": "`name`"}')
     // Step: the name is defined, so there is no error.
     expect(messages).toEqual([])
 }
@@ -33,36 +39,46 @@ function validateBatchOnNameIsDefinedWhenEveryItemHasIt() {
 function validateBatchOnNameGivesAnErrorWhenOneItemLacksIt() {
     // Step: the second item has no `name`, and the questions do not define it.
     pageState.isBatchOn = true
-    const messages = lintQuestions('[{"name": 1}, {"other": 2}]', '{"q": "`name`"}')
-    expect(messages).toEqual(['name is not defined in either JSON editor'])
+    // const messages = lintQuestions('[{"name": 1}, {"other": 2}]', '{"q": "`name`"}')
+    // expect(messages).toEqual(['name is not defined in either JSON editor'])
+    const messages = lintQuestions('[{"name": "a"}, {"other": "b"}]', '{"q": "`name`"}')
+    expect(messages).toEqual([NOT_FOUND_MESSAGE])
 }
 
 function validateBatchOnNameIsDefinedWhenTheQuestionsDefineItEvenIfAnItemLacksIt() {
     pageState.isBatchOn = true
-    const messages = lintQuestions('[{"name": 1}, {"other": 2}]', '{"name": 1, "q": "`name`"}')
+    // const messages = lintQuestions('[{"name": 1}, {"other": 2}]', '{"name": 1, "q": "`name`"}')
+    // Step: the question declares `name` in its own object.
+    const messages = lintQuestions('[{"name": "a"}, {"other": "b"}]', '{"q": {"name": "c", "text": "`name`"}}')
     expect(messages).toEqual([])
 }
 
 function validateBatchOnWithoutAValidArrayUsesTodaysCheck() {
     // Step: batch is on, the state text is a single object with `name`.
     pageState.isBatchOn = true
-    expect(lintQuestions('{"name": 1}', '{"q": "`name`"}')).toEqual([])
-    // Step: batch is on and the state text is broken: today's check finds `name` in the first item, so no error.
+    // expect(lintQuestions('{"name": 1}', '{"q": "`name`"}')).toEqual([])
+    expect(lintQuestions('{"name": "a"}', '{"q": "`name`"}')).toEqual([])
+    // Step: batch is on and the state text is broken: the name check reports nothing.
     expect(lintQuestions('[{"name": 1}, {"other": 2', '{"q": "`name`"}')).toEqual([])
     // Step: an empty array also uses today's check, which finds no name.
-    expect(lintQuestions('[]', '{"q": "`name`"}')).toEqual(['name is not defined in either JSON editor'])
+    // expect(lintQuestions('[]', '{"q": "`name`"}')).toEqual(['name is not defined in either JSON editor'])
+    expect(lintQuestions('[]', '{"q": "`name`"}')).toEqual([NOT_FOUND_MESSAGE])
 }
 
 function validateBatchOffArrayStateUsesTodaysCheck() {
-    // Step: batch is off, so one item with `name` text inside the array is enough for today's check.
+    // Step: batch is off, so the array is the state and `name` is not a top-level key of it.
     pageState.isBatchOn = false
-    expect(lintQuestions('[{"name": 1}, {"other": 2}]', '{"q": "`name`"}')).toEqual([])
+    // expect(lintQuestions('[{"name": 1}, {"other": 2}]', '{"q": "`name`"}')).toEqual([])
+    // expect(lintQuestions('[{"name": "a"}, {"other": "b"}]', '{"q": "`name`"}')).toEqual([])
+    expect(lintQuestions('[{"name": "a"}, {"other": "b"}]', '{"q": "`name`"}')).toEqual([NOT_FOUND_MESSAGE])
 }
 
 function validateBatchOnPathNamesWorkInEveryItem() {
     pageState.isBatchOn = true
-    const messages = lintQuestions('[{"a": {"b": 1}}, {"a": {"c": 1}}]', '{"q": "`a.b`"}')
-    expect(messages).toEqual(['a.b is not defined in either JSON editor'])
+    // const messages = lintQuestions('[{"a": {"b": 1}}, {"a": {"c": 1}}]', '{"q": "`a.b`"}')
+    // expect(messages).toEqual(['a.b is not defined in either JSON editor'])
+    const messages = lintQuestions('[{"a": {"b": "x"}}, {"a": {"c": "y"}}]', '{"q": "`a.b`"}')
+    expect(messages).toEqual(['`a.b` is not in state or in this question'])
 }
 
 function validateRelintSendsTheRefreshEffectToBothEditors() {

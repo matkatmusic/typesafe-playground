@@ -1,21 +1,32 @@
 import type { Version } from '../playgroundHistory';
-import { findPathValue, formatReferenceValue, REFERENCE_PATTERN } from './references';
+// import { findPathValue, formatReferenceValue, REFERENCE_PATTERN } from './references';
+import { findReferenceValue } from '../typesafe-checks/typesafeChecks';
+import { formatReferenceValue, REFERENCE_PATTERN } from './references';
+import { readQuestions } from './graphValues';
 
 const SHORT_REFERENCE_LIMIT = 40;
 
-function findReferenceText(path: string, version: Version): string | undefined {
-  const stateLookup = findPathValue(version.state, path);
-  if (stateLookup.isFound)
-    return formatReferenceValue(stateLookup.value);
-  const questionsLookup = findPathValue(version.questions, path);
-  if (questionsLookup.isFound)
-    return formatReferenceValue(questionsLookup.value);
+// function findReferenceText(path: string, version: Version): string | undefined {
+//   const stateLookup = findPathValue(version.state, path);
+//   if (stateLookup.isFound)
+//     return formatReferenceValue(stateLookup.value);
+//   const questionsLookup = findPathValue(version.questions, path);
+//   if (questionsLookup.isFound)
+//     return formatReferenceValue(questionsLookup.value);
+//   return undefined;
+// }
+function findReferenceText(path: string, version: Version, question: unknown): string | undefined {
+  const lookup = findReferenceValue(version.state, question, path);
+  if (lookup.isFound)
+    return formatReferenceValue(lookup.value);
   return undefined;
 }
 
-function replaceBlockReferences(block: string, version: Version, longValues: Map<string, string>): string {
+// function replaceBlockReferences(block: string, version: Version, longValues: Map<string, string>): string {
+function replaceBlockReferences(block: string, version: Version, question: unknown, longValues: Map<string, string>): string {
   function replaceReference(reference: string, path: string): string {
-    const text = findReferenceText(path, version);
+    // const text = findReferenceText(path, version);
+    const text = findReferenceText(path, version, question);
     const isMissing = text === undefined;
     if (isMissing)
       return reference;
@@ -43,8 +54,17 @@ function buildReferenceTable(longValues: Map<string, string>): string {
 export function replaceVersionReferences(blocks: string[], version: Version): string[] {
   const longValues = new Map<string, string>();
   const replacedBlocks: string[] = [];
-  for (const block of blocks)
-    replacedBlocks.push(replaceBlockReferences(block, version, longValues));
+  // for (const block of blocks)
+  //   replacedBlocks.push(replaceBlockReferences(block, version, longValues));
+  // ponytail: question comes from the last '#### name' heading; a note starting with '#### ' is misread.
+  let question: unknown = undefined;
+  for (const block of blocks) {
+    if (block.startsWith('### '))
+      question = undefined;
+    if (block.startsWith('#### '))
+      question = readQuestions(version)[block.slice('#### '.length)];
+    replacedBlocks.push(replaceBlockReferences(block, version, question, longValues));
+  }
   const hasLongValues = longValues.size > 0;
   if (!hasLongValues)
     return replacedBlocks;

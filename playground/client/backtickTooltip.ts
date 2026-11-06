@@ -1,23 +1,32 @@
 import { hoverTooltip } from '@codemirror/view';
 import type { EditorView, Tooltip } from '@codemirror/view';
 import type { EditorState, Extension } from '@codemirror/state';
-import { listBothEditorStates } from './backtickCompletion';
+import { findReferenceValue } from '../typesafe-checks/typesafeChecks';
+import { findEnclosingQuestion, listBothEditorStates } from './backtickCompletion';
 import { computeJsonParseResult } from './jsonParse';
-import { REFERENCE_PATTERN, findPathValue, formatReferenceValue } from './references';
+// import { REFERENCE_PATTERN, findPathValue, formatReferenceValue } from './references';
+import { REFERENCE_PATTERN, formatReferenceValue } from './references';
 import { pageState } from './state';
 
-const BACKTICKED_NAME = /`([^`\s]+)`/g;
+// const BACKTICKED_NAME = /`([^`\s]+)`/g;
+const BACKTICKED_NAME = /(?<!\\)`([^`\s]+)`/g;
 export const BATCH_HOVER_TEXT = 'hover text replacement not active in batch mode';
 let openTooltip: HTMLElement | null = null;
 
-export function findReferenceTooltipText(name: string, state: unknown, questions: unknown): string | null {
-  const stateLookup = findPathValue(state, name);
-  if (stateLookup.isFound)
-    return formatReferenceValue(stateLookup.value);
-  const questionsLookup = findPathValue(questions, name);
-  if (questionsLookup.isFound)
-    return formatReferenceValue(questionsLookup.value);
-  return null;
+// export function findReferenceTooltipText(name: string, state: unknown, questions: unknown): string | null {
+//   const stateLookup = findPathValue(state, name);
+//   if (stateLookup.isFound)
+//     return formatReferenceValue(stateLookup.value);
+//   const questionsLookup = findPathValue(questions, name);
+//   if (questionsLookup.isFound)
+//     return formatReferenceValue(questionsLookup.value);
+//   return null;
+// }
+export function findReferenceTooltipText(name: string, state: unknown, question: unknown): string | null {
+  const referenceLookup = findReferenceValue(state, question, name);
+  if (!referenceLookup.isFound)
+    return null;
+  return formatReferenceValue(referenceLookup.value);
 }
 
 export function createReferenceTooltipElement(text: string): HTMLElement {
@@ -47,7 +56,9 @@ export function buildBacktickHoverSource(listStates: () => EditorState[]): (view
       const isEitherInvalid = isStateInvalid || isQuestionsInvalid;
       if (isEitherInvalid)
         return null;
-      const text = findReferenceTooltipText(name, stateParse.value, questionsParse.value);
+      // const text = findReferenceTooltipText(name, stateParse.value, questionsParse.value);
+      const question = findEnclosingQuestion(view.state, questionsParse.value, from);
+      const text = findReferenceTooltipText(name, stateParse.value, question);
       if (text === null)
         return null;
       return { pos: from, end: to, above: true, create: () => ({ dom: createReferenceTooltipElement(text) }) };
@@ -82,10 +93,12 @@ function buildTooltipOpener(span: HTMLElement, text: string): () => void {
   return addReferenceTooltip;
 }
 
-export function appendReferenceText(parent: HTMLElement, text: string, state: unknown, questions: unknown): void {
+// export function appendReferenceText(parent: HTMLElement, text: string, state: unknown, questions: unknown): void {
+export function appendReferenceText(parent: HTMLElement, text: string, state: unknown, question: unknown): void {
   let plainStart = 0;
   for (const match of text.matchAll(REFERENCE_PATTERN)) {
-    const tooltipText = findReferenceTooltipText(match[1], state, questions);
+    // const tooltipText = findReferenceTooltipText(match[1], state, questions);
+    const tooltipText = findReferenceTooltipText(match[1], state, question);
     if (tooltipText === null)
       continue;
     parent.appendChild(document.createTextNode(text.slice(plainStart, match.index)));

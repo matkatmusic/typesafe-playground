@@ -16,7 +16,8 @@ class FakeBox { textContent = '' }
 
 const ISO_TIME = '2026-03-04T05:06:07.000Z'
 // const VERSION = { time: ISO_TIME, state: { a: 1 }, questions: { q: 1 }, calls: 1, outputs: [] }
-const VERSION = { time: ISO_TIME, state: { a: 1 }, questions: { q: 1 } as never, calls: 1, outputs: [] }
+// const VERSION = { time: ISO_TIME, state: { a: 1 }, questions: { q: 1 } as never, calls: 1, outputs: [] }
+const VERSION = { time: ISO_TIME, state: { a: 1 }, questions: { q: { type: 'noul' } } as never, calls: 1, outputs: [] }
 const realFetch = globalThis.fetch
 
 afterEach(() => {
@@ -40,7 +41,8 @@ function installOneVersionWithAnEditedState() {
     elements.typeSafeKeyEditor.value = 'key'
     const getElementById = (id: string) => (elements as Record<string, unknown>)[id] ?? null
     Object.assign(globalThis, { document: { getElementById }, HTMLButtonElement: FakeButton, HTMLInputElement: FakeInput, HTMLTextAreaElement: FakeInput })
-    const texts = { state: '{"a": 2}', questions: '{"q": 1}' }
+    // const texts = { state: '{"a": 2}', questions: '{"q": 1}' }
+    const texts = { state: '{"a": 2}', questions: '{"q": {"type": "noul"}}' }
     const stateEditor = { state: { doc: { toString: () => texts.state } }, dispatch: () => {} } as unknown as EditorView
     const questionsEditor = { state: { doc: { toString: () => texts.questions } }, dispatch: () => {} } as unknown as EditorView
     spyOn(editors, 'getStateEditor').mockReturnValue(stateEditor)
@@ -83,7 +85,8 @@ function validateOneVersionPlusAnEditKeepsTheArrowsEnabledAndBothStopsReachable(
 async function validateARunClearsTheKeptDraft() {
     const { elements } = installOneVersionWithAnEditedState()
     moveToPreviousVersion()
-    expect(pageState.editedDraft).toEqual({ state: '{"a": 2}', questions: '{"q": 1}', baseIndex: 0 })
+    // expect(pageState.editedDraft).toEqual({ state: '{"a": 2}', questions: '{"q": 1}', baseIndex: 0 })
+    expect(pageState.editedDraft).toEqual({ state: '{"a": 2}', questions: '{"q": {"type": "noul"}}', baseIndex: 0 })
     globalThis.fetch = (async () => Response.json({ outputs: [], version: { ...VERSION }, index: 1 })) as unknown as typeof fetch
     await executeSubmit()
     expect(pageState.editedDraft).toBeNull()
