@@ -3,7 +3,8 @@ import { computePositionCount } from './editedPosition';
 import { isBatchLocked, pageState } from './state';
 
 export function isVersionMovePossible(): boolean {
-  if (isBatchLocked())
+  const isLocked = isBatchLocked();
+  if (isLocked)
     return false;
   // return pageState.versions.length >= 2;
   return computePositionCount() >= 2;

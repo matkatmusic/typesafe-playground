@@ -55,47 +55,69 @@ export function setMenuPosition(menu: HTMLElement, button: HTMLElement): void {
     menu.style.top = Math.max(0, rect.top - menuHeight - 4) + 'px';
 }
 
-export function createAddQuestionElement(onPick: PickHandler): HTMLElement {
-  const root = document.createElement('div');
-  root.className = 'add-question';
+function createAddQuestionButton(): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'add-question-btn';
   button.textContent = 'Add Question ⌄';
-  function closeMenu(): void {
-    menu.remove();
-    document.removeEventListener('mousedown', closeOnOutsideClick);
-    document.removeEventListener('keydown', closeOnEscape);
+  return button;
+}
+
+class AddQuestionController {
+  readonly root: HTMLElement;
+  readonly button: HTMLButtonElement;
+  readonly menu: HTMLElement;
+  readonly onPick: PickHandler;
+
+  constructor(onPick: PickHandler) {
+    this.onPick = onPick;
+    this.root = document.createElement('div');
+    this.root.className = 'add-question';
+    this.button = createAddQuestionButton();
+    this.menu = createMenuElement(this.selectAndClose);
+    this.button.addEventListener('click', this.openMenu);
+    this.root.append(this.button);
   }
-  function closeOnOutsideClick(event: MouseEvent): void {
+
+  closeMenu = (): void => {
+    this.menu.remove();
+    document.removeEventListener('mousedown', this.closeOnOutsideClick);
+    document.removeEventListener('keydown', this.closeOnEscape);
+  };
+
+  closeOnOutsideClick = (event: MouseEvent): void => {
     const target = event.target;
     if (!(target instanceof Node))
       throw new Error('mousedown target is not a node');
-    const isInsideMenu = menu.contains(target);
-    const isInsideRoot = root.contains(target);
+    const isInsideMenu = this.menu.contains(target);
+    const isInsideRoot = this.root.contains(target);
     const isInside = isInsideMenu || isInsideRoot;
     if (isInside)
       return;
-    closeMenu();
-  }
-  function closeOnEscape(event: KeyboardEvent): void {
+    this.closeMenu();
+  };
+
+  closeOnEscape = (event: KeyboardEvent): void => {
     if (event.key === 'Escape')
-      closeMenu();
-  }
-  function openMenu(): void {
-    if (menu.isConnected)
+      this.closeMenu();
+  };
+
+  openMenu = (): void => {
+    if (this.menu.isConnected)
       return;
-    document.body.append(menu);
-    setMenuPosition(menu, button);
-    document.addEventListener('mousedown', closeOnOutsideClick);
-    document.addEventListener('keydown', closeOnEscape);
-  }
-  function selectAndClose(type: QuestionType): void {
-    closeMenu();
-    onPick(type);
-  }
-  const menu = createMenuElement(selectAndClose);
-  button.addEventListener('click', openMenu);
-  root.append(button);
-  return root;
+    document.body.append(this.menu);
+    setMenuPosition(this.menu, this.button);
+    document.addEventListener('mousedown', this.closeOnOutsideClick);
+    document.addEventListener('keydown', this.closeOnEscape);
+  };
+
+  selectAndClose = (type: QuestionType): void => {
+    this.closeMenu();
+    this.onPick(type);
+  };
+}
+
+export function createAddQuestionElement(onPick: PickHandler): HTMLElement {
+  const controller = new AddQuestionController(onPick);
+  return controller.root;
 }

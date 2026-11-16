@@ -36,12 +36,7 @@ export async function readDraft(historyPath: string, id: string): Promise<Draft 
   return draft;
 }
 
-export async function executeDraftRequest(request: Request, historyPath: string): Promise<Response> {
-  const body = (await request.json()) as { id?: unknown; state?: unknown; questions?: unknown; isBatch?: unknown };
-  const { id, state, questions, isBatch } = body;
-  const isIdValid = isSessionId(id);
-  if (!isIdValid)
-    return new Response('id must be a lowercase uuid', { status: 400 });
+function parseDraftFields(state: unknown, questions: unknown, isBatch: unknown): Draft | Response {
   const isStateString = typeof state === 'string';
   if (!isStateString)
     return new Response('state must be a string', { status: 400 });
@@ -53,7 +48,26 @@ export async function executeDraftRequest(request: Request, historyPath: string)
     return new Response('isBatch must be a boolean', { status: 400 });
   // const draft: Draft = { state, questions };
   const draft: Draft = { state, questions, isBatch };
-  await Bun.write(computeDraftPath(historyPath, id), JSON.stringify(draft));
+  return draft;
+}
+
+function parseDraftBody(body: { id?: unknown; state?: unknown; questions?: unknown; isBatch?: unknown }): { id: string; draft: Draft } | Response {
+  const { id, state, questions, isBatch } = body;
+  const isIdValid = isSessionId(id);
+  if (!isIdValid)
+    return new Response('id must be a lowercase uuid', { status: 400 });
+  const draft = parseDraftFields(state, questions, isBatch);
+  if (draft instanceof Response)
+    return draft;
+  return { id, draft };
+}
+
+export async function executeDraftRequest(request: Request, historyPath: string): Promise<Response> {
+  const body = (await request.json()) as { id?: unknown; state?: unknown; questions?: unknown; isBatch?: unknown };
+  const parsed = parseDraftBody(body);
+  if (parsed instanceof Response)
+    return parsed;
+  await Bun.write(computeDraftPath(historyPath, parsed.id), JSON.stringify(parsed.draft));
   return new Response('ok');
 }
 

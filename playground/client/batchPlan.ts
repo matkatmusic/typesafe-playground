@@ -10,16 +10,16 @@ export const SINGLE_ARRAY_ERROR = 'state must be one JSON object: turn on batch 
 export type BatchVersions = { versions: Version[]; itemIndexes: number[] };
 
 export function computeBatchStateError(value: unknown): string | null {
-  if (!Array.isArray(value))
+  const isArray = Array.isArray(value);
+  if (!isArray)
     return BATCH_NOT_ARRAY_ERROR;
   if (value.length === 0)
     return BATCH_EMPTY_ERROR;
   for (let i = 0; i < value.length; i++) {
     const item = value[i];
     const isObject = typeof item === 'object' && item !== null;
-    if (!isObject)
-      return `item ${i + 1} of the state array must be a JSON object`;
-    if (Array.isArray(item))
+    const isPlainObject = isObject && !Array.isArray(item);
+    if (!isPlainObject)
       return `item ${i + 1} of the state array must be a JSON object`;
   }
   return null;
@@ -30,22 +30,26 @@ function buildNotRunVersion(state: Record<string, JsonValue>, questions: Questio
   return { time: NOT_RUN_TIME, state: state, questions: structuredClone(questions), calls: 0, outputs: [] };
 }
 
-// export function buildBatchVersions(versions: Version[], shownIndex: number, states: unknown[], questions: unknown): BatchVersions {
-export function buildBatchVersions(versions: Version[], shownIndex: number, states: Record<string, JsonValue>[], questions: Questions): BatchVersions {
-  const shownVersion = versions[shownIndex];
-  const step = computeVersionStep(shownVersion, states[0], questions);
-  const batchVersions = [...versions];
-  const itemIndexes: number[] = [];
+function applyFirstStateStep(batchVersions: Version[], itemIndexes: number[], shownIndex: number, firstState: Record<string, JsonValue>, questions: Questions): void {
+  const shownVersion = batchVersions[shownIndex];
+  const step = computeVersionStep(shownVersion, firstState, questions);
   if (step === 'create') {
-    batchVersions.push(buildNotRunVersion(states[0], questions));
+    batchVersions.push(buildNotRunVersion(firstState, questions));
     itemIndexes.push(batchVersions.length - 1);
   }
   if (step === 'overwrite') {
-    batchVersions[shownIndex] = { ...shownVersion, state: states[0], questions: structuredClone(questions) };
+    batchVersions[shownIndex] = { ...shownVersion, state: firstState, questions: structuredClone(questions) };
     itemIndexes.push(shownIndex);
   }
   if (step === 'keep')
     itemIndexes.push(shownIndex);
+}
+
+// export function buildBatchVersions(versions: Version[], shownIndex: number, states: unknown[], questions: unknown): BatchVersions {
+export function buildBatchVersions(versions: Version[], shownIndex: number, states: Record<string, JsonValue>[], questions: Questions): BatchVersions {
+  const batchVersions = [...versions];
+  const itemIndexes: number[] = [];
+  applyFirstStateStep(batchVersions, itemIndexes, shownIndex, states[0], questions);
   for (let i = 1; i < states.length; i++) {
     batchVersions.push(buildNotRunVersion(states[i], questions));
     itemIndexes.push(batchVersions.length - 1);

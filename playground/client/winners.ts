@@ -5,16 +5,21 @@ import { readDescription, readTopKey } from './infoValues';
 
 export type WinnerGroup = { key: string; runs: number[] };
 
+function findWinnerGroup(groups: WinnerGroup[], key: string): WinnerGroup | undefined {
+  let group: WinnerGroup | undefined;
+  for (const candidate of groups) {
+    const isSameKey = candidate.key === key;
+    if (isSameKey)
+      group = candidate;
+  }
+  return group;
+}
+
 export function listWinnerGroups(answers: Answer[]): WinnerGroup[] {
   const groups: WinnerGroup[] = [];
   for (let i = 0; i < answers.length; i++) {
     const topKey = readTopKey(answers[i], listOptionKeys(answers[i]));
-    let group: WinnerGroup | undefined;
-    for (const candidate of groups) {
-      const isSameKey = candidate.key === topKey;
-      if (isSameKey)
-        group = candidate;
-    }
+    const group = findWinnerGroup(groups, topKey);
     if (group === undefined)
       groups.push({ key: topKey, runs: [i + 1] });
     else

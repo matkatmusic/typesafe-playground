@@ -35,6 +35,22 @@ export function listSortedKeys(answers: Answer[]): string[] {
   return keys;
 }
 
+function renderAxisForQuestion(svg: Element, question: Question, plotRight: number, plotH: number): void {
+  if (question.type === 'noul')
+    renderNoulAxis(svg, plotRight, plotH);
+  else
+    renderAxis(svg, plotRight, plotH);
+}
+
+function renderAllOptions(svg: Element, keys: string[], answers: Answer[], pinned: PinnedData | null, slot: number, plotH: number, isAverageShown: boolean, baseline: number): void {
+  for (let i = 0; i < keys.length; i++) {
+    const pinnedValues = readPinnedValues(pinned, keys[i]);
+    if (pinnedValues !== null)
+      renderOption(svg, pinnedValues.values, computeSlotLeft(i, slot), plotH, isAverageShown, baseline, true);
+    renderOption(svg, listValues(answers, keys[i]), computeSlotLeft(i, slot), plotH, isAverageShown, baseline, false);
+  }
+}
+
 export function renderChart(graphBlock: GraphBlock, name: string, question: Question, answers: Answer[], pinned: PinnedData | null): ChartLayout {
   const { block, box } = graphBlock;
   const keys = listSortedKeys(answers);
@@ -44,16 +60,8 @@ export function renderChart(graphBlock: GraphBlock, name: string, question: Ques
   const plotRight = LEFT + keys.length * slot;
   const svg = createSvgNode('svg', { width: plotRight + 20, height: TOP + plotH + BOTTOM, role: 'img' });
   const baseline = computeBaseline(question);
-  if (question.type === 'noul')
-    renderNoulAxis(svg, plotRight, plotH);
-  else
-    renderAxis(svg, plotRight, plotH);
-  for (let i = 0; i < keys.length; i++) {
-    const pinnedValues = readPinnedValues(pinned, keys[i]);
-    if (pinnedValues !== null)
-      renderOption(svg, pinnedValues.values, computeSlotLeft(i, slot), plotH, isAverageShown, baseline, true);
-    renderOption(svg, listValues(answers, keys[i]), computeSlotLeft(i, slot), plotH, isAverageShown, baseline, false);
-  }
+  renderAxisForQuestion(svg, question, plotRight, plotH);
+  renderAllOptions(svg, keys, answers, pinned, slot, plotH, isAverageShown, baseline);
   box.replaceChildren(svg);
   return { name, block, box, svg, question, answers, keys, slot, plotH, isAverageShown, baseline, pinned };
 }

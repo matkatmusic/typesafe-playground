@@ -45,61 +45,74 @@ export function listSubmitErrors(state: unknown, questions: unknown): string[] {
   return listUndefinedReferences(state, questions as Record<string, unknown>);
 }
 
-export async function executeSubmit(): Promise<void> {
-  const submitButton = getButton('submitButton');
-  const errorLine = getElement('errorLine');
-  errorLine.textContent = '';
+type SubmitInputs = { errorMessage: string; state: unknown; questions: unknown };
+
+function computeSubmitInputs(): SubmitInputs {
   const stateResult = computeJsonParseResult('state', getStateEditor().state.doc.toString());
-  if (!stateResult.isValid) {
-    errorLine.textContent = stateResult.errorMessage;
-    return;
-  }
+  if (!stateResult.isValid)
+    return { errorMessage: stateResult.errorMessage, state: null, questions: null };
   const isStateArray = Array.isArray(stateResult.value);
-  if (isStateArray) {
-    errorLine.textContent = SINGLE_ARRAY_ERROR;
-    return;
-  }
+  if (isStateArray)
+    return { errorMessage: SINGLE_ARRAY_ERROR, state: null, questions: null };
   const questionsResult = computeJsonParseResult('questions', getQuestionsEditor().state.doc.toString());
-  if (!questionsResult.isValid) {
-    errorLine.textContent = questionsResult.errorMessage;
-    return;
-  }
+  if (!questionsResult.isValid)
+    return { errorMessage: questionsResult.errorMessage, state: null, questions: null };
   const submitErrors = listSubmitErrors(stateResult.value, questionsResult.value);
-  const hasSubmitErrors = submitErrors.length > 0;
-  if (hasSubmitErrors) {
-    errorLine.textContent = submitErrors.join('; ');
-    return;
+  return { errorMessage: submitErrors.join('; '), state: stateResult.value, questions: questionsResult.value };
+}
+
+async function saveRunResult(result: RunResult, baseVersion: ReturnType<typeof getShownVersion>, isStateUnchanged: boolean, isQuestionsUnchanged: boolean): Promise<void> {
+  // pageState.versions[result.version.id - 1] = result.version;
+  pageState.versions[result.index] = result.version;
+  // const isNewVersion = result.version.id !== baseVersion.id;
+  const isInputUnchanged = isStateUnchanged && isQuestionsUnchanged;
+  pageState.index = result.index;
+  if (!isInputUnchanged) {
+    await saveInheritedNote('state', baseVersion.stateNote, isStateUnchanged, result.version);
+    await saveInheritedNote('questions', baseVersion.questionsNote, isQuestionsUnchanged, result.version);
   }
+  // pageState.index = result.version.id - 1;
+  pageState.editedDraft = null;
+  markPageChanged('last run');
+  renderShownVersion();
+}
+
+async function sendRunAndRecordResult(inputs: SubmitInputs, errorLine: HTMLElement): Promise<void> {
   const baseVersion = getShownVersion();
   const isStateUnchanged = !isKindTextEdited('state');
   const isQuestionsUnchanged = !isKindTextEdited('questions');
+  const response = await sendRun(buildRunBody(inputs.state, inputs.questions));
+  getButton('submitButton').textContent = SUBMIT_TEXT;
+  refreshSubmitAvailability();
+  if (!response.ok) {
+    errorLine.textContent = formatRunFailure(response.status, await response.text());
+    return;
+  }
+  const result: RunResult = await response.json();
+  await saveRunResult(result, baseVersion, isStateUnchanged, isQuestionsUnchanged);
+}
+
+async function executeRunWithEditorsLocked(inputs: SubmitInputs, errorLine: HTMLElement): Promise<void> {
+  const submitButton = getButton('submitButton');
   submitButton.disabled = true;
   submitButton.textContent = RUNNING_TEXT;
   setEditorsLocked(true);
   try {
-    const response = await sendRun(buildRunBody(stateResult.value, questionsResult.value));
-    submitButton.textContent = SUBMIT_TEXT;
-    refreshSubmitAvailability();
-    if (!response.ok) {
-      errorLine.textContent = formatRunFailure(response.status, await response.text());
-      return;
-    }
-    const result: RunResult = await response.json();
-    // pageState.versions[result.version.id - 1] = result.version;
-    pageState.versions[result.index] = result.version;
-    // const isNewVersion = result.version.id !== baseVersion.id;
-    const isInputUnchanged = isStateUnchanged && isQuestionsUnchanged;
-    pageState.index = result.index;
-    if (!isInputUnchanged) {
-      await saveInheritedNote('state', baseVersion.stateNote, isStateUnchanged, result.version);
-      await saveInheritedNote('questions', baseVersion.questionsNote, isQuestionsUnchanged, result.version);
-    }
-    // pageState.index = result.version.id - 1;
-    pageState.editedDraft = null;
-    markPageChanged('last run');
-    renderShownVersion();
+    await sendRunAndRecordResult(inputs, errorLine);
   }
   finally {
     setEditorsLocked(false);
   }
+}
+
+export async function executeSubmit(): Promise<void> {
+  const errorLine = getElement('errorLine');
+  errorLine.textContent = '';
+  const inputs = computeSubmitInputs();
+  const hasInputErrors = inputs.errorMessage !== '';
+  if (hasInputErrors) {
+    errorLine.textContent = inputs.errorMessage;
+    return;
+  }
+  await executeRunWithEditorsLocked(inputs, errorLine);
 }

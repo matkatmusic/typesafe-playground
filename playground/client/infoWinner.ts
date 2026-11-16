@@ -1,7 +1,7 @@
 import type { Answer } from './graphTypes';
 import { listWinnerGroups } from './winners';
 
-export function readWinningKey(answers: Answer[], keys: string[]): string {
+function findWinningGroup(answers: Answer[]) {
   const groups = listWinnerGroups(answers);
   let winningGroup = groups[0];
   for (const group of groups) {
@@ -9,6 +9,11 @@ export function readWinningKey(answers: Answer[], keys: string[]): string {
     if (hasMoreRuns)
       winningGroup = group;
   }
+  return winningGroup;
+}
+
+export function readWinningKey(answers: Answer[], keys: string[]): string {
+  const winningGroup = findWinningGroup(answers);
   let isKeyCharted = false;
   for (const key of keys) {
     const isWinningKey = key === winningGroup.key;

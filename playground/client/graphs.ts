@@ -37,12 +37,7 @@ export function renderStaleCharts(charts: ChartLayout[], onRendered?: ChartsHook
     onRendered(redrawn);
 }
 
-export function renderGraphs(version: Version, container: HTMLElement, onRendered?: ChartsHook): void {
-  const questions = readQuestions(version);
-  function renderAgain(): void {
-    renderGraphs(version, container, onRendered);
-  }
-  container.replaceChildren();
+function appendGraphBlocks(version: Version, container: HTMLElement, questions: ReturnType<typeof readQuestions>, renderAgain: () => void): GraphBlock[] {
   const names = Object.keys(questions);
   const blocks: GraphBlock[] = [];
   for (let i = 0; i < names.length; i++) {
@@ -50,6 +45,11 @@ export function renderGraphs(version: Version, container: HTMLElement, onRendere
     container.appendChild(graphBlock.block);
     blocks.push(graphBlock);
   }
+  return blocks;
+}
+
+function renderDataCharts(version: Version, blocks: GraphBlock[], questions: ReturnType<typeof readQuestions>): ChartLayout[] {
+  const names = Object.keys(questions);
   const charts: ChartLayout[] = [];
   const pinnedVersion = findPinned(pageState.versions, pageState.pinnedIndex);
   for (let i = 0; i < names.length; i++) {
@@ -60,6 +60,17 @@ export function renderGraphs(version: Version, container: HTMLElement, onRendere
     else if (!isCollapsed)
       charts.push(renderChart(blocks[i], names[i], questions[names[i]], listAnswers(version, names[i]), readPinnedData(pinnedVersion, names[i])));
   }
+  return charts;
+}
+
+export function renderGraphs(version: Version, container: HTMLElement, onRendered?: ChartsHook): void {
+  const questions = readQuestions(version);
+  function renderAgain(): void {
+    renderGraphs(version, container, onRendered);
+  }
+  container.replaceChildren();
+  const blocks = appendGraphBlocks(version, container, questions, renderAgain);
+  const charts = renderDataCharts(version, blocks, questions);
   if (onRendered !== undefined)
     onRendered(charts);
   renderStaleCharts(charts, onRendered);

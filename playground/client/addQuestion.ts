@@ -10,6 +10,15 @@ import { findTopLevelObject } from './questionNames';
 import { buildInsertPlan } from './questionSnippets';
 import type { QuestionType } from './questionSnippets';
 
+function createPlaceholderDispatch(view: EditorView, fieldTexts: string[], insertFrom: number): (transaction: Transaction) => void {
+  function dispatchWithPlaceholders(transaction: Transaction): void {
+    const ranges = findInsertedRanges(transaction.newDoc.toString(), fieldTexts, insertFrom);
+    const effects = [...transaction.effects, addPlaceholderRanges.of(ranges)];
+    view.dispatch(view.state.update({ changes: transaction.changes, selection: transaction.selection, effects: effects, scrollIntoView: true }));
+  }
+  return dispatchWithPlaceholders;
+}
+
 export function insertQuestion(view: EditorView, type: QuestionType): void {
   if (view.state.readOnly)
     return;
@@ -17,11 +26,7 @@ export function insertQuestion(view: EditorView, type: QuestionType): void {
   const plan = buildInsertPlan(syntaxTree(view.state), text, type);
   const lengthBefore = view.state.doc.length;
   const fieldTexts = listTemplateFieldTexts(plan.template);
-  function dispatchWithPlaceholders(transaction: Transaction): void {
-    const ranges = findInsertedRanges(transaction.newDoc.toString(), fieldTexts, plan.from);
-    const effects = [...transaction.effects, addPlaceholderRanges.of(ranges)];
-    view.dispatch(view.state.update({ changes: transaction.changes, selection: transaction.selection, effects: effects, scrollIntoView: true }));
-  }
+  const dispatchWithPlaceholders = createPlaceholderDispatch(view, fieldTexts, plan.from);
   snippet(plan.template)({ state: view.state, dispatch: dispatchWithPlaceholders }, null, plan.from, plan.to);
   const insertedEnd = plan.to + view.state.doc.length - lengthBefore;
   const insertedRange = EditorSelection.range(plan.from, insertedEnd);

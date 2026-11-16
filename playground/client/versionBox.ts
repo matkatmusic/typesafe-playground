@@ -55,24 +55,12 @@ export function renderLastVersion(): void {
   renderShownVersion();
 }
 
-export function moveByVersions(step: number): void {
-  const isMovePossible = isVersionMovePossible();
-  if (!isMovePossible)
-    return;
-  // pageState.index = computeWrappedIndex(pageState.index, step, pageState.versions.length);
-  // renderShownVersion();
-  const isEdited = isEditorTextEdited();
-  if (isEdited)
-    pageState.editedDraft = { state: getStateEditor().state.doc.toString(), questions: getQuestionsEditor().state.doc.toString(), baseIndex: pageState.index };
-  const currentPosition = isEdited ? pageState.versions.length : pageState.index;
-  const targetPosition = computeWrappedIndex(currentPosition, step, computePositionCount());
+function saveEditedDraft(): void {
+  pageState.editedDraft = { state: getStateEditor().state.doc.toString(), questions: getQuestionsEditor().state.doc.toString(), baseIndex: pageState.index };
+}
+
+function renderEditedDraft(): void {
   const draft = pageState.editedDraft;
-  const isEditedTarget = targetPosition === pageState.versions.length;
-  if (!isEditedTarget) {
-    pageState.index = targetPosition;
-    renderShownVersion();
-    return;
-  }
   if (draft === null)
     throw new Error('the edited position has no draft');
   pageState.index = draft.baseIndex;
@@ -82,6 +70,30 @@ export function moveByVersions(step: number): void {
   fillEditorText(getStateEditor(), draft.state);
   fillEditorText(getQuestionsEditor(), draft.questions);
   refreshVersionBox();
+}
+
+function renderTargetPosition(targetPosition: number): void {
+  const isEditedTarget = targetPosition === pageState.versions.length;
+  if (isEditedTarget) {
+    renderEditedDraft();
+    return;
+  }
+  pageState.index = targetPosition;
+  renderShownVersion();
+}
+
+// pageState.index = computeWrappedIndex(pageState.index, step, pageState.versions.length);
+// renderShownVersion();
+export function moveByVersions(step: number): void {
+  const isMovePossible = isVersionMovePossible();
+  if (!isMovePossible)
+    return;
+  const isEdited = isEditorTextEdited();
+  if (isEdited)
+    saveEditedDraft();
+  const currentPosition = isEdited ? pageState.versions.length : pageState.index;
+  const targetPosition = computeWrappedIndex(currentPosition, step, computePositionCount());
+  renderTargetPosition(targetPosition);
 }
 
 export function moveToPreviousVersion(): void {

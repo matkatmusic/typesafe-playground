@@ -49,50 +49,71 @@ function countTopRuns(answers: Answer[], keys: string[], key: string): number {
   return topCount;
 }
 
+interface BarTexts {
+  shownKey: string;
+  messageText: string;
+  scoreText: string;
+  confidenceText: string | null;
+  lowText: string;
+  highText: string;
+  averageText: string;
+  topCountText: string;
+}
+
+function buildHiddenBarTexts(answers: Answer[]): BarTexts {
+  const confidenceText = answers[0].type === 'noul' ? null : '';
+  return { shownKey: '', messageText: '', scoreText: '', confidenceText, lowText: '', highText: '', averageText: '', topCountText: '' };
+}
+
+function buildShownBarTexts(request: BarInfoRequest, callIndex: number): BarTexts {
+  const { question, answers, key, keys } = request;
+  const values = listValues(answers, key);
+  const stat = computeSummary(values);
+  const scoreValue = callIndex === -1 ? stat.average : values[callIndex];
+  const shownKey = answers[0].type === 'noul' ? readTopKey({ type: 'noul', noul: scoreValue }, keys) : key;
+  // messageText = buildTextFormatter(getShownVersion())(readDescription(question, key));
+  // messageText = buildTextFormatter(getShownVersion())(readDescription(question, shownKey));
+  const messageText = buildTextFormatter(getShownVersion(), question)(readDescription(question, shownKey));
+  // scoreText = formatThreeDecimals(callIndex === -1 ? stat.average : values[callIndex]);
+  const scoreText = formatThreeDecimals(scoreValue);
+  const confidenceText = formatConfidenceText(answers, callIndex);
+  // topCountText = String(countTopRuns(answers, keys, key));
+  const topCountText = String(countTopRuns(answers, keys, shownKey));
+  const lowText = formatThreeDecimals(stat.low);
+  const highText = formatThreeDecimals(stat.high);
+  const averageText = formatThreeDecimals(stat.average);
+  return { shownKey, messageText, scoreText, confidenceText, lowText, highText, averageText, topCountText };
+}
+
+function buildPinnedRow(pinned: NonNullable<BarInfoRequest['pinned']>): InfoRow {
+  const pinnedStat = computeSummary(pinned.values);
+  const pinnedParts = listRangeParts(formatThreeDecimals(pinnedStat.low), formatThreeDecimals(pinnedStat.high), formatThreeDecimals(pinnedStat.average));
+  if (pageState.pinnedIndex === null)
+    throw new Error('a pinned row needs a pinned version');
+  // rows.push({ label: `Pinned v${pinned.id}:`, parts: pinnedParts });
+  return { label: `Pinned v${pageState.pinnedIndex + 1}:`, parts: pinnedParts };
+}
+
+function buildShownOnlyRows(request: BarInfoRequest, texts: BarTexts): InfoRow[] {
+  const { answers, pinned } = request;
+  const rows: InfoRow[] = [];
+  rows.push({ label: 'Top choice in', parts: [[texts.topCountText, VALUE], [' of ', LABEL], [String(answers.length), VALUE], [' runs', LABEL]] });
+  if (pinned !== null)
+    rows.push(buildPinnedRow(pinned));
+  return rows;
+}
+
 export function buildBarInfoRows(request: BarInfoRequest): InfoRow[] {
-  const { question, answers, key, keys, callIndex, pinned } = request;
+  const { answers, callIndex } = request;
   const isBarShown = callIndex !== null;
-  let shownKey = '';
-  let messageText = '';
-  let scoreText = '';
-  let confidenceText: string | null = answers[0].type === 'noul' ? null : '';
-  let lowText = '';
-  let highText = '';
-  let averageText = '';
-  let topCountText = '';
-  if (isBarShown) {
-    const values = listValues(answers, key);
-    const stat = computeSummary(values);
-    const scoreValue = callIndex === -1 ? stat.average : values[callIndex];
-    shownKey = answers[0].type === 'noul' ? readTopKey({ type: 'noul', noul: scoreValue }, keys) : key;
-    // messageText = buildTextFormatter(getShownVersion())(readDescription(question, key));
-    // messageText = buildTextFormatter(getShownVersion())(readDescription(question, shownKey));
-    messageText = buildTextFormatter(getShownVersion(), question)(readDescription(question, shownKey));
-    lowText = formatThreeDecimals(stat.low);
-    highText = formatThreeDecimals(stat.high);
-    averageText = formatThreeDecimals(stat.average);
-    // scoreText = formatThreeDecimals(callIndex === -1 ? stat.average : values[callIndex]);
-    scoreText = formatThreeDecimals(scoreValue);
-    confidenceText = formatConfidenceText(answers, callIndex);
-    // topCountText = String(countTopRuns(answers, keys, key));
-    topCountText = String(countTopRuns(answers, keys, shownKey));
-  }
+  const texts = isBarShown ? buildShownBarTexts(request, callIndex) : buildHiddenBarTexts(answers);
   const rows: InfoRow[] = [];
   // rows.push({ label: 'Choice:', parts: [[isBarShown ? key : '', VALUE]] });
-  rows.push({ label: 'Choice:', parts: [[shownKey, VALUE]] });
-  rows.push({ label: 'Score:', parts: listScoreParts(scoreText, confidenceText) });
-  rows.push({ label: 'Range:', parts: listRangeParts(lowText, highText, averageText) });
+  rows.push({ label: 'Choice:', parts: [[texts.shownKey, VALUE]] });
+  rows.push({ label: 'Score:', parts: listScoreParts(texts.scoreText, texts.confidenceText) });
+  rows.push({ label: 'Range:', parts: listRangeParts(texts.lowText, texts.highText, texts.averageText) });
   if (isBarShown)
-    rows.push({ label: 'Top choice in', parts: [[topCountText, VALUE], [' of ', LABEL], [String(answers.length), VALUE], [' runs', LABEL]] });
-  const isPinnedRowShown = isBarShown && pinned !== null;
-  if (isPinnedRowShown) {
-    const pinnedStat = computeSummary(pinned.values);
-    const pinnedParts = listRangeParts(formatThreeDecimals(pinnedStat.low), formatThreeDecimals(pinnedStat.high), formatThreeDecimals(pinnedStat.average));
-    if (pageState.pinnedIndex === null)
-      throw new Error('a pinned row needs a pinned version');
-    // rows.push({ label: `Pinned v${pinned.id}:`, parts: pinnedParts });
-    rows.push({ label: `Pinned v${pageState.pinnedIndex + 1}:`, parts: pinnedParts });
-  }
-  rows.push({ label: 'Message:', parts: [[messageText, MESSAGE]] });
+    rows.push(...buildShownOnlyRows(request, texts));
+  rows.push({ label: 'Message:', parts: [[texts.messageText, MESSAGE]] });
   return rows;
 }

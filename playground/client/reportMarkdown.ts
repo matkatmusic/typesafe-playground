@@ -50,16 +50,20 @@ function listSectionBlocks(title: string, note: string | undefined): string[] {
 //   return ['### Result notes', ...questionBlocks];
 // }
 
-function listVersionBlocks(versions: Version[], index: number): string[] {
-  const version = versions[index];
-  const previous = versions[index - 1];
+function listVersionNoteBlocks(version: Version, previous: Version | undefined): string[] {
   const isStateNoteNew = version.stateNote !== previous?.stateNote;
   const isQuestionsNoteNew = version.questionsNote !== previous?.questionsNote;
-  const noteBlocks = [
+  return [
     ...listSectionBlocks('State notes', isStateNoteNew ? version.stateNote : undefined),
     ...listSectionBlocks('Questions notes', isQuestionsNoteNew ? version.questionsNote : undefined),
     ...listSectionBlocks('Run comments', version.note),
   ];
+}
+
+function listVersionBlocks(versions: Version[], index: number): string[] {
+  const version = versions[index];
+  const previous = versions[index - 1];
+  const noteBlocks = listVersionNoteBlocks(version, previous);
   const resultBlocks = listResultBlocks(versions, index);
   const hasContent = noteBlocks.length > 0 || resultBlocks.length > 0;
   if (!hasContent)

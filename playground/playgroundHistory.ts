@@ -18,7 +18,8 @@ export async function loadHistory(historyPath: string): Promise<Version[]> {
 }
 
 export function findVersionByIndex(history: Version[], index: unknown): Version | undefined {
-  if (!Number.isInteger(index))
+  const isIndexInteger = Number.isInteger(index);
+  if (!isIndexInteger)
     return undefined;
   return history[index as number];
 }

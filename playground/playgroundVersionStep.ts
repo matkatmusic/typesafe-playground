@@ -25,7 +25,8 @@ export function computeVersionStep(shownVersion: Version, state: unknown, questi
 
   const isStateDefault = JSON.stringify(shownVersion.state) === JSON.stringify(HARD_CODED_STATE);
   const isQuestionsDefault = JSON.stringify(shownVersion.questions) === JSON.stringify(HARD_CODED_QUESTIONS);
-  if (isStateDefault || isQuestionsDefault)
+  const isStateOrQuestionsDefault = isStateDefault || isQuestionsDefault;
+  if (isStateOrQuestionsDefault)
     return 'overwrite';
 
   return 'create';

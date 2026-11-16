@@ -10,21 +10,26 @@ import { readPinnedValues } from './pinned';
 import { readWinningKey } from './infoWinner';
 import { createSvgNode } from './svgDom';
 
-export function attachColumnHits(chart: ChartLayout, tracker: HoverTracker, columnIndex: number): ColumnHit {
+function attachBarHit(chart: ChartLayout, tracker: HoverTracker, key: string, slotX: number, offset: number, values: number[], callIndex: number): ColumnHit {
   const { svg, question, answers, keys, plotH, isAverageShown, baseline } = chart;
-  const key = keys[columnIndex];
+  const bar = computeHitBar(slotX, offset, callIndex, values, plotH, baseline);
+  const hit = createSvgNode('rect', { x: bar.x, y: bar.y, width: bar.width, height: bar.height, fill: 'transparent', 'stroke-width': 1 });
+  const request: BarInfoRequest = { question, answers, key, keys, callIndex, pinned: readPinnedValues(chart.pinned, key) };
+  attachHover({ tracker, svg, hit, request, values, slotX, plotH, isAverageShown, baseline });
+  svg.appendChild(hit);
+  return { hit, request };
+}
+
+export function attachColumnHits(chart: ChartLayout, tracker: HoverTracker, columnIndex: number): ColumnHit {
+  const key = chart.keys[columnIndex];
   const slotX = computeSlotLeft(columnIndex, chart.slot);
-  const values = listValues(answers, key);
-  const offset = computeBarOffset(isAverageShown);
+  const values = listValues(chart.answers, key);
+  const offset = computeBarOffset(chart.isAverageShown);
   let firstHit: ColumnHit | null = null;
-  for (let callIndex = isAverageShown ? -1 : 0; callIndex < values.length; callIndex++) {
-    const bar = computeHitBar(slotX, offset, callIndex, values, plotH, baseline);
-    const hit = createSvgNode('rect', { x: bar.x, y: bar.y, width: bar.width, height: bar.height, fill: 'transparent', 'stroke-width': 1 });
-    const request: BarInfoRequest = { question, answers, key, keys, callIndex, pinned: readPinnedValues(chart.pinned, key) };
-    attachHover({ tracker, svg, hit, request, values, slotX, plotH, isAverageShown, baseline });
-    svg.appendChild(hit);
+  for (let callIndex = chart.isAverageShown ? -1 : 0; callIndex < values.length; callIndex++) {
+    const barHit = attachBarHit(chart, tracker, key, slotX, offset, values, callIndex);
     if (firstHit === null)
-      firstHit = { hit, request };
+      firstHit = barHit;
   }
   if (firstHit === null)
     throw new Error('a chart column has no bars');
