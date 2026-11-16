@@ -65,7 +65,7 @@ async function validateNoteBoxSitsInTheVersionRowAfterTheNextButtonWithADivider(
         previousIndex = itemIndex
     }
     expect(page.indexOf('id="resetRunsButton"')).toBeLessThan(page.indexOf('id="inputResultsBox"'))
-    expect(page).toContain('#versionNoteDivider { flex: none; align-self: stretch; width: 1px; margin: 0 4px; background: var(--grid); }')
+    expect(page).toContain('#versionNoteDivider { flex: none; align-self: stretch; inline-size: 1px; margin: 0 4px; background: var(--grid, #dddcd7); }')
 }
 
 test('test_note_box_sits_in_the_version_row_after_the_next_button_with_a_divider', validateNoteBoxSitsInTheVersionRowAfterTheNextButtonWithADivider)
@@ -78,7 +78,7 @@ async function validateJsonToggleButtonStretchesToTheHeightOfCollapseAndExpand()
     const page = await buildPage(await buildTempHistoryPath())
     const rule = page.split('\n').find((line) => line.startsWith('#jsonToggleButton {'))
     expect(rule).toContain('align-self: stretch')
-    expect(rule).not.toContain('height:')
+    expect(rule).not.toContain('block-size:')
 }
 
 async function validateReplaceReferencesToggleIsAnUncheckedCheckboxInTheButtonRow() {
@@ -94,14 +94,14 @@ async function validateGraphsScrollWithAStyledScrollbarAndInfoBoxSitsInTheBlockF
     const page = await buildPage(await buildTempHistoryPath())
     const lines = page.split('\n')
     const containerRule = lines.find((line) => line.startsWith('#graphContainerBox {'))
-    expect(containerRule).toContain('overflow-y: auto')
+    expect(containerRule).toContain('overflow: auto')
     expect(containerRule).toContain('scrollbar-gutter: stable')
-    expect(page).toContain('#graphContainerBox::-webkit-scrollbar { width: 10px; }')
-    expect(page).toContain('#graphContainerBox::-webkit-scrollbar-track { background: var(--grid);')
-    expect(page).toContain('#graphContainerBox::-webkit-scrollbar-thumb { background: var(--text-muted);')
+    expect(page).toContain('#graphContainerBox::-webkit-scrollbar { inline-size: 10px; }')
+    expect(page).toContain('#graphContainerBox::-webkit-scrollbar-track { background: var(--grid, #dddcd7);')
+    expect(page).toContain('#graphContainerBox::-webkit-scrollbar-thumb { background: var(--text-muted, #52514e);')
     const blockRule = lines.find((line) => line.startsWith('.graph-block {'))
     expect(blockRule).toContain('display: grid')
-    expect(blockRule).not.toContain('min-height: 0')
+    expect(blockRule).not.toContain('min-block-size: 0')
     const infoRule = lines.find((line) => line.startsWith('.bar-info {'))
     expect(infoRule).toContain('grid-column: 2')
     expect(infoRule).not.toContain('position: absolute')

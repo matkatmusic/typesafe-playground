@@ -9,7 +9,8 @@ export function listBatchItems(states: EditorState[]): unknown[] | null {
   if (!stateParse.isValid)
     return null;
   const items = stateParse.value;
-  if (!Array.isArray(items))
+  const isItemsArray = Array.isArray(items);
+  if (!isItemsArray)
     return null;
   if (items.length === 0)
     return null;

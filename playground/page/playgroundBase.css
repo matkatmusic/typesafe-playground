@@ -39,43 +39,62 @@
     --placeholder-idle-text: #d4d3cf;
 }
 * { box-sizing: border-box; }
-body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: var(--surface); color: var(--text); font: 15px/1.4 system-ui, sans-serif; overflow: hidden; }
-#playgroundComponentBox { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
+/* body { margin: 0; height: 100vh; display: flex; flex-direction: column; background: var(--surface); color: var(--text); font: 15px/1.4 system-ui, sans-serif; overflow: hidden; } */
+body { margin: 0; block-size: 100vb; display: flex; flex-direction: column; background: var(--surface); color: var(--text); font: 0.9375rem/1.4 system-ui, sans-serif; overflow: hidden; }
+/* #playgroundComponentBox { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; } */
+#playgroundComponentBox { flex: 1 1 0; min-block-size: 0; display: flex; flex-direction: column; }
 #headerBox, #versionBox, #inputResultsBox { background: var(--panel); border: 1px solid var(--grid); padding: 6px 12px; }
-#headerBox, #versionBox { flex: none; height: 40px; display: flex; align-items: center; }
+/* #headerBox, #versionBox { flex: none; height: 40px; display: flex; align-items: center; } */
+#headerBox, #versionBox { flex: none; block-size: 40px; display: flex; align-items: center; }
 #headerBox, #versionBox { gap: 8px; }
-#versionLabel { flex: 0 1 auto; min-width: 0; text-align: center; color: var(--text-muted); white-space: nowrap; }
-#headerBox #typeSafeKeyLabel { margin-left: 16px; color: var(--text-muted); }
-#headerBox #typeSafeKeyEditor { width: 260px; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 8px; font: inherit; }
-#headerBox #lastEditedLabel { margin-left: auto; font-weight: 300; color: var(--text-muted); white-space: nowrap; }
-button { background: var(--panel); color: var(--text); border: 1px solid var(--button-border); border-radius: 6px; padding: 4px 12px; font-size: 15px; cursor: pointer; transition: transform 60ms; }
+/* #versionLabel { flex: 0 1 auto; min-width: 0; text-align: center; color: var(--text-muted); white-space: nowrap; } */
+#versionLabel { flex: 0 1 auto; min-inline-size: 0; text-align: center; color: var(--text-muted); white-space: nowrap; }
+/* #headerBox #typeSafeKeyLabel { margin-left: 16px; color: var(--text-muted); } */
+#typeSafeKeyLabel { margin-inline-start: 16px; color: var(--text-muted); }
+/* #headerBox #typeSafeKeyEditor { width: 260px; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 8px; font: inherit; } */
+#typeSafeKeyEditor { inline-size: 260px; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 8px; font: inherit; }
+/* #headerBox #lastEditedLabel { margin-left: auto; font-weight: 300; color: var(--text-muted); white-space: nowrap; } */
+#lastEditedLabel { margin-inline-start: auto; font-weight: 300; color: var(--text-muted); white-space: nowrap; }
+/* button { background: var(--panel); color: var(--text); border: 1px solid var(--button-border); border-radius: 6px; padding: 4px 12px; font-size: 15px; cursor: pointer; transition: transform 60ms; } */
+button { background: var(--panel); color: var(--text); border: 1px solid var(--button-border); border-radius: 6px; padding: 4px 12px; font-size: 0.9375rem; cursor: pointer; transition: transform 60ms; }
 button:active:not(:disabled) { transform: translate(2px, 2px); }
 button:disabled { opacity: 0.5; cursor: default; }
 #unsavedDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; }
 #unsavedDialog form { display: flex; flex-direction: column; gap: 12px; }
 #unsavedDialog p { margin: 0; }
 #unsavedDialogButtons { display: flex; gap: 8px; justify-content: flex-end; }
-#notesDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; width: min(560px, 90vw); }
+/* #notesDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; width: min(560px, 90vw); } */
+#notesDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; inline-size: min(560px, 90vi); }
 #notesDialog form { display: flex; flex-direction: column; gap: 12px; }
 #notesDialog p { margin: 0; }
-#notesDialogText { width: 100%; resize: vertical; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+/* #notesDialogText { width: 100%; resize: vertical; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; font: 13px/1.4 ui-monospace, Menlo, monospace; } */
+#notesDialogText { inline-size: 100%; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; font: 0.8125rem/1.4 ui-monospace, Menlo, monospace; }
 #notesDialogButtons { display: flex; gap: 8px; justify-content: flex-end; }
-#sessionPathDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; width: min(640px, 90vw); }
+/* #sessionPathDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; width: min(640px, 90vw); } */
+#sessionPathDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; inline-size: min(640px, 90vi); }
 #sessionPathDialog form { display: flex; flex-direction: column; gap: 12px; }
-#sessionPathField { width: 100%; box-sizing: border-box; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; font: 13px/1.4 ui-monospace, Menlo, monospace; }
+/* #sessionPathField { width: 100%; box-sizing: border-box; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; font: 13px/1.4 ui-monospace, Menlo, monospace; } */
+#sessionPathField { inline-size: 100%; box-sizing: border-box; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; font: 0.8125rem/1.4 ui-monospace, Menlo, monospace; }
 #sessionPathDialogButtons { display: flex; gap: 8px; justify-content: flex-end; }
 /* #reportDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; width: min(800px, 90vw); max-height: 85vh; padding: 12px; } */
-#reportDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; inset: 40px; margin: 0; width: auto; height: auto; max-width: none; max-height: none; padding: 12px; }
+/* #reportDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; inset: 40px; margin: 0; width: auto; height: auto; max-width: none; max-height: none; padding: 12px; } */
+#reportDialog { background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; inset: 40px; margin: 0; inline-size: auto; block-size: auto; max-inline-size: none; max-block-size: none; padding: 12px; }
 #reportDialog[open] { display: flex; flex-direction: column; gap: 12px; }
 #reportDialogHeader { flex: none; display: flex; align-items: center; gap: 8px; }
-#reportDialogTitle { margin-right: auto; font-weight: 600; }
+/* #reportDialogTitle { margin-right: auto; font-weight: 600; } */
+#reportDialogTitle { margin-inline-end: auto; font-weight: 600; }
 /* #reportBody { flex: 1 1 0; min-height: 0; overflow-y: auto; overflow-wrap: anywhere; } */
-#reportBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-wrap: anywhere; }
+/* #reportBody { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-wrap: anywhere; } */
+#reportBody { flex: 1 1 auto; min-block-size: 0; overflow: auto; overflow-wrap: anywhere; }
 #reportBody h1, #reportBody h2, #reportBody h3, #reportBody h4 { margin: 12px 0 6px; }
-#reportBody summary { margin: 12px 0 6px; font-size: 1.5em; font-weight: bold; cursor: pointer; }
+/* #reportBody summary { margin: 12px 0 6px; font-size: 1.5em; font-weight: bold; cursor: pointer; } */
+#reportBody summary { margin: 12px 0 6px; font-size: 1.40625rem; font-weight: bold; cursor: pointer; }
 #reportBody p { margin: 6px 0; }
-#reportBody blockquote { margin: 6px 0; padding-left: 10px; border-left: 3px solid var(--grid); color: var(--text-muted); }
-#reportBody code { font: 13px/1.4 ui-monospace, Menlo, monospace; }
+/* #reportBody blockquote { margin: 6px 0; padding-left: 10px; border-left: 3px solid var(--grid); color: var(--text-muted); } */
+#reportBody blockquote { margin: 6px 0; padding-inline-start: 10px; border-inline-start: 3px solid var(--grid); color: var(--text-muted); }
+/* #reportBody code { font: 13px/1.4 ui-monospace, Menlo, monospace; } */
+#reportBody code { font: 0.8125rem/1.4 ui-monospace, Menlo, monospace; }
 #reportBody table { border-collapse: collapse; }
-#reportBody th, #reportBody td { border: 1px solid var(--grid); padding: 4px 8px; text-align: left; vertical-align: top; }
+/* #reportBody th, #reportBody td { border: 1px solid var(--grid); padding: 4px 8px; text-align: left; vertical-align: top; } */
+#reportBody th, #reportBody td { border: 1px solid var(--grid); padding: 4px 8px; text-align: start; vertical-align: top; }
 #reportBody td:first-child { white-space: nowrap; overflow-wrap: normal; }

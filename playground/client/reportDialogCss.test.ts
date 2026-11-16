@@ -18,7 +18,7 @@ async function validateReportDialogHasFixedInsetSize() {
     const reportDialogRules = activeLines.filter(line => line.startsWith('#reportDialog {'))
     expect(reportDialogRules.length).toBe(1)
     expect(reportDialogRules[0]).toContain('inset: 40px;')
-    expect(reportDialogRules[0]).toContain('max-height: none;')
+    expect(reportDialogRules[0]).toContain('max-block-size: none;')
     expect(reportDialogRules[0]).not.toContain('85vh')
 }
 

@@ -3,7 +3,7 @@ import { json } from '@codemirror/lang-json'
 import type { Diagnostic } from '@codemirror/lint'
 import { EditorState } from '@codemirror/state'
 import type { EditorView } from '@codemirror/view'
-import { isOtherEditorChanged, relintBothEditors } from './backtickEditors'
+import { isOtherEditorChanged, refreshBothEditorLints } from './backtickEditors'
 import { buildUndefinedNameSource } from './backtickLint'
 import * as editors from './editors'
 import { IS_QUESTIONS_EDITOR } from './questionNames'
@@ -90,7 +90,7 @@ function validateRelintSendsTheRefreshEffectToBothEditors() {
     }
     const stateMock = spyOn(editors, 'getStateEditor').mockReturnValue(buildStub(specs[0]))
     const questionsMock = spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStub(specs[1]))
-    relintBothEditors()
+    refreshBothEditorLints()
     stateMock.mockRestore()
     questionsMock.mockRestore()
     // Step: both editors got one transaction that the lint reads as an other-editor change.

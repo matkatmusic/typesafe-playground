@@ -40,7 +40,7 @@ export function isOtherEditorChanged(update: ViewUpdate): boolean {
   return false;
 }
 
-export function relintBothEditors(): void {
+export function refreshBothEditorLints(): void {
   for (const view of listBothEditorViews())
     view.dispatch({ effects: OTHER_EDITOR_CHANGED.of(null) });
 }

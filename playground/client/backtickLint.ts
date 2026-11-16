@@ -51,43 +51,62 @@ export function findBatchReferenceError(items: unknown[], question: unknown, nam
   return null;
 }
 
+interface ParsedEditorValues {
+  stateValue: unknown;
+  questionsValue: unknown;
+}
+
+function parseEditorStates(states: EditorState[]): ParsedEditorValues | null {
+  const stateParse = computeJsonParseResult('State', states[0].doc.toString());
+  if (!stateParse.isValid)
+    return null;
+  const questionsParse = computeJsonParseResult('Questions', states[1].doc.toString());
+  if (!questionsParse.isValid)
+    return null;
+  return { stateValue: stateParse.value, questionsValue: questionsParse.value };
+}
+
+function findNameReferenceError(stateValue: unknown, batchItems: unknown[] | null, question: unknown, keyName: string): string | null {
+  // // const isDefined = isNameDefined(states, keyName);
+  // const isDefined = batchItems === null ? isNameDefined(states, keyName) : isNameDefinedInBatch(states[1], batchItems, keyName);
+  // if (isDefined)
+  //   continue;
+  if (batchItems !== null)
+    return findBatchReferenceError(batchItems, question, keyName);
+  return findReferenceError(stateValue, question, keyName);
+}
+
+function buildMatchDiagnostic(view: EditorView, parsed: ParsedEditorValues, batchItems: unknown[] | null, match: RegExpMatchArray): Diagnostic | null {
+  const keyName = match[1];
+  const nameFrom = match.index + 1;
+  const isInKey = syntaxTree(view.state).resolveInner(nameFrom, 1).name === 'PropertyName';
+  if (isInKey)
+    return null;
+  const question = findEnclosingQuestion(view.state, parsed.questionsValue, nameFrom);
+  const referenceError = findNameReferenceError(parsed.stateValue, batchItems, question, keyName);
+  if (referenceError === null)
+    return null;
+  // message: `${keyName} is not defined in either JSON editor`,
+  return { from: nameFrom, to: nameFrom + keyName.length, severity: 'error', message: referenceError };
+}
+
+function listMatchDiagnostics(view: EditorView, parsed: ParsedEditorValues, batchItems: unknown[] | null): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  for (const match of view.state.doc.toString().matchAll(BACKTICKED_NAME)) {
+    const diagnostic = buildMatchDiagnostic(view, parsed, batchItems, match);
+    if (diagnostic !== null)
+      diagnostics.push(diagnostic);
+  }
+  return diagnostics;
+}
+
 export function buildUndefinedNameSource(listStates: () => EditorState[]): LintSource {
   function findUndefinedNames(view: EditorView): Diagnostic[] {
     const states = listStates();
-    const stateParse = computeJsonParseResult('State', states[0].doc.toString());
-    if (!stateParse.isValid)
+    const parsed = parseEditorStates(states);
+    if (parsed === null)
       return [];
-    const questionsParse = computeJsonParseResult('Questions', states[1].doc.toString());
-    if (!questionsParse.isValid)
-      return [];
-    const batchItems = listBatchItems(states);
-    const tree = syntaxTree(view.state);
-    const diagnostics: Diagnostic[] = [];
-    for (const match of view.state.doc.toString().matchAll(BACKTICKED_NAME)) {
-      const keyName = match[1];
-      const nameFrom = match.index + 1;
-      // // const isDefined = isNameDefined(states, keyName);
-      // const isDefined = batchItems === null ? isNameDefined(states, keyName) : isNameDefinedInBatch(states[1], batchItems, keyName);
-      // if (isDefined)
-      //   continue;
-      const isInKey = tree.resolveInner(nameFrom, 1).name === 'PropertyName';
-      if (isInKey)
-        continue;
-      const question = findEnclosingQuestion(view.state, questionsParse.value, nameFrom);
-      let referenceError = findReferenceError(stateParse.value, question, keyName);
-      if (batchItems !== null)
-        referenceError = findBatchReferenceError(batchItems, question, keyName);
-      if (referenceError === null)
-        continue;
-      diagnostics.push({
-        from: nameFrom,
-        to: nameFrom + keyName.length,
-        severity: 'error',
-        // message: `${keyName} is not defined in either JSON editor`,
-        message: referenceError,
-      });
-    }
-    return diagnostics;
+    return listMatchDiagnostics(view, parsed, listBatchItems(states));
   }
   return findUndefinedNames;
 }

@@ -1,5 +1,5 @@
 import { refreshSubmitAvailability } from './apiKey';
-import { relintBothEditors } from './backtickEditors';
+import { refreshBothEditorLints } from './backtickEditors';
 import { getButton, getInput } from './dom';
 import { refreshFileView } from './fileView';
 import { applyPinButtons } from './pinButtons';
@@ -37,7 +37,7 @@ export function applyBatchMode(isOn: boolean): void {
   pageState.isBatchOn = isOn;
   getInput('batchCheckbox').checked = isOn;
   refreshBatchControls();
-  relintBothEditors();
+  refreshBothEditorLints();
 }
 
 export function toggleBatchMode(): void {
