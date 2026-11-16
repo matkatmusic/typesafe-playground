@@ -1,5 +1,5 @@
 import { refreshSubmitAvailability } from './apiKey';
-import { relintBothEditors } from './backtickCompletion';
+import { relintBothEditors } from './backtickEditors';
 import { getButton, getInput } from './dom';
 import { refreshFileView } from './fileView';
 import { applyPinButtons } from './pinButtons';

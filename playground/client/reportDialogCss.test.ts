@@ -1,6 +1,6 @@
 import { test, expect } from 'bun:test'
 
-const CSS_PATH = `${import.meta.dir}/../page/playground.css`
+const CSS_PATH = `${import.meta.dir}/../page/playgroundBase.css`
 
 async function validateReportBodyRuleHasAutoFlexBasis() {
     const css = await Bun.file(CSS_PATH).text()

@@ -32,9 +32,10 @@ async function buildClientScript(): Promise<string> {
 export async function buildPage(historyPath: string): Promise<string> {
   const versions = await loadHistory(historyPath);
   const htmlFile = Bun.file(`${import.meta.dir}/page/playground.html`);
-  const cssFile = Bun.file(`${import.meta.dir}/page/playground.css`);
   const html = await htmlFile.text();
-  const css = await cssFile.text();
+  let css = '';
+  for (const cssFileName of ['playgroundBase.css', 'playgroundPanels.css', 'playgroundEditors.css'])
+    css += await Bun.file(`${import.meta.dir}/page/${cssFileName}`).text();
   const script = await buildClientScript();
   const hasEnvKey = (Bun.env.TYPESAFE_API_KEY ?? '').trim() !== '';
   // const draft = await readDraft(historyPath);

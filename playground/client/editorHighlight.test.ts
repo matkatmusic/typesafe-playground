@@ -1,7 +1,7 @@
 import { test, expect } from 'bun:test'
 import { jsonHighlight } from './editorHighlight'
 
-const CSS_PATH = `${import.meta.dir}/../page/playground.css`
+const CSS_PATH = `${import.meta.dir}/../page/playgroundBase.css`
 const TOKEN_VARIABLES = ['--tok-string', '--tok-number', '--tok-key', '--tok-atom', '--tok-punct']
 
 function extractBlock(css: string, startMarker: string): string {

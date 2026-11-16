@@ -113,6 +113,14 @@ async function validateCostTokenSubmitBoxHoldsFourItemsInOrderAndErrorLineFollow
     expect(page).toContain('border: 1px solid var(--button-border); border-radius: 6px; padding: 4px 8px; font: inherit; }')
 }
 
+async function validatePageHoldsRulesFromEveryCssFile() {
+    const page = await buildPage(await buildTempHistoryPath())
+    expect(page).toContain('--tok-string: #0a7a3e;')
+    expect(page).toContain('#costTokenSubmitBox {')
+    expect(page).toContain('.cm-tooltip .backtick-tooltip {')
+}
+
+test('test_page_holds_rules_from_every_css_file', validatePageHoldsRulesFromEveryCssFile)
 test('test_page_get_returns_200_html_with_css_filled_in', validatePageGetReturns200WithHtmlAndNoMarkersLeft)
 test('test_page_holds_header_version_and_input_results_boxes_in_order', validatePageHoldsThreeBoxesInsidePlaygroundComponentBoxInOrder)
 test('test_page_holds_header_buttons_in_order_and_the_client_script',validatePageHoldsHeaderButtonsInOrderAndTheClientScript)
