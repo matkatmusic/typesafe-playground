@@ -40,8 +40,10 @@ export function renderProviderLetters(svg: Element, providers: Provider[], slotX
 
 export function computeProviderFill(provider: Provider): string {
   if (provider === 'SubQ')
-    return 'rgb(77, 121, 57)';
-  return 'rgb(201, 112, 157)';
+    // return 'rgb(77, 121, 57)';
+    return '#56B4E9';
+  // return 'rgb(201, 112, 157)';
+  return '#009E73';
 }
 
 // export function renderOption(svg: Element, values: number[], slotX: number, plotH: number, isAverageShown: boolean, baseline: number, isPinned: boolean): void {

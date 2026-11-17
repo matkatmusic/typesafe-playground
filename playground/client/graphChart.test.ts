@@ -117,7 +117,8 @@ function validatePinnedRunsDrawMutedBarsBehindAndWidenTheSlot() {
   expect(bars.length).toBe(4);
   // expect(bars[0].attrs.fill).toBe('var(--text-muted)');
   // expect(bars[3].attrs.fill).toBe('var(--score)');
-  expect(bars.map((bar) => bar.attrs.fill)).toEqual(['rgb(77, 121, 57)', 'rgb(77, 121, 57)', 'rgb(201, 112, 157)', 'rgb(201, 112, 157)']);
+  // expect(bars.map((bar) => bar.attrs.fill)).toEqual(['rgb(77, 121, 57)', 'rgb(77, 121, 57)', 'rgb(201, 112, 157)', 'rgb(201, 112, 157)']);
+  expect(bars.map((bar) => bar.attrs.fill)).toEqual(['#56B4E9', '#56B4E9', '#009E73', '#009E73']);
   expect(bars.map((bar) => bar.attrs.opacity)).toEqual(['0.35', '0.35', '0.35', '1']);
   expect(layout.slot).toBeGreaterThan(plain.slot);
   expect(layout.pinned).toBe(pinned);
@@ -138,7 +139,8 @@ function validateChartMarksEachCallBarWithItsProviderLetter() {
   expect(listByName(drawn.svg!.children as FakeNode[], 'g').length).toBe(0);
   expect(listByName(drawn.svg!.children as FakeNode[], 'text').map((label) => label.textContent)).toEqual(['True', 'False']);
   const bars = listByName(drawn.svg!.children as FakeNode[], 'rect');
-  expect(bars.map((bar) => bar.attrs.fill)).toEqual(['rgb(77, 121, 57)', 'rgb(201, 112, 157)']);
+  // expect(bars.map((bar) => bar.attrs.fill)).toEqual(['rgb(77, 121, 57)', 'rgb(201, 112, 157)']);
+  expect(bars.map((bar) => bar.attrs.fill)).toEqual(['#56B4E9', '#009E73']);
   expect(layout.providers).toEqual(['SubQ', 'TypeSafe']);
 }
 
@@ -153,7 +155,8 @@ function validateOutputsWithoutAProviderDrawTheTypeSafeFill() {
   const oldVersion = { time: 't', state: {}, questions: {}, calls: 1, outputs: [{ answers: {}, usage: { input_tokens: 1, output_tokens: 1 } }] } as unknown as Version;
   renderChart(graphBlock, 'q', { type: 'noul' }, answers, null, listProviders(oldVersion));
   const bars = listByName(drawn.svg!.children as FakeNode[], 'rect');
-  expect(bars[0].attrs.fill).toBe('rgb(201, 112, 157)');
+  // expect(bars[0].attrs.fill).toBe('rgb(201, 112, 157)');
+  expect(bars[0].attrs.fill).toBe('#009E73');
 }
 
 afterEach(removeFakeDocument);

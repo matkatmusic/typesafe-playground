@@ -85,3 +85,11 @@ test('test_noul_bars_are_at_least_3px_tall', validateNoulBarsAreAtLeast3pxTall);
 test('test_score_bars_keep_their_height', validateScoreBarsKeepTheirHeight);
 test('test_pinned_bar_grows_sideways_only', validatePinnedBarGrowsSidewaysOnly);
 test('test_ticks_draw_six_grid_lines', validateTicksDrawSixGridLines);
+
+function validateCallBarIsTwoPixelsWiderThanBefore() {
+  const OLD_BAR_W = 8;
+  expect(BAR_W).toBe(OLD_BAR_W + 2);
+  const callBar = computeCallBar(100, 0, 0, 0.5, 100, 0);
+  expect(callBar.width).toBe(OLD_BAR_W - 1 + 2);
+}
+test('test_call_bar_is_two_pixels_wider_than_before', validateCallBarIsTwoPixelsWiderThanBefore);

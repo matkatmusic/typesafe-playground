@@ -1,5 +1,6 @@
 :root {
     color-scheme: light;
+    --hit-stroke: #000000;
     --surface: #fcfcfb;
     --panel: #f3f2ef;
     --text: #0b0b0b;
@@ -20,11 +21,15 @@
 }
 :root[data-theme="dark"] {
     color-scheme: dark;
-    --surface: #1a1a19;
-    --panel: #262624;
+    --hit-stroke: #ffffff;
+    /* --surface: #1a1a19; */
+    --surface: #000000;
+    /* --panel: #262624; */
+    --panel: #141414;
     --text: #f0efec;
     --text-muted: #c3c2b7;
-    --grid: #3a3a37;
+    /* --grid: #3a3a37; */
+    --grid: #2e2e2e;
     --button-border: #a8a7a1;
     --label-other: #e5c07b;
     --bad: #e66767;
@@ -54,6 +59,8 @@ body { margin: 0; block-size: 100vb; display: flex; flex-direction: column; back
 /* #headerBox #typeSafeKeyEditor { width: 260px; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 8px; font: inherit; } */
 #typeSafeKeyEditor { inline-size: 260px; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 8px; font: inherit; }
 #providerSwitchBox { display: flex; align-items: center; gap: 6px; }
+#providerTypeSafeLabel { color: #009E73; }
+#providerSubqLabel { color: #56B4E9; }
 #providerSwitch { appearance: none; position: relative; inline-size: 40px; block-size: 20px; margin: 0; border-radius: 10px; background: var(--button-border); cursor: pointer; transition: background 120ms; }
 #providerSwitch::before { content: ""; position: absolute; inset-block-start: 2px; inset-inline-start: 2px; inline-size: 16px; block-size: 16px; border-radius: 50%; background: white; transition: transform 120ms; }
 #providerSwitch:checked { background: var(--score); }

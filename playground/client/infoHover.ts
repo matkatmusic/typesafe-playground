@@ -3,7 +3,8 @@ import { createBarInfoBox } from './infoDom';
 import { removeValueLabels, renderValueLabels } from './infoLabels';
 import { buildBarInfoRows } from './infoRows';
 
-export const HIT_STROKE_COLOR = 'hotpink';
+// export const HIT_STROKE_COLOR = 'hotpink';
+export const HIT_STROKE_COLOR = 'var(--hit-stroke)';
 
 export function updateShownInfo(tracker: HoverTracker, info: HTMLElement, hit: Element | null): void {
   const shown = tracker.block.querySelector('.bar-info');

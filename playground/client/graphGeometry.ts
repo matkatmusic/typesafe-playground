@@ -1,7 +1,8 @@
 import type { Question } from '@typesafe-ai/sdk';
 import type { BarGeometry, BarSpan, RangeLineGeometry, Summary } from './graphTypes';
 
-export const BAR_W = 8;
+// export const BAR_W = 8;
+export const BAR_W = 10;
 export const OPTION_GAP = 14;
 export const LEFT = 44;
 export const TOP = 30;

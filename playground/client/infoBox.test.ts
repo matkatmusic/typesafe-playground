@@ -102,9 +102,11 @@ function validateNoulHoverDoesNotThrowAndShowsTheValue() {
   expect(defaultBox.className).toBe('bar-info');
   expect(defaultBox.children.length).toBe(10);
   expect(defaultBox.children[1].children[0].textContent).toBe('yes');
-  expect(hits[0].attrs.stroke).toBe('hotpink');
+  // expect(hits[0].attrs.stroke).toBe('hotpink');
+  expect(hits[0].attrs.stroke).toBe('var(--hit-stroke)');
   hits[0].listeners.mouseenter();
-  expect(hits[0].attrs.stroke).toBe('hotpink');
+  // expect(hits[0].attrs.stroke).toBe('hotpink');
+  expect(hits[0].attrs.stroke).toBe('var(--hit-stroke)');
   // const labels = listByName(svg.children, 'g');
   const labels = listByName(svg.children, 'g').filter((group) => group.attrs.class === 'value-labels');
   expect(labels.length).toBe(1);

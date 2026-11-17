@@ -15,7 +15,8 @@ function validateOutlineMovesToTheLatestHit() {
   const second = createFakeHit();
   const info = {} as HTMLElement;
   updateShownInfo(tracker, info, first as unknown as Element);
-  expect(first.attrs.stroke).toBe('hotpink');
+  // expect(first.attrs.stroke).toBe('hotpink');
+  expect(first.attrs.stroke).toBe('var(--hit-stroke)');
   updateShownInfo(tracker, info, second as unknown as Element);
   expect(first.attrs.stroke).toBeUndefined();
   expect(second.attrs.stroke).toBe(HIT_STROKE_COLOR);
@@ -36,3 +37,8 @@ function validateOldInfoBoxIsRemoved() {
 
 test('test_outline_moves_to_the_latest_hit', validateOutlineMovesToTheLatestHit);
 test('test_old_info_box_is_removed', validateOldInfoBoxIsRemoved);
+
+function validateHitStrokeColorIsTheThemeVariable() {
+  expect(HIT_STROKE_COLOR).toBe('var(--hit-stroke)');
+}
+test('test_hit_stroke_color_is_the_theme_variable', validateHitStrokeColorIsTheThemeVariable);

@@ -22,20 +22,25 @@ function drawOption(isAverageShown: boolean, isPinned = false) {
 function validateOneBarPerCallWithoutAverage() {
   const nodes = drawOption(false);
   expect(nodes.length).toBe(2);
-  expect(nodes[0].attrs.fill).toBe('rgb(77, 121, 57)');
+  // expect(nodes[0].attrs.fill).toBe('rgb(77, 121, 57)');
+  expect(nodes[0].attrs.fill).toBe('#56B4E9');
 }
 
 function validateCallBarFillShowsTheProvider() {
   const nodes = drawOption(false);
-  expect(nodes[0].attrs.fill).toBe('rgb(77, 121, 57)');
-  expect(nodes[1].attrs.fill).toBe('rgb(201, 112, 157)');
+  // expect(nodes[0].attrs.fill).toBe('rgb(77, 121, 57)');
+  // expect(nodes[1].attrs.fill).toBe('rgb(201, 112, 157)');
+  expect(nodes[0].attrs.fill).toBe('#56B4E9');
+  expect(nodes[1].attrs.fill).toBe('#009E73');
   expect(nodes[0].attrs.opacity).toBe('1');
 }
 
 function validatePinnedCallBarsKeepTheProviderFillAndAreFaded() {
   const nodes = drawOption(false, true);
-  expect(nodes[0].attrs.fill).toBe('rgb(77, 121, 57)');
-  expect(nodes[1].attrs.fill).toBe('rgb(201, 112, 157)');
+  // expect(nodes[0].attrs.fill).toBe('rgb(77, 121, 57)');
+  // expect(nodes[1].attrs.fill).toBe('rgb(201, 112, 157)');
+  expect(nodes[0].attrs.fill).toBe('#56B4E9');
+  expect(nodes[1].attrs.fill).toBe('#009E73');
   expect(nodes[0].attrs.opacity).toBe('0.35');
 }
 
@@ -55,7 +60,8 @@ function validatePinnedBarsAreMutedAndWiderThanCurrentBars() {
   const current = drawOption(false)[0];
   const pinned = drawOption(false, true)[0];
   // expect(pinned.attrs.fill).toBe('var(--text-muted)');
-  expect(pinned.attrs.fill).toBe('rgb(77, 121, 57)');
+  // expect(pinned.attrs.fill).toBe('rgb(77, 121, 57)');
+  expect(pinned.attrs.fill).toBe('#56B4E9');
   expect(pinned.attrs.opacity).toBe('0.35');
   expect(current.attrs.opacity).toBe('1');
   expect(Number(pinned.attrs.x)).toBe(Number(current.attrs.x) - PINNED_PAD);
