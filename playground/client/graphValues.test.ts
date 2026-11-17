@@ -1,7 +1,7 @@
 import { test, expect } from 'bun:test';
 import type { Version } from '../playgroundHistory';
 import type { Answer } from './graphTypes';
-import { computeSummary, formatValueText, listAnswers, listOptionKeys, listValues, NOUL_KEY, readQuestions, readValue } from './graphValues';
+import { computeSummary, formatValueText, listAnswers, listOptionKeys, listProviders, listValues, NOUL_KEY, readQuestions, readValue } from './graphValues';
 
 const choiceAnswer: Answer = { type: 'choice', choice: 'a', confidence: 0.9, probabilities: { a: 0.7, b: 0.3 } };
 const noulAnswer: Answer = { type: 'noul', noul: 0.8 };
@@ -75,4 +75,10 @@ test('test_noul_other_key_and_missing_choice_key_throw', validateBadKeysThrow);
 test('test_choice_and_score_values_come_from_probabilities', validateChoiceAndScoreValues);
 test('test_compute_summary_finds_low_high_average', validateComputeSummary);
 test('test_list_answers_reads_one_name_per_output', validateListAnswersReadsOneNamePerOutput);
+
+function validateListProvidersReadsOneProviderPerOutputAndTreatsOldOutputsAsTypeSafe() {
+  const version = { ...buildVersion({}), outputs: [{ model: 'm', answers: {}, usage, provider: 'SubQ' }, { model: 'm', answers: {}, usage }] } as unknown as Version;
+  expect(listProviders(version)).toEqual(['SubQ', 'TypeSafe']);
+}
+test('test_list_providers_reads_one_provider_per_output_and_treats_old_outputs_as_typesafe', validateListProvidersReadsOneProviderPerOutputAndTreatsOldOutputsAsTypeSafe);
 test('test_read_questions_rejects_non_objects', validateReadQuestionsRejectsNonObjects);

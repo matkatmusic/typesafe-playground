@@ -8,7 +8,7 @@ import { pageState } from './state'
 import { buildRunBody, executeSubmit, formatRunFailure, RUNNING_TEXT, SUBMIT_TEXT } from './submit'
 
 class FakeButton { disabled = false; textContent = SUBMIT_TEXT }
-class FakeInput { value = ''; type = 'password' }
+class FakeInput { value = ''; type = 'password'; checked = false }
 class FakeBox { textContent = '' }
 
 const ISO_TIME = '2026-03-04T05:06:07.000Z'
@@ -19,7 +19,7 @@ const realFetch = globalThis.fetch
 function installFakeDom(hasEnvKey: boolean) {
     const elements = {
         data: new FakeBox(), graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), errorLine: new FakeBox(), costLabel: new FakeBox(), totalCostLabel: new FakeBox(), tokensLabel: new FakeBox(), versionLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
-        submitButton: new FakeButton(), prevVersionButton: new FakeButton(), deleteVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), pinButton: new FakeButton(), unpinButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(), noteText: new FakeInput(),
+        submitButton: new FakeButton(), prevVersionButton: new FakeButton(), deleteVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), pinButton: new FakeButton(), unpinButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(), providerSwitch: new FakeInput(), noteText: new FakeInput(),
     }
     elements.data.textContent = JSON.stringify({ versions: [VERSION], hasEnvKey })
     function getElementById(id: string) {
@@ -49,7 +49,15 @@ function validateRunBodyHoldsCallsTheTrimmedTypedKeyTheStateAndTheQuestions() {
     elements.typeSafeKeyEditor.value = ' typed '
     pageState.versions = [VERSION, { ...VERSION }]
     pageState.index = 1
-    expect(buildRunBody({ a: 1 }, { q: 1 })).toEqual({ index: 1, calls: 3, apiKey: 'typed', state: { a: 1 }, questions: { q: 1 } })
+    expect(buildRunBody({ a: 1 }, { q: 1 })).toEqual({ index: 1, calls: 3, apiKey: 'typed', provider: 'TypeSafe', state: { a: 1 }, questions: { q: 1 } })
+}
+
+function validateRunBodyHoldsTheSubqProviderWhenTheSwitchIsOn() {
+    const elements = installFakeDom(true)
+    elements.providerSwitch.checked = true
+    pageState.versions = [VERSION]
+    pageState.index = 0
+    expect(buildRunBody({ a: 1 }, { q: 1 }).provider).toBe('SubQ')
 }
 
 function validateRunFailureNamesTheStatusAndText() {
@@ -92,7 +100,8 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
     stateSpy.mockRestore()
     questionsSpy.mockRestore()
     // expect(JSON.parse(seenBody)).toEqual({ index: 0, calls: 3, apiKey: '', state: { a: 1 }, questions: {} })
-    expect(JSON.parse(seenBody)).toEqual({ index: 0, calls: 3, apiKey: '', state: { a: 1 }, questions: { q: { type: 'noul' } } })
+    // expect(JSON.parse(seenBody)).toEqual({ index: 0, calls: 3, apiKey: '', state: { a: 1 }, questions: { q: { type: 'noul' } } })
+    expect(JSON.parse(seenBody)).toEqual({ index: 0, calls: 3, apiKey: '', provider: 'TypeSafe', state: { a: 1 }, questions: { q: { type: 'noul' } } })
     expect(wasDisabledWhileRunning).toBe(true)
     expect(textWhileRunning).toBe(RUNNING_TEXT)
     expect(elements.submitButton.disabled).toBe(false)
@@ -148,6 +157,7 @@ async function validateInvalidStateShowsTheErrorAndSendsNothing() {
 }
 
 test('test_run_body_holds_calls_the_trimmed_typed_key_the_state_and_the_questions', validateRunBodyHoldsCallsTheTrimmedTypedKeyTheStateAndTheQuestions)
+test('test_run_body_holds_the_subq_provider_when_the_switch_is_on', validateRunBodyHoldsTheSubqProviderWhenTheSwitchIsOn)
 test('test_invalid_state_shows_the_error_and_sends_nothing', validateInvalidStateShowsTheErrorAndSendsNothing)
 test('test_run_failure_names_the_status_and_text', validateRunFailureNamesTheStatusAndText)
 test('test_submit_posts_run_and_shows_the_outputs_and_labels', validateSubmitPostsRunAndShowsTheOutputsAndLabels)

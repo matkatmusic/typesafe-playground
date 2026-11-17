@@ -7,7 +7,7 @@ import { HISTORY_PATH, initHistory, loadHistory } from './playgroundHistory';
 import { executeDraftGetRequest, executeDraftRequest } from './playgroundDraftRequests';
 // import { executeDraftRequest, readDraft } from './playgroundDraftRequests';
 import { executeNoteRequest } from './playgroundNoteRequests';
-import { createTypeSafeClient, executeRunRequest, type CreateRunClient } from './playgroundRequests';
+import { createClientForProvider, executeRunRequest, type CreateRunClient } from './playgroundRequests';
 import { executeNewRequest, executeOpenRequest, executeResetRunsRequest, executeSaveRequest } from './playgroundVersionRequests';
 import { buildErrorResponse } from './serverErrors';
 
@@ -53,8 +53,10 @@ export async function buildPage(historyPath: string): Promise<string> {
   // const draft = await readDraft(historyPath);
   // const safeJson = JSON.stringify({ versions, draft, hasEnvKey }).replaceAll('<', '\\u003c');
   // const safeJson = JSON.stringify({ versions, hasEnvKey }).replaceAll('<', '\\u003c');
-  const safeJson = JSON.stringify({ versions, historyPath, hasEnvKey }).replaceAll('<', '\\u003c');
-  const withCss = replacePlaceholderWithText(html, '__PAGE_CSS__', css);
+  const hasSubqEnvKey = (Bun.env.SUBQ_AI_API_KEY ?? '').trim() !== '';
+  // const safeJson = JSON.stringify({ versions, historyPath, hasEnvKey }).replaceAll('<', '\\u003c');
+  const safeJson = JSON.stringify({ versions, historyPath, hasSubqEnvKey, hasEnvKey }).replaceAll('<', '\\u003c');
+  const withCss = replacePlaceholderWithText(html, '/*__PAGE_CSS__*/', css);
   const withScript = replacePlaceholderWithText(withCss, '__PAGE_SCRIPT__', script);
   return replacePlaceholderWithText(withScript, '__DATA_JSON__', safeJson);
 }
@@ -97,7 +99,7 @@ async function dispatchGetRequest(request: Request, pathname: string, historyPat
   return new Response('not found', { status: 404 });
 }
 
-export async function dispatchRequest(request: Request, port: number, historyPath: string, createClient: CreateRunClient = createTypeSafeClient, lanAddresses: string[] = []): Promise<Response> {
+export async function dispatchRequest(request: Request, port: number, historyPath: string, createClient: CreateRunClient = createClientForProvider, lanAddresses: string[] = []): Promise<Response> {
   const isAllowed = isRequestAllowed(request, SERVER_HOSTNAME, port, lanAddresses);
   if (!isAllowed)
     return new Response('forbidden', { status: 403 });
@@ -121,7 +123,7 @@ if (import.meta.main) {
     fetch(request): Promise<Response> {
       if (server.port === undefined)
         throw new Error('server has no port');
-      return dispatchRequest(request, server.port, HISTORY_PATH, createTypeSafeClient, lanAddresses);
+      return dispatchRequest(request, server.port, HISTORY_PATH, createClientForProvider, lanAddresses);
     },
     error: buildErrorResponse,
   });

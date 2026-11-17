@@ -120,6 +120,14 @@ async function validatePageHoldsRulesFromEveryCssFile() {
     expect(page).toContain('.cm-tooltip .backtick-tooltip {')
 }
 
+async function validatePageTemplateStylePlaceholderIsCssComment() {
+    // read the raw page template file
+    const template = await Bun.file(`${import.meta.dir}/page/playground.html`).text()
+    // the style placeholder is a CSS comment, so the code editor does not parse it as a selector
+    expect(template).toContain('<style>/*__PAGE_CSS__*/</style>')
+}
+
+test('test_page_template_style_placeholder_is_css_comment', validatePageTemplateStylePlaceholderIsCssComment)
 test('test_page_holds_rules_from_every_css_file', validatePageHoldsRulesFromEveryCssFile)
 test('test_page_get_returns_200_html_with_css_filled_in', validatePageGetReturns200WithHtmlAndNoMarkersLeft)
 test('test_page_holds_header_version_and_input_results_boxes_in_order', validatePageHoldsThreeBoxesInsidePlaygroundComponentBoxInOrder)

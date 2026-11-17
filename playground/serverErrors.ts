@@ -7,7 +7,8 @@ export function setLastTypedKey(typedKey: string): void {
 
 export function hideKeysInMessage(message: string): string {
   const envKey = (Bun.env.TYPESAFE_API_KEY ?? '').trim();
-  const knownKeys = [envKey, lastTypedKey];
+  const subqEnvKey = (Bun.env.SUBQ_AI_API_KEY ?? '').trim();
+  const knownKeys = [envKey, subqEnvKey, lastTypedKey];
   let hiddenMessage = message;
   for (const knownKey of knownKeys) {
     if (knownKey !== '')

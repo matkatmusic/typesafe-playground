@@ -4,7 +4,7 @@ import { renderChart } from './graphChart';
 import { createGraphBlock } from './graphBlock';
 import { computePlotHeight } from './graphGeometry';
 import { graphState } from './graphState';
-import { listAnswers, readQuestions } from './graphValues';
+import { listAnswers, listProviders, readQuestions } from './graphValues';
 import { findPinned, readPinnedData } from './pinned';
 import { pageState } from './state';
 
@@ -28,7 +28,7 @@ export function renderStaleCharts(charts: ChartLayout[], onRendered?: ChartsHook
   for (const chart of charts) {
     const isStale = computePlotHeight(chart.box.clientHeight) !== chart.plotH;
     if (isStale)
-      redrawn.push(renderChart({ block: chart.block as HTMLDivElement, box: chart.box as HTMLDivElement }, chart.name, chart.question, chart.answers, chart.pinned));
+      redrawn.push(renderChart({ block: chart.block as HTMLDivElement, box: chart.box as HTMLDivElement }, chart.name, chart.question, chart.answers, chart.pinned, chart.providers));
   }
   const hasRedrawn = redrawn.length > 0;
   if (!hasRedrawn)
@@ -58,7 +58,7 @@ function renderDataCharts(version: Version, blocks: GraphBlock[], questions: Ret
     if (!isDataPresent)
       fillEmptyMessage(blocks[i].box);
     else if (!isCollapsed)
-      charts.push(renderChart(blocks[i], names[i], questions[names[i]], listAnswers(version, names[i]), readPinnedData(pinnedVersion, names[i])));
+      charts.push(renderChart(blocks[i], names[i], questions[names[i]], listAnswers(version, names[i]), readPinnedData(pinnedVersion, names[i]), listProviders(version)));
   }
   return charts;
 }

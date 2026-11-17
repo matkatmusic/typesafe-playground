@@ -1,5 +1,5 @@
 import type { EntryType, Questions } from '@typesafe-ai/sdk';
-import type { Version } from '../playgroundHistory';
+import type { Provider, Version } from '../playgroundHistory';
 import type { Answer, ProbabilityTable, Summary } from './graphTypes';
 
 export const NOUL_KEY = 'yes';
@@ -62,6 +62,15 @@ export function computeSummary(values: number[]): Summary {
     sum += value;
   }
   return { low: low, high: high, average: sum / values.length };
+}
+
+export function listProviders(version: Version): Provider[] {
+  const providers: Provider[] = [];
+  for (const output of version.outputs) {
+    // outputs saved before SubQ support have no provider: they all came from TypeSafe
+    providers.push(output.provider ?? 'TypeSafe');
+  }
+  return providers;
 }
 
 export function listAnswers(version: Version, name: string): Answer[] {

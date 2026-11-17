@@ -31,7 +31,7 @@ export function buildVersion(state: unknown, questions: unknown, outputCount: nu
 export function installHarness(initial: Version[], shownIndex: number, stateText: string, questionsText: string, failingIndexes: number[], hasEnvKey = true): Harness {
     const elements: Record<string, unknown> = {
         data: new FakeBox(), errorLine: new FakeBox(), versionLabel: new FakeBox(), costLabel: new FakeBox(), totalCostLabel: new FakeBox(), tokensLabel: new FakeBox(), lastEditedLabel: new FakeBox(),
-        graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), batchCheckbox: new FakeInput(), typeSafeKeyEditor: new FakeInput(), noteText: new FakeInput(), callsPicker: new FakeInput(),
+        graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), batchCheckbox: new FakeInput(), typeSafeKeyEditor: new FakeInput(), providerSwitch: new FakeInput(), noteText: new FakeInput(), callsPicker: new FakeInput(),
     }
     const buttonIds = [...LOCKED_BUTTON_IDS, 'resetButton', 'submitButton', 'prevVersionButton', 'nextVersionButton', 'deleteVersionButton', 'pinButton', 'unpinButton']
     for (const id of buttonIds)

@@ -115,7 +115,8 @@ async function validateRunAppendsToTheLastVersionAndRespondsWithOutputsAndVersio
     const historyPath = await buildTempHistoryPath()
     const factory = makeStubFactory([])
     const first = (await (await executeRunRequest(makeRunRequest({ calls: 2, state: HARD_CODED_STATE }), factory, historyPath)).json()) as RunResult
-    expect(first.outputs).toEqual([OUTPUT, OUTPUT])
+    // expect(first.outputs).toEqual([OUTPUT, OUTPUT])
+    expect(first.outputs).toEqual([{ ...OUTPUT, provider: 'TypeSafe' }, { ...OUTPUT, provider: 'TypeSafe' }])
     expect(first.index).toBe(0)
     expect(first.version.calls).toBe(2)
     const second = (await (await executeRunRequest(makeRunRequest({ calls: 3, state: HARD_CODED_STATE }), factory, historyPath)).json()) as RunResult

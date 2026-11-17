@@ -53,6 +53,12 @@ body { margin: 0; block-size: 100vb; display: flex; flex-direction: column; back
 #typeSafeKeyLabel { margin-inline-start: 16px; color: var(--text-muted); }
 /* #headerBox #typeSafeKeyEditor { width: 260px; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 8px; font: inherit; } */
 #typeSafeKeyEditor { inline-size: 260px; background: var(--panel); color: var(--text); border: 1px solid var(--grid); border-radius: 6px; padding: 4px 8px; font: inherit; }
+#providerSwitchBox { display: flex; align-items: center; gap: 6px; }
+#providerSwitch { appearance: none; position: relative; inline-size: 40px; block-size: 20px; margin: 0; border-radius: 10px; background: var(--button-border); cursor: pointer; transition: background 120ms; }
+#providerSwitch::before { content: ""; position: absolute; inset-block-start: 2px; inset-inline-start: 2px; inline-size: 16px; block-size: 16px; border-radius: 50%; background: white; transition: transform 120ms; }
+#providerSwitch:checked { background: var(--score); }
+#providerSwitch:checked::before { transform: translateX(20px); }
+#providerSwitch:disabled { opacity: 0.4; cursor: not-allowed; }
 /* #headerBox #lastEditedLabel { margin-left: auto; font-weight: 300; color: var(--text-muted); white-space: nowrap; } */
 #lastEditedLabel { margin-inline-start: auto; font-weight: 300; color: var(--text-muted); white-space: nowrap; }
 /* button { background: var(--panel); color: var(--text); border: 1px solid var(--button-border); border-radius: 6px; padding: 4px 12px; font-size: 15px; cursor: pointer; transition: transform 60ms; } */

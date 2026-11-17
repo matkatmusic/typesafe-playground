@@ -122,6 +122,10 @@ function validateChartsTallerBlocksAreDrawnAgainAfterTheInfoBox() {
   }
   renderGraphs(twoQuestions, container as unknown as HTMLElement, growBoxOnFirstDraw);
   expect(drawn.length).toBe(2);
+  // expect(drawn[0][0].plotH).toBe(156);
+  // expect(drawn[1][0].plotH).toBe(356);
+  // expect(drawn[0][0].plotH).toBe(145);
+  // expect(drawn[1][0].plotH).toBe(345);
   expect(drawn[0][0].plotH).toBe(156);
   expect(drawn[1][0].plotH).toBe(356);
   renderStaleCharts(drawn[1], growBoxOnFirstDraw);
