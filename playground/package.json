@@ -3,7 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "start": "bun --watch playground.ts",
+        "start": "bun --watch server/playground.ts",
         "test": "bun test"
     },
     "devDependencies": {
