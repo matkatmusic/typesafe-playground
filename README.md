@@ -12,23 +12,45 @@ bun install
 bun run start
 ```
 
-The server prints its address. Open that address in a browser.
+`bun run start` runs `bun --watch server/playground.ts`. The server prints its address. Open that address in a browser.
 
 ### Options
 
 - `--port <number>`: use this port. The number must be from 1 to 65535. Without `--port`, the server picks a free port.
 - `--lan`: also serve the page on your local network. The server prints one more address for each network address of the computer. Other devices on the same network can open the page at those addresses. They can also press Submit, and those runs use your API key.
 
-Example: `bun playground.ts --port 4318 --lan`
+Example, from the `playground` folder: `bun server/playground.ts --port 4318 --lan`
 
 ## API key
 
-Submit sends paid requests to TypeSafe, so it needs a TypeSafe API key. The server gets the key from one of two places:
+Submit sends paid requests to TypeSafe or to SubQ, so it needs an API key for that provider. The server gets the key from one of two places:
 
-1. The **TypeSafe API key** box at the top of the page. A key in this box is used first. The page sends it to the local server with each Submit. The server does not write it to disk.
-2. `TYPESAFE_API_KEY` in `playground/.env`. Bun reads this file when the server starts. When this key is set, the box shows "Using key from .env".
+1. The **API key** box at the top of the page. The label shows the provider that is on. A key in this box is used first. The page sends it to the local server with each Submit. The server does not write it to disk.
+2. An environment variable in `playground/.env`. Bun reads this file when the server starts. TypeSafe uses `TYPESAFE_API_KEY`. SubQ uses `SUBQ_AI_API_KEY`. When the key for the provider that is on is set, the box shows "Using key from .env".
 
 Without a key, the Submit button is disabled. `.env` is in `playground/.gitignore`.
+
+### TypeSafe or SubQ
+
+The switch in the header picks the provider for the next Submit. Off is TypeSafe. On is SubQ. The page starts on TypeSafe.
+
+- You can turn the switch on only when `SUBQ_AI_API_KEY` is set in `playground/.env`.
+- When SubQ is on, the key in the box is used first. If the box is empty, the server uses `SUBQ_AI_API_KEY`.
+- When you move the switch, the page clears the key in the box.
+- SubQ queries go to `https://api.subq.ai/v1/systemone` with the model `subq-snap-1.2`. The state and the questions have the same format as for TypeSafe.
+
+## Graphs
+
+Each question has a graph. Each call has one bar. The color of a call bar shows the provider that made the call:
+
+- SubQ is sky blue (`#56B4E9`).
+- TypeSafe is blue-green (`#009E73`).
+
+Pinned bars use the same colors, but faded.
+
+Each saved output stores its `provider`. An old output without a `provider` counts as TypeSafe.
+
+The cost uses $0.042 per 1M input tokens for TypeSafe and $0.04 per 1M input tokens for SubQ.
 
 ## Data on disk
 
@@ -79,7 +101,7 @@ In the state editor or the questions editor, type a backtick (`` ` ``). A list s
 
 ## Back-ticked name checks
 
-A back-ticked name that no editor defines gets a red squiggle. The message says the name is not defined in either JSON editor.
+A back-ticked name that no editor defines gets a red squiggle. The message says `` `<name>` is not in state or in this question ``. A back-ticked name that points to an object or an array also gets a squiggle. The message says `` `<name>` must not point to an object or array ``.
 
 - The squiggles update when the other editor changes. For example, rename a key in the state editor. The old name gets a squiggle in the questions editor.
 - To point at an item in an array, write the index in square brackets, for example `` `userMessageArray[0]` ``. A name like `` `userMessageArray.0` `` is not an index, so it gets a squiggle.
@@ -123,3 +145,28 @@ The **Report** button at the top opens a report of every version that has notes 
 **Copy** puts the markdown on the clipboard. **Download .md** saves it as `<open file>-notes.md`. For example, if the open file is `playground-versions.json`, the report file is `playground-versions-notes.md`. Without an open file, the name is `notes.md`.
 
 ![The Report with Changes, notes, and results](docs/report.png)
+
+## Code layout
+
+All code is in the `playground` folder.
+
+- `server/`: the local server, its request handlers, the request guard, and the error messages.
+- `providers/`: the SubQ client and the starting state and questions for TypeSafe.
+- `history/`: the history file, the version step rules, and the "not run" time.
+- `startup/`: the `--port` and `--lan` options and the network addresses.
+- `shared/`: small helpers that other folders use.
+- `page/`: `playground.html` and the CSS files.
+- `client/`: the code that runs in the browser, in these folders:
+  - `keys/`: the API key box and the provider switch.
+  - `questions/`: the Add Question menu, question names, and the key and value lists.
+  - `backticks/`: back-ticked names: the lists, the checks, the tooltips, and the placeholders.
+  - `editors/`: the State and Questions editors, formatting, highlights, and undo and redo.
+  - `runs/`: Submit, the Winners box, the cost and tokens, and Reset runs.
+  - `batch/`: batch input and batch runs.
+  - `graphs/`: the graphs, their bars, and their collapse and result buttons.
+  - `infoBox/`: the InfoBox.
+  - `notes/`: the notes buttons and dialogs.
+  - `pins/`: the pin buttons and the pinned bars.
+  - `versions/`: the version label and arrows, Save, Open, New, and auto-save.
+  - `report/`: the Report dialog and its markdown.
+  - `page/`: the page start, the page data, the theme, the dialogs, and the resizer.
