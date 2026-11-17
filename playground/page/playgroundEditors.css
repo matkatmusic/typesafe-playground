@@ -1,0 +1,49 @@
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) > .cm-editor { flex: 1 1 0; min-block-size: 0; }
+:is(#stateJsonEditor, #questionsJsonEditor) .cm-editor:has(> .cm-scroller > .cm-content[contenteditable="false"]) { opacity: 0.5; }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-activeLineGutter { background: var(--grid, #dddcd7); }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-activeLine { background: transparent; }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-cursor { border-inline-start-color: var(--text, #0b0b0b); }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-selectionBackground, :is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-focused .cm-selectionBackground { background: var(--grid, #dddcd7); }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-panels { background: var(--panel, #f3f2ef); color: var(--text, #0b0b0b); border-color: var(--grid, #dddcd7); }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-textfield { background: var(--surface, #fcfcfb); color: var(--text, #0b0b0b); border: 1px solid var(--grid, #dddcd7); border-radius: 4px; }
+:is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-button { background: var(--surface, #fcfcfb); color: var(--text, #0b0b0b); border: 1px solid var(--button-border, #4a4945); }
+#questionsJsonEditor .cm-placeholderValue { background: var(--placeholder-idle-bg, #4a4a48); border-radius: 3px; font-style: italic; }
+#questionsJsonEditor .cm-placeholderValue, #questionsJsonEditor .cm-placeholderValue span { color: var(--placeholder-idle-text, #d4d3cf); }
+#questionsJsonEditor .cm-placeholderValue.cm-placeholderSelected { background: var(--placeholder-bg, #ffe58f); outline: 1px dashed var(--placeholder-border, #b08600); outline-offset: -1px; }
+#questionsJsonEditor .cm-placeholderValue.cm-placeholderSelected, #questionsJsonEditor .cm-placeholderValue.cm-placeholderSelected span { color: var(--text, #0b0b0b); }
+#questionsJsonEditor .cm-placeholderIsSelected .cm-selectionMatch { background: none; }
+#questionsJsonEditor .add-question { position: relative; display: block; padding: 4px 0 4px 6px; }
+#questionsJsonEditor .add-question-btn { background: var(--panel, #f3f2ef); color: var(--text, #0b0b0b); border: 1px solid var(--button-border, #4a4945); border-radius: 999px; padding: 3px 12px; font-size: 0.8125rem; cursor: pointer; }
+.add-question-menu { position: fixed; z-index: 1000; min-inline-size: 240px; background: var(--surface, #fcfcfb); color: var(--text, #0b0b0b); border: 1px solid var(--grid, #dddcd7); border-radius: 6px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); padding: 4px; font-family: system-ui, sans-serif; }
+.add-question-menu-header { display: block; padding: 4px 8px; color: var(--text-muted, #52514e); font-size: 0.6875rem; font-variant: small-caps; letter-spacing: 0.08em; }
+.add-question-menu .add-question-item { display: block; inline-size: 100%; text-align: start; background: transparent; border: none; border-radius: 4px; padding: 6px 8px; cursor: pointer; }
+.add-question-menu .add-question-item:hover { background: var(--panel, #f3f2ef); }
+.add-question-item-title { display: block; color: var(--text, #0b0b0b); font-size: 0.8125rem; }
+.add-question-item-desc { display: block; color: var(--text-muted, #52514e); font-size: 0.75rem; }
+
+body .cm-editor .cm-tooltip {
+    background: var(--panel, #f3f2ef);
+    color: var(--text, #0b0b0b);
+    border: 1px solid var(--grid, #dddcd7);
+}
+
+/* .cm-backtick-value { margin: 0; padding: 2px 6px; max-height: 300px; overflow: auto; } */
+
+.backtick-tooltip {
+    background: var(--panel, #f3f2ef);
+    color: var(--text, #0b0b0b);
+    border: 1px solid var(--grid, #dddcd7);
+    white-space: pre-wrap;
+    max-inline-size: 400px;
+    max-block-size: 300px;
+    overflow: auto;
+    padding: 2px 6px;
+    z-index: 2000;
+}
+
+.cm-tooltip .backtick-tooltip { border: none; }
+
+body .cm-tooltip.cm-tooltip-autocomplete > ul > li[aria-selected] {
+    background: var(--grid, #dddcd7);
+    color: var(--text, #0b0b0b);
+}

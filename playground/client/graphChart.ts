@@ -1,7 +1,9 @@
 import type { Question } from '@typesafe-ai/sdk';
 import type { Answer, ChartLayout, GraphBlock, PinnedData } from './graphTypes';
 import { BOTTOM, computeBaseline, computePlotHeight, computeSlotLeft, computeSlotWidth, computeY, LEFT, NOUL_BASELINE, TICK_COUNT, TOP } from './graphGeometry';
+// import { renderOption, renderProviderLetters } from './graphOption';
 import { renderOption } from './graphOption';
+import type { Provider } from '../playgroundHistory';
 import { graphState } from './graphState';
 import { computeSummary, listOptionKeys, listValues } from './graphValues';
 import { readPinnedValues } from './pinned';
@@ -35,7 +37,32 @@ export function listSortedKeys(answers: Answer[]): string[] {
   return keys;
 }
 
-export function renderChart(graphBlock: GraphBlock, name: string, question: Question, answers: Answer[], pinned: PinnedData | null): ChartLayout {
+function renderAxisForQuestion(svg: Element, question: Question, plotRight: number, plotH: number): void {
+  if (question.type === 'noul')
+    renderNoulAxis(svg, plotRight, plotH);
+  else
+    renderAxis(svg, plotRight, plotH);
+}
+
+function renderAllOptions(svg: Element, keys: string[], answers: Answer[], providers: Provider[], pinned: PinnedData | null, slot: number, plotH: number, isAverageShown: boolean, baseline: number): void {
+  for (let i = 0; i < keys.length; i++) {
+    const pinnedValues = readPinnedValues(pinned, keys[i]);
+    // if (pinnedValues !== null)
+    //   renderOption(svg, pinnedValues.values, computeSlotLeft(i, slot), plotH, isAverageShown, baseline, true);
+    if (pinned !== null) {
+      if (pinnedValues !== null)
+        renderOption(svg, pinnedValues.values, computeSlotLeft(i, slot), plotH, isAverageShown, baseline, true, pinned.providers);
+    }
+    renderOption(svg, listValues(answers, keys[i]), computeSlotLeft(i, slot), plotH, isAverageShown, baseline, false, providers);
+    // renderProviderLetters(svg, providers, computeSlotLeft(i, slot), plotH, isAverageShown, false);
+    // if (pinned !== null) {
+    //   if (pinnedValues !== null)
+    //     renderProviderLetters(svg, pinned.providers, computeSlotLeft(i, slot), plotH, isAverageShown, true);
+    // }
+  }
+}
+
+export function renderChart(graphBlock: GraphBlock, name: string, question: Question, answers: Answer[], pinned: PinnedData | null, providers: Provider[]): ChartLayout {
   const { block, box } = graphBlock;
   const keys = listSortedKeys(answers);
   const isAverageShown = graphState.averageShownByName[name] === true;
@@ -44,16 +71,8 @@ export function renderChart(graphBlock: GraphBlock, name: string, question: Ques
   const plotRight = LEFT + keys.length * slot;
   const svg = createSvgNode('svg', { width: plotRight + 20, height: TOP + plotH + BOTTOM, role: 'img' });
   const baseline = computeBaseline(question);
-  if (question.type === 'noul')
-    renderNoulAxis(svg, plotRight, plotH);
-  else
-    renderAxis(svg, plotRight, plotH);
-  for (let i = 0; i < keys.length; i++) {
-    const pinnedValues = readPinnedValues(pinned, keys[i]);
-    if (pinnedValues !== null)
-      renderOption(svg, pinnedValues.values, computeSlotLeft(i, slot), plotH, isAverageShown, baseline, true);
-    renderOption(svg, listValues(answers, keys[i]), computeSlotLeft(i, slot), plotH, isAverageShown, baseline, false);
-  }
+  renderAxisForQuestion(svg, question, plotRight, plotH);
+  renderAllOptions(svg, keys, answers, providers, pinned, slot, plotH, isAverageShown, baseline);
   box.replaceChildren(svg);
-  return { name, block, box, svg, question, answers, keys, slot, plotH, isAverageShown, baseline, pinned };
+  return { name, block, box, svg, question, answers, providers, keys, slot, plotH, isAverageShown, baseline, pinned };
 }

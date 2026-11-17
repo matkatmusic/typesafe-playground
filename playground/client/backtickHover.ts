@@ -2,7 +2,7 @@
 // import { hoverTooltip } from '@codemirror/view';
 // import type { EditorView, Tooltip } from '@codemirror/view';
 // import type { EditorState, Extension } from '@codemirror/state';
-// import { listBothEditorStates } from './backtickCompletion';
+// import { listBothEditorStates } from './backtickEditors';
 // import { findEditorValueText, splitKeyPath } from './propertyNames';
 //
 // const BACKTICKED_NAME = /`([^`\s]+)`/g;

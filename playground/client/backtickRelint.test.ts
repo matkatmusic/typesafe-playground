@@ -1,45 +1,12 @@
 import { test, expect } from 'bun:test';
 import { json } from '@codemirror/lang-json';
 import { EditorState } from '@codemirror/state';
-import type { StateEffect, TransactionSpec } from '@codemirror/state';
-import type { EditorView, ViewUpdate } from '@codemirror/view';
-import { buildOtherEditorRelint, buildUndefinedNameSource, isOtherEditorChanged } from './backtickCompletion';
+import type { EditorView } from '@codemirror/view';
+import { buildUndefinedNameSource } from './backtickLint';
 import { IS_QUESTIONS_EDITOR } from './questionNames';
 
 function createJsonState(text: string): EditorState {
   return EditorState.create({ doc: text, extensions: [json()] });
-}
-
-function createFakeView(specs: TransactionSpec[]): EditorView {
-  return { dispatch(spec: TransactionSpec) { specs.push(spec); } } as unknown as EditorView;
-}
-
-function createFakeUpdate(view: EditorView, docChanged: boolean): ViewUpdate {
-  return { docChanged: docChanged, view: view } as unknown as ViewUpdate;
-}
-
-function createUpdateFromSpec(spec: TransactionSpec): ViewUpdate {
-  const transaction = EditorState.create({}).update(spec);
-  return { transactions: [transaction] } as unknown as ViewUpdate;
-}
-
-function validateRelintGoesOnlyToTheOtherViewOnDocChange() {
-  const firstSpecs: TransactionSpec[] = [];
-  const secondSpecs: TransactionSpec[] = [];
-  const firstView = createFakeView(firstSpecs);
-  const secondView = createFakeView(secondSpecs);
-  const relint = buildOtherEditorRelint(() => [firstView, secondView]);
-  relint(createFakeUpdate(firstView, false));
-  expect(secondSpecs.length).toBe(0);
-  relint(createFakeUpdate(firstView, true));
-  expect(firstSpecs.length).toBe(0);
-  expect(secondSpecs.length).toBe(1);
-  expect(isOtherEditorChanged(createUpdateFromSpec(secondSpecs[0]))).toBe(true);
-}
-
-function validatePlainTransactionIsNotAnOtherEditorChange() {
-  expect(isOtherEditorChanged(createUpdateFromSpec({ changes: { from: 0, insert: 'x' } }))).toBe(false);
-  expect(isOtherEditorChanged(createUpdateFromSpec({ effects: [] as StateEffect<unknown>[] }))).toBe(false);
 }
 
 function validateRenamedKeyGetsSquiggleInTheQuestionsEditor() {
@@ -79,6 +46,4 @@ function validateArrayIndexNamesAreDefinedOnlyInsideTheArray() {
 }
 
 test('test_array_index_names_are_defined_only_inside_the_array', validateArrayIndexNamesAreDefinedOnlyInsideTheArray);
-test('test_relint_goes_only_to_the_other_view_on_doc_change',validateRelintGoesOnlyToTheOtherViewOnDocChange);
-test('test_plain_transaction_is_not_an_other_editor_change', validatePlainTransactionIsNotAnOtherEditorChange);
 test('test_renamed_key_gets_squiggle_in_the_questions_editor', validateRenamedKeyGetsSquiggleInTheQuestionsEditor);

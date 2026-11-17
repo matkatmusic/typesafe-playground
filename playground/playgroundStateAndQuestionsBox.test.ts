@@ -31,8 +31,8 @@ async function validateEachRowStartsWithItsTitleLabelInsideTheSizedBox() {
     const questionsUndoRedo = '<button class="format-json-button" id="questionsUndoButton">Undo</button><button class="format-json-button" id="questionsRedoButton">Redo</button>'
     const stateOpening = `<div id="stateJsonEditor"><div id="stateTitleRow"><span class="other-label">state</span><label id="batchToggle"><input type="checkbox" id="batchCheckbox"> batch</label>${stateUndoRedo}<button class="format-json-button" id="stateFormatJsonButton">Format JSON</button></div></div>`
     const questionsOpening = `<div id="questionsJsonEditor"><div id="questionsTitleRow"><span class="other-label">questions</span><div id="questionsAddQuestion"></div>${questionsUndoRedo}<button class="format-json-button" id="questionsFormatJsonButton">Format JSON</button></div>`
-    expect(page).toContain('.format-json-button { margin-left: auto;')
-    expect(page).toContain('.format-json-button + .format-json-button { margin-left: 0; }')
+    expect(page).toContain('.format-json-button { margin-inline-start: auto;')
+    expect(page).toContain('.format-json-button + .format-json-button { margin-inline-start: 0; }')
     expect(page).toContain(stateOpening)
     expect(page).toContain(questionsOpening)
     expect(page.indexOf(stateOpening)).toBeLessThan(page.indexOf('id="rowResizer"'))
@@ -46,7 +46,7 @@ async function validateTitleLabelColorChangesWithTheTheme() {
     expect(lightColor).toBeDefined()
     expect(darkColor).toBeDefined()
     expect(lightColor).not.toBe(darkColor)
-    expect(page).toContain('.other-label { flex: none; color: var(--label-other); }')
+    expect(page).toContain('.other-label { flex: none; color: var(--label-other, #8a6d00); }')
 }
 
 async function validateLockGreyCueOnlyMatchesTheLockedContentElement() {
@@ -74,9 +74,9 @@ async function validateIssue26DarkModeHoverBoxRuleBeatsCodeMirrorsLightTooltipRu
     const page = await buildPage(await buildTempHistoryPath())
     const rule = page.match(/body \.cm-editor \.cm-tooltip \{([^}]*)\}/)?.[1]
     expect(rule).toBeDefined()
-    expect(rule).toContain('background: var(--panel);')
-    expect(rule).toContain('color: var(--text);')
-    expect(rule).toContain('border: 1px solid var(--grid);')
+    expect(rule).toContain('background: var(--panel, #f3f2ef);')
+    expect(rule).toContain('color: var(--text, #0b0b0b);')
+    expect(rule).toContain('border: 1px solid var(--grid, #dddcd7);')
     expect(page).not.toContain('body .cm-tooltip {')
 }
 
@@ -85,9 +85,9 @@ async function validateIssue32FindReplaceButtonsAreStyledInAllThreeEditors() {
     const selector = ':is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-button {'
     const rule = page.split('\n').find((line) => line.startsWith(selector))
     expect(rule).toBeDefined()
-    expect(rule).toContain('background: var(--surface);')
-    expect(rule).toContain('color: var(--text);')
-    expect(rule).toContain('border: 1px solid var(--button-border);')
+    expect(rule).toContain('background: var(--surface, #fcfcfb);')
+    expect(rule).toContain('color: var(--text, #0b0b0b);')
+    expect(rule).toContain('border: 1px solid var(--button-border, #4a4945);')
 }
 
 async function validateQuestionQuickNavStartsSmallAndGrowsOnlyIntoFreeSpace() {
@@ -96,8 +96,8 @@ async function validateQuestionQuickNavStartsSmallAndGrowsOnlyIntoFreeSpace() {
     const rule = page.split('\n').find((line) => line.startsWith(selector))
     expect(rule).toBeDefined()
     expect(rule).toContain('flex: 1 1 100px;')
-    expect(rule).toContain('min-width: 100px;')
-    expect(rule).toContain('max-width: 200px;')
+    expect(rule).toContain('min-inline-size: 100px;')
+    expect(rule).toContain('max-inline-size: 200px;')
 }
 
 test('test_question_quick_nav_starts_small_and_grows_only_into_free_space_so_header_items_do_not_wrap', validateQuestionQuickNavStartsSmallAndGrowsOnlyIntoFreeSpace)

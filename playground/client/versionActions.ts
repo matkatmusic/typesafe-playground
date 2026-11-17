@@ -48,6 +48,12 @@ function saveVersionsPicker(): Promise<FileSystemFileHandle> {
   return window.showSaveFilePicker({ suggestedName: VERSIONS_FILE_NAME, types: VERSIONS_FILE_TYPES });
 }
 
+async function writeVersionsToHandle(handle: FileSystemFileHandle, versions: Version[]): Promise<void> {
+  const writable = await handle.createWritable();
+  await writable.write(JSON.stringify(versions, null, 2) + '\n');
+  await writable.close();
+}
+
 export async function writeVersionsFile(): Promise<boolean> {
   const handle = pageState.fileHandle ?? (await executePicker(saveVersionsPicker));
   if (handle === null)
@@ -57,9 +63,7 @@ export async function writeVersionsFile(): Promise<boolean> {
     return false;
   const response = await sendJson('/save', {});
   const saved: { versions: Version[] } = await response.json();
-  const writable = await handle.createWritable();
-  await writable.write(JSON.stringify(saved.versions, null, 2) + '\n');
-  await writable.close();
+  await writeVersionsToHandle(handle, saved.versions);
   pageState.fileHandle = handle;
   pageState.isDirty = false;
   refreshFileView();

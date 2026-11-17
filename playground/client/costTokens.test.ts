@@ -1,5 +1,5 @@
 import { test, expect, afterEach } from 'bun:test'
-import { computeInputTokens, computeTotalInputTokens, formatCostText, formatTokensText, formatTotalCostText, INPUT_COST_PER_MILLION, renderCostAndTokens, renderTotalCost } from './costTokens'
+import { computeInputCost, computeInputTokens, computeTotalInputCost, computeTotalInputTokens, formatCostText, formatTokensText, formatTotalCostText, INPUT_COST_PER_MILLION, renderCostAndTokens, renderTotalCost, SUBQ_INPUT_COST_PER_MILLION } from './costTokens'
 import { pageState } from './state'
 import type { RunOutput, Version } from '../playgroundHistory'
 
@@ -25,7 +25,8 @@ function validateTokensAddUpAcrossOutputs() {
 
 function validateCostIsTokensTimesPricePerMillion() {
     expect(INPUT_COST_PER_MILLION).toBe(0.042)
-    expect(formatCostText(1000000)).toBe('Cost: $0.042000')
+    expect(computeInputCost(makeVersion([1000000]))).toBeCloseTo(0.042)
+    expect(formatCostText(0.042)).toBe('Cost: $0.042000')
     expect(formatCostText(0)).toBe('Cost: $0.000000')
     expect(formatTokensText(1000000)).toBe('Tokens: 1000000')
 }
@@ -35,8 +36,17 @@ function validateTotalCostAddsEveryVersionWithSixDecimals() {
     const versions = [makeVersion([500000]), makeVersion([1000000, 500000]), makeVersion([])]
     // Step: the total tokens are 2000000, so the total cost is 2000000 * 0.042 / 1000000.
     expect(computeTotalInputTokens(versions)).toBe(2000000)
-    expect(formatTotalCostText(2000000)).toBe('total cost: $0.084000')
+    expect(computeTotalInputCost(versions)).toBeCloseTo(0.084)
+    expect(formatTotalCostText(0.084)).toBe('total cost: $0.084000')
     expect(formatTotalCostText(0)).toBe('total cost: $0.000000')
+}
+
+function validateSubqOutputsCostTheSubqRateAndOutputsWithoutAProviderCostTheTypeSafeRate() {
+    const subqOutput = { answers: {}, provider: 'SubQ', usage: { input_tokens: 1000000, output_tokens: 1 } } as unknown as RunOutput
+    const oldOutput = { answers: {}, usage: { input_tokens: 1000000, output_tokens: 1 } } as unknown as RunOutput
+    const version = { id: 1, time: 't', state: {}, questions: {}, calls: 2, outputs: [subqOutput, oldOutput] } as Version
+    expect(SUBQ_INPUT_COST_PER_MILLION).toBe(0.04)
+    expect(computeInputCost(version)).toBeCloseTo(0.04 + 0.042)
 }
 
 function validateRenderTotalCostReadsEveryVersionInThePageState() {
@@ -64,3 +74,4 @@ test('test_cost_is_tokens_times_price_per_million', validateCostIsTokensTimesPri
 test('test_total_cost_adds_every_version_with_six_decimals', validateTotalCostAddsEveryVersionWithSixDecimals)
 test('test_render_total_cost_reads_every_version_in_the_page_state', validateRenderTotalCostReadsEveryVersionInThePageState)
 test('test_render_fills_both_labels', validateRenderFillsBothLabels)
+test('test_subq_outputs_cost_the_subq_rate_and_outputs_without_a_provider_cost_the_typesafe_rate', validateSubqOutputsCostTheSubqRateAndOutputsWithoutAProviderCostTheTypeSafeRate)

@@ -1,6 +1,6 @@
 import { test, expect, afterEach, mock, spyOn } from 'bun:test'
 import type { Version } from '../playgroundHistory'
-import { deleteShownVersion, DELETE_CONFIRM_TEXT } from './deleteVersion'
+import { removeShownVersion, DELETE_CONFIRM_TEXT } from './deleteVersion'
 import * as pinInfo from './pinInfo'
 import { pageState } from './state'
 import * as versionBox from './versionBox'
@@ -53,7 +53,7 @@ function validateTheConfirmTextIsExact() {
 async function validateDeclinedConfirmChangesNothing() {
   const { seen, renderSpy } = installDeleteScene(false)
   pageState.index = 1
-  await deleteShownVersion()
+  await removeShownVersion()
   expect(seen).toEqual([])
   expect(pageState.versions.length).toBe(3)
   expect(pageState.isDirty).toBe(false)
@@ -63,7 +63,7 @@ async function validateDeclinedConfirmChangesNothing() {
 async function validateConfirmedDeleteSendsTheRemainingVersionsThroughOpen() {
   const { seen } = installDeleteScene(true)
   pageState.index = 1
-  await deleteShownVersion()
+  await removeShownVersion()
   expect(seen.length).toBe(1)
   expect(seen[0].path).toBe('/open')
   expect(seen[0].body.versions.map((version) => version.note)).toEqual(['first', 'third'])
@@ -73,7 +73,7 @@ async function validateConfirmedDeleteSendsTheRemainingVersionsThroughOpen() {
 async function validateDeleteShowsTheVersionThatTookItsPlace() {
   const { renderSpy } = installDeleteScene(true)
   pageState.index = 1
-  await deleteShownVersion()
+  await removeShownVersion()
   expect(pageState.index).toBe(1)
   expect(pageState.versions[pageState.index].note).toBe('third')
   expect(renderSpy).toHaveBeenCalledTimes(1)
@@ -82,14 +82,14 @@ async function validateDeleteShowsTheVersionThatTookItsPlace() {
 async function validateDeletingTheLastVersionShowsTheNewLastVersion() {
   installDeleteScene(true)
   pageState.index = 2
-  await deleteShownVersion()
+  await removeShownVersion()
   expect(pageState.index).toBe(1)
   expect(pageState.versions[pageState.index].note).toBe('second')
 }
 
 async function validateDeleteMarksThePageChanged() {
   const { elements } = installDeleteScene(true)
-  await deleteShownVersion()
+  await removeShownVersion()
   expect(pageState.isDirty).toBe(true)
   expect(elements.lastEditedLabel.textContent).toContain('last edited: ')
 }
@@ -98,7 +98,7 @@ async function validateDeleteDiscardsTheEditedDraftAndPendingNotes() {
   installDeleteScene(true)
   pageState.editedDraft = { state: 'x', questions: 'y', baseIndex: 0 }
   pageState.pendingNotes = { state: 'pending', questions: null }
-  await deleteShownVersion()
+  await removeShownVersion()
   expect(pageState.editedDraft).toBeNull()
   expect(pageState.pendingNotes).toEqual({ state: null, questions: null })
 }
@@ -107,7 +107,7 @@ async function validatePinAfterTheDeletedVersionMovesDownByOne() {
   const { pinInfoSpy } = installDeleteScene(true)
   pageState.index = 0
   pageState.pinnedIndex = 2
-  await deleteShownVersion()
+  await removeShownVersion()
   expect(pageState.pinnedIndex).toBe(1)
   expect(pinInfoSpy).toHaveBeenCalledWith(1)
 }
@@ -116,7 +116,7 @@ async function validatePinBeforeTheDeletedVersionStays() {
   installDeleteScene(true)
   pageState.index = 2
   pageState.pinnedIndex = 0
-  await deleteShownVersion()
+  await removeShownVersion()
   expect(pageState.pinnedIndex).toBe(0)
 }
 
@@ -124,7 +124,7 @@ async function validateDeletingThePinnedVersionClearsThePin() {
   installDeleteScene(true)
   pageState.index = 1
   pageState.pinnedIndex = 1
-  await deleteShownVersion()
+  await removeShownVersion()
   expect(pageState.pinnedIndex).toBeNull()
 }
 

@@ -24,6 +24,11 @@ function validateReadPinnedDataNeedsRunsAndTheQuestion() {
   expect(data?.answers.length).toBe(2)
 }
 
+function validateReadPinnedDataListsOneProviderPerOutputAndTreatsOldOutputsAsTypeSafe() {
+  const data = readPinnedData(buildVersion([{ ...noulOutput, provider: 'SubQ' }, noulOutput]), 'q')
+  expect(data?.providers).toEqual(['SubQ', 'TypeSafe'])
+}
+
 function validateReadPinnedValuesNeedsTheKey() {
   const data = readPinnedData(buildVersion([noulOutput, noulOutput]), 'q')
   expect(readPinnedValues(null, 'yes')).toBeNull()
@@ -33,4 +38,5 @@ function validateReadPinnedValuesNeedsTheKey() {
 
 test('test_find_pinned_matches_by_index', validateFindPinnedMatchesByIndex)
 test('test_read_pinned_data_needs_runs_and_the_question', validateReadPinnedDataNeedsRunsAndTheQuestion)
-test('test_read_pinned_values_needs_the_key', validateReadPinnedValuesNeedsTheKey)
+test('test_read_pinned_data_lists_one_provider_per_output_and_treats_old_outputs_as_typesafe', validateReadPinnedDataListsOneProviderPerOutputAndTreatsOldOutputsAsTypeSafe)
+test('test_read_pinned_values_needs_the_key',validateReadPinnedValuesNeedsTheKey)

@@ -1,5 +1,6 @@
 // import { StateEffect } from '@codemirror/state';
 // import { EditorView, type ViewUpdate } from '@codemirror/view';
+import type { EditorView } from '@codemirror/view';
 import type { Draft } from '../playgroundDraftRequests';
 import { applyBatchMode } from './batchControls';
 import { isEditorTextEdited } from './editedPosition';
@@ -87,20 +88,29 @@ export async function fetchDraft(id: string): Promise<Draft | null> {
   return response.json();
 }
 
+function fillEditorIfTextDiffers(editor: EditorView, text: string): boolean {
+  const isTextDifferent = text !== editor.state.doc.toString();
+  if (isTextDifferent)
+    fillEditorText(editor, text);
+  return isTextDifferent;
+}
+
 // export function applyDraft(draft: PageData['draft']): void {
 export function applyDraft(draft: Draft | null): void {
   if (draft === null)
     return;
-  const stateEditor = getStateEditor();
-  const questionsEditor = getQuestionsEditor();
-  const isStateDifferent = draft.state !== stateEditor.state.doc.toString();
-  if (isStateDifferent)
-    // replaceEditorText(stateEditor, draft.state);
-    fillEditorText(stateEditor, draft.state);
-  const isQuestionsDifferent = draft.questions !== questionsEditor.state.doc.toString();
-  if (isQuestionsDifferent)
-    // replaceEditorText(questionsEditor, draft.questions);
-    fillEditorText(questionsEditor, draft.questions);
+  // const stateEditor = getStateEditor();
+  // const questionsEditor = getQuestionsEditor();
+  // const isStateDifferent = draft.state !== stateEditor.state.doc.toString();
+  // if (isStateDifferent)
+  //   // replaceEditorText(stateEditor, draft.state);
+  //   fillEditorText(stateEditor, draft.state);
+  // const isQuestionsDifferent = draft.questions !== questionsEditor.state.doc.toString();
+  // if (isQuestionsDifferent)
+  //   // replaceEditorText(questionsEditor, draft.questions);
+  //   fillEditorText(questionsEditor, draft.questions);
+  const isStateDifferent = fillEditorIfTextDiffers(getStateEditor(), draft.state);
+  const isQuestionsDifferent = fillEditorIfTextDiffers(getQuestionsEditor(), draft.questions);
   const isDraftBatch = draft.isBatch === true;
   const isBatchDifferent = isDraftBatch !== pageState.isBatchOn;
   if (isBatchDifferent)

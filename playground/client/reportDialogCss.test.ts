@@ -1,6 +1,6 @@
 import { test, expect } from 'bun:test'
 
-const CSS_PATH = `${import.meta.dir}/../page/playground.css`
+const CSS_PATH = `${import.meta.dir}/../page/playgroundBase.css`
 
 async function validateReportBodyRuleHasAutoFlexBasis() {
     const css = await Bun.file(CSS_PATH).text()
@@ -18,7 +18,7 @@ async function validateReportDialogHasFixedInsetSize() {
     const reportDialogRules = activeLines.filter(line => line.startsWith('#reportDialog {'))
     expect(reportDialogRules.length).toBe(1)
     expect(reportDialogRules[0]).toContain('inset: 40px;')
-    expect(reportDialogRules[0]).toContain('max-height: none;')
+    expect(reportDialogRules[0]).toContain('max-block-size: none;')
     expect(reportDialogRules[0]).not.toContain('85vh')
 }
 

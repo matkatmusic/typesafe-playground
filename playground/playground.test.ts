@@ -108,11 +108,27 @@ async function validateCostTokenSubmitBoxHoldsFourItemsInOrderAndErrorLineFollow
     expect(page.includes('<button id="submitButton">Submit (paid)</button>')).toBe(true)
     expect(page.includes('<label id="callsLabel" for="callsPicker">Calls</label>')).toBe(true)
     expect(page.indexOf('id="callsLabel"')).toBeLessThan(page.indexOf('id="callsPicker"'))
-    expect(page).toContain('gap: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--grid); }')
-    expect(page).toContain('#callsSubmitGroup #submitButton { height: 30px; margin-left: 2px; border-radius: 6px; }')
-    expect(page).toContain('border: 1px solid var(--button-border); border-radius: 6px; padding: 4px 8px; font: inherit; }')
+    expect(page).toContain('gap: 12px; padding-block-end: 6px; border-block-end: 1px solid var(--grid, #dddcd7); }')
+    expect(page).toContain('#submitButton { block-size: 30px; margin-inline-start: 2px; border-radius: 6px; }')
+    expect(page).toContain('border: 1px solid var(--button-border, #4a4945); border-radius: 6px; padding: 4px 8px; font: inherit; }')
 }
 
+async function validatePageHoldsRulesFromEveryCssFile() {
+    const page = await buildPage(await buildTempHistoryPath())
+    expect(page).toContain('--tok-string: #0a7a3e;')
+    expect(page).toContain('#costTokenSubmitBox {')
+    expect(page).toContain('.cm-tooltip .backtick-tooltip {')
+}
+
+async function validatePageTemplateStylePlaceholderIsCssComment() {
+    // read the raw page template file
+    const template = await Bun.file(`${import.meta.dir}/page/playground.html`).text()
+    // the style placeholder is a CSS comment, so the code editor does not parse it as a selector
+    expect(template).toContain('<style>/*__PAGE_CSS__*/</style>')
+}
+
+test('test_page_template_style_placeholder_is_css_comment', validatePageTemplateStylePlaceholderIsCssComment)
+test('test_page_holds_rules_from_every_css_file', validatePageHoldsRulesFromEveryCssFile)
 test('test_page_get_returns_200_html_with_css_filled_in', validatePageGetReturns200WithHtmlAndNoMarkersLeft)
 test('test_page_holds_header_version_and_input_results_boxes_in_order', validatePageHoldsThreeBoxesInsidePlaygroundComponentBoxInOrder)
 test('test_page_holds_header_buttons_in_order_and_the_client_script',validatePageHoldsHeaderButtonsInOrderAndTheClientScript)

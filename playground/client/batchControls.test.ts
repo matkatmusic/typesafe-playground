@@ -20,7 +20,7 @@ const dispatchedSpecs: unknown[] = []
 function installFakeDom(hasEnvKey: boolean) {
     const elements: Record<string, unknown> = {
         data: new FakeBox(), errorLine: new FakeBox(), versionLabel: new FakeBox(),
-        batchCheckbox: new FakeInput(), typeSafeKeyEditor: new FakeInput(), noteText: new FakeInput(),
+        batchCheckbox: new FakeInput(), typeSafeKeyEditor: new FakeInput(), providerSwitch: new FakeInput(), noteText: new FakeInput(),
     }
     const buttonIds = [...LOCKED_BUTTON_IDS, 'resetButton', 'submitButton', 'prevVersionButton', 'nextVersionButton', 'deleteVersionButton', 'pinButton', 'unpinButton']
     for (const id of buttonIds)

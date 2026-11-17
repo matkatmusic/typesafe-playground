@@ -51,18 +51,25 @@ function buildReferenceTable(longValues: Map<string, string>): string {
   return rows.join('\n');
 }
 
+// ponytail: question comes from the last '#### name' heading; a note starting with '#### ' is misread.
+function findBlockQuestion(block: string, version: Version, previousQuestion: unknown): unknown {
+  const isQuestionHeading = block.startsWith('#### ');
+  if (isQuestionHeading)
+    return readQuestions(version)[block.slice('#### '.length)];
+  const isSectionHeading = block.startsWith('### ');
+  if (isSectionHeading)
+    return undefined;
+  return previousQuestion;
+}
+
 export function replaceVersionReferences(blocks: string[], version: Version): string[] {
   const longValues = new Map<string, string>();
   const replacedBlocks: string[] = [];
   // for (const block of blocks)
   //   replacedBlocks.push(replaceBlockReferences(block, version, longValues));
-  // ponytail: question comes from the last '#### name' heading; a note starting with '#### ' is misread.
   let question: unknown = undefined;
   for (const block of blocks) {
-    if (block.startsWith('### '))
-      question = undefined;
-    if (block.startsWith('#### '))
-      question = readQuestions(version)[block.slice('#### '.length)];
+    question = findBlockQuestion(block, version, question);
     replacedBlocks.push(replaceBlockReferences(block, version, question, longValues));
   }
   const hasLongValues = longValues.size > 0;

@@ -1,4 +1,4 @@
-import type { Tree } from '@lezer/common';
+import type { SyntaxNode, Tree } from '@lezer/common';
 import { findTopLevelObject, listTopLevelKeys, listTopLevelProperties } from './questionNames';
 
 export type QuestionType = 'noul' | 'score' | 'choice';
@@ -76,6 +76,10 @@ export function buildInsertPlan(tree: Tree, text: string, type: QuestionType): I
     const lastEnd = properties[properties.length - 1].to;
     return { from: lastEnd, to: lastEnd, template: ',\n' + lines.join('\n') };
   }
+  return buildInsertPlanForEmptyObject(rootNode, lines);
+}
+
+function buildInsertPlanForEmptyObject(rootNode: SyntaxNode, lines: string[]): InsertPlan {
   const openBrace = rootNode.firstChild;
   const closeBrace = rootNode.lastChild;
   if (openBrace === null)

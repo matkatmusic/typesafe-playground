@@ -105,7 +105,8 @@ function validateNoulHoverDoesNotThrowAndShowsTheValue() {
   expect(hits[0].attrs.stroke).toBe('hotpink');
   hits[0].listeners.mouseenter();
   expect(hits[0].attrs.stroke).toBe('hotpink');
-  const labels = listByName(svg.children, 'g');
+  // const labels = listByName(svg.children, 'g');
+  const labels = listByName(svg.children, 'g').filter((group) => group.attrs.class === 'value-labels');
   expect(labels.length).toBe(1);
   expect(labels[0].children[0].textContent).toBe('0.800');
   const shownBox = block.children[block.children.length - 1];

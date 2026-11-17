@@ -13,9 +13,7 @@ export function formatGraphTitle(questionNumber: number, name: string, question:
   return 'Q' + questionNumber + ' ' + name + ' · ' + formatValueText(question.instructions);
 }
 
-export function createAverageToggle(name: string, onChange: RenderCallback): HTMLLabelElement {
-  const toggle = document.createElement('label');
-  toggle.className = 'avg-toggle';
+function createAverageCheckbox(name: string, onChange: RenderCallback): HTMLInputElement {
   const checkbox = document.createElement('input');
   checkbox.type = 'checkbox';
   checkbox.checked = graphState.averageShownByName[name] === true;
@@ -27,6 +25,13 @@ export function createAverageToggle(name: string, onChange: RenderCallback): HTM
     container.scrollTop = scrollTopBeforeRender;
   }
   checkbox.addEventListener('change', updateAverageShown);
+  return checkbox;
+}
+
+export function createAverageToggle(name: string, onChange: RenderCallback): HTMLLabelElement {
+  const toggle = document.createElement('label');
+  toggle.className = 'avg-toggle';
+  const checkbox = createAverageCheckbox(name, onChange);
   const text = document.createElement('span');
   text.textContent = ' Show average';
   toggle.appendChild(checkbox);
@@ -34,12 +39,7 @@ export function createAverageToggle(name: string, onChange: RenderCallback): HTM
   return toggle;
 }
 
-export function createCollapseButton(name: string, onChange: RenderCallback): HTMLButtonElement {
-  const isCollapsed = graphState.collapsedByName[name] === true;
-  const button = document.createElement('button');
-  button.className = 'graph-toggle';
-  button.textContent = isCollapsed ? '▶' : '▼';
-  button.setAttribute('aria-label', isCollapsed ? 'expand graph' : 'collapse graph');
+function createCollapseHandler(name: string, isCollapsed: boolean, onChange: RenderCallback): () => void {
   function updateCollapsed(): void {
     const container = getElement('graphContainerBox');
     const scrollTopBeforeRender = container.scrollTop;
@@ -49,7 +49,16 @@ export function createCollapseButton(name: string, onChange: RenderCallback): HT
     if (isCollapsed)
       getElement('graphBlock' + name).scrollIntoView({ block: 'nearest' });
   }
-  button.addEventListener('click', updateCollapsed);
+  return updateCollapsed;
+}
+
+export function createCollapseButton(name: string, onChange: RenderCallback): HTMLButtonElement {
+  const isCollapsed = graphState.collapsedByName[name] === true;
+  const button = document.createElement('button');
+  button.className = 'graph-toggle';
+  button.textContent = isCollapsed ? '▶' : '▼';
+  button.setAttribute('aria-label', isCollapsed ? 'expand graph' : 'collapse graph');
+  button.addEventListener('click', createCollapseHandler(name, isCollapsed, onChange));
   return button;
 }
 
@@ -65,18 +74,16 @@ export function createQuestionLink(label: string, name: string): HTMLButtonEleme
   return link;
 }
 
-export function createGraphBlock(questionNumber: number, name: string, question: Question, onChange: RenderCallback, version: Version): GraphBlock {
-  const questionLabel = 'Q' + questionNumber + ' ' + name;
-  const formattedInstructions = formatGraphTitle(questionNumber, name, question).slice(questionLabel.length);
-  // const instructionsText = graphState.isReferencesReplaced ? replaceReferences(formattedInstructions, version.state, version.questions) : formattedInstructions;
-  const instructionsText = graphState.isReferencesReplaced ? replaceReferences(formattedInstructions, version.state, question) : formattedInstructions;
+function createGraphBlockElement(name: string): HTMLDivElement {
   const block = document.createElement('div');
   block.className = 'graph-block';
   block.id = 'graphBlock' + name;
   if (graphState.collapsedByName[name] === true)
     block.classList.add('collapsed');
-  const titleRow = document.createElement('div');
-  titleRow.className = 'graph-title-row';
+  return block;
+}
+
+function createGraphTitle(questionLabel: string, name: string, instructionsText: string, question: Question, version: Version): HTMLDivElement {
   const title = document.createElement('div');
   title.className = 'graph-title';
   // title.textContent = titleText;
@@ -84,12 +91,29 @@ export function createGraphBlock(questionNumber: number, name: string, question:
   // appendReferenceText(title, instructionsText, version.state, version.questions);
   appendReferenceText(title, instructionsText, version.state, question);
   title.title = questionLabel + instructionsText;
+  return title;
+}
+
+function createGraphTitleRow(name: string, title: HTMLDivElement, onChange: RenderCallback, version: Version): HTMLDivElement {
+  const titleRow = document.createElement('div');
+  titleRow.className = 'graph-title-row';
   titleRow.appendChild(createCollapseButton(name, onChange));
   titleRow.appendChild(title);
   const isRunCompleted = version.outputs.length > 0;
   if (isRunCompleted)
     titleRow.appendChild(createNotesButton('resultNotesButton' + name, 'Result notes: ' + name, { kind: 'result', question: name }));
   titleRow.appendChild(createAverageToggle(name, onChange));
+  return titleRow;
+}
+
+export function createGraphBlock(questionNumber: number, name: string, question: Question, onChange: RenderCallback, version: Version): GraphBlock {
+  const questionLabel = 'Q' + questionNumber + ' ' + name;
+  const formattedInstructions = formatGraphTitle(questionNumber, name, question).slice(questionLabel.length);
+  // const instructionsText = graphState.isReferencesReplaced ? replaceReferences(formattedInstructions, version.state, version.questions) : formattedInstructions;
+  const instructionsText = graphState.isReferencesReplaced ? replaceReferences(formattedInstructions, version.state, question) : formattedInstructions;
+  const block = createGraphBlockElement(name);
+  const title = createGraphTitle(questionLabel, name, instructionsText, question, version);
+  const titleRow = createGraphTitleRow(name, title, onChange, version);
   const box = document.createElement('div');
   box.className = 'chart-box';
   block.appendChild(titleRow);

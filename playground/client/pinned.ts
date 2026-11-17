@@ -1,7 +1,7 @@
 import type { Version } from '../playgroundHistory';
 import type { PinnedData } from './graphTypes';
 import type { PinnedValues } from './infoTypes';
-import { listAnswers, listOptionKeys, listValues } from './graphValues';
+import { listAnswers, listOptionKeys, listProviders, listValues } from './graphValues';
 
 export function findPinned(versions: Version[], pinnedIndex: number | null): Version | null {
   if (pinnedIndex === null)
@@ -20,7 +20,8 @@ export function readPinnedData(pinnedVersion: Version | null, name: string): Pin
     return null;
   const answers = listAnswers(pinnedVersion, name);
   // return { id: pinnedVersion.id, answers: answers, keys: listOptionKeys(answers[0]) };
-  return { answers: answers, keys: listOptionKeys(answers[0]) };
+  // return { answers: answers, keys: listOptionKeys(answers[0]) };
+  return { answers: answers, providers: listProviders(pinnedVersion), keys: listOptionKeys(answers[0]) };
 }
 
 export function readPinnedValues(pinned: PinnedData | null, key: string): PinnedValues | null {

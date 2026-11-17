@@ -1,0 +1,96 @@
+import { test, expect } from 'bun:test';
+import { CompletionContext } from '@codemirror/autocomplete';
+import type { CompletionResult } from '@codemirror/autocomplete';
+import { json } from '@codemirror/lang-json';
+import { EditorState } from '@codemirror/state';
+import { buildBacktickSource, buildNameOptions } from './backtickSource';
+
+function validateOptionsInsertNameThenBacktick() {
+    const options = buildNameOptions(['mood']);
+    expect(options[0].label).toBe('mood');
+    expect(options[0].apply).toBe('mood`');
+}
+
+function createJsonState(text: string): EditorState {
+    return EditorState.create({ doc: text, extensions: [json()] });
+}
+
+function createContext(typedText: string): CompletionContext {
+    return new CompletionContext(createJsonState(typedText), typedText.length, false);
+}
+
+function listLabels(result: CompletionResult | null): string[] {
+    if (result === null)
+        throw new Error('no result');
+    const labels: string[] = [];
+    for (let i = 0; i < result.options.length; i++)
+        labels.push(result.options[i].label);
+    return labels;
+}
+
+function validateNoListWithoutBacktick() {
+    const source = buildBacktickSource(() => [createJsonState('{"a": 1}')]);
+    expect(source(createContext('x'))).toBe(null);
+    expect(source(createContext(''))).toBe(null);
+}
+
+function validateStatesAreReadWhenTyping() {
+    const states = [createJsonState('{}')];
+    const source = buildBacktickSource(() => states);
+    states[0] = createJsonState('{"late": 1}');
+    expect(listLabels(source(createContext('`')) as CompletionResult | null)).toEqual(['late']);
+}
+
+const NESTED_STATE_TEXT = '{"message": {"text": 1, "x": {"deep": 2}}, "other": 3}';
+
+function validateBacktickListsOnlyTopLevelStateKeys() {
+    // Step: the state has a nested object with its own keys.
+    const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+    // Step: after a lone backtick, only the top-level keys are offered.
+    expect(listLabels(source(createContext('`')) as CompletionResult | null)).toEqual(['message', 'other']);
+}
+
+function validateDotListsChildKeysOfTheKey() {
+    const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+    const result = source(createContext('`message.')) as CompletionResult | null;
+    expect(listLabels(result)).toEqual(['text', 'x']);
+    expect(result?.from).toBe(9);
+    expect(result?.options[0].apply).toBe('text`');
+}
+
+function validateDotListsChildKeysAtAnyDepth() {
+    const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+    expect(listLabels(source(createContext('`message.x.')) as CompletionResult | null)).toEqual(['deep']);
+}
+
+function validateDotListsNothingWithoutObjectChildren() {
+    const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+    expect(source(createContext('`other.'))).toBe(null);
+    expect(source(createContext('`message.text.'))).toBe(null);
+    expect(source(createContext('`missing.'))).toBe(null);
+}
+
+function validateDotOutsideABacktickKeyListsNothing() {
+    const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+    expect(source(createContext('message.'))).toBe(null);
+    expect(source(createContext('`message `.'))).toBe(null);
+    expect(source(createContext('`.'))).toBe(null);
+    expect(source(createContext('`message..'))).toBe(null);
+}
+
+function validateNoListWhileReadOnly() {
+    const lockedState = EditorState.create({ doc: '`', extensions: [json(), EditorState.readOnly.of(true)] });
+    const lockedContext = new CompletionContext(lockedState, 1, false);
+    const source = buildBacktickSource(() => [createJsonState('{"a": 1}')]);
+    expect(source(lockedContext)).toBe(null);
+}
+
+test('test_options_insert_name_then_backtick', validateOptionsInsertNameThenBacktick);
+test('test_no_list_without_a_backtick', validateNoListWithoutBacktick);
+test('test_states_are_read_when_typing', validateStatesAreReadWhenTyping);
+test('test_backtick_lists_only_top_level_state_keys', validateBacktickListsOnlyTopLevelStateKeys);
+test('test_dot_lists_child_keys_of_the_key', validateDotListsChildKeysOfTheKey);
+test('test_dot_lists_child_keys_at_any_depth', validateDotListsChildKeysAtAnyDepth);
+test('test_dot_lists_nothing_without_object_children', validateDotListsNothingWithoutObjectChildren);
+test('test_dot_outside_a_backtick_key_lists_nothing', validateDotOutsideABacktickKeyListsNothing);
+test('test_no_list_while_read_only', validateNoListWhileReadOnly);

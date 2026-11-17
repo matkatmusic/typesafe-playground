@@ -25,7 +25,7 @@ function buildStubEditor(text: string) {
 function installFakeDom() {
     const data = new FakeBox()
     data.textContent = JSON.stringify({ versions: [], hasEnvKey: true })
-    const elements = { data: data, errorLine: new FakeBox(), lastEditedLabel: new FakeBox(), deleteVersionButton: new FakeButton(), submitButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput() }
+    const elements = { data: data, errorLine: new FakeBox(), lastEditedLabel: new FakeBox(), deleteVersionButton: new FakeButton(), submitButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(), providerSwitch: new FakeInput() }
     function getElementById(id: string) {
         return (elements as Record<string, unknown>)[id] ?? null
     }

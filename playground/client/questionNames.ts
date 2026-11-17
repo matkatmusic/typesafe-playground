@@ -60,21 +60,27 @@ export function findEnclosingQuestionName(state: EditorState, offset: number): s
   return readPropertyName(state.doc.toString(), nameNode);
 }
 
+function isErrorStartingWithQuestionName(error: string, questionName: string): boolean {
+  const startsWithSpace = error.startsWith(questionName + ' ');
+  if (startsWithSpace)
+    return true;
+  const startsWithDot = error.startsWith(questionName + '.');
+  return startsWithDot;
+}
+
 // ponytail: first key that prefixes the error wins; keys "a" and "a.b" would both match "a.b ...".
 export function findQuestionKeyNode(state: EditorState, error: string): SyntaxNode | null {
   const rootNode = findTopLevelObject(syntaxTree(state));
   if (rootNode === null)
     return null;
-  const text = state.doc.toString();
   for (const property of listTopLevelProperties(rootNode)) {
     const nameNode = property.getChild('PropertyName');
     if (nameNode === null)
       continue;
-    const questionName = readPropertyName(text, nameNode);
-    for (const boundary of [' ', '.']) {
-      if (error.startsWith(questionName + boundary))
-        return nameNode;
-    }
+    const questionName = readPropertyName(state.doc.toString(), nameNode);
+    const isErrorForQuestion = isErrorStartingWithQuestionName(error, questionName);
+    if (isErrorForQuestion)
+      return nameNode;
   }
   return null;
 }

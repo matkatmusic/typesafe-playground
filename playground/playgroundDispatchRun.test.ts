@@ -37,7 +37,8 @@ async function validateRunPostUsesTheStubClientAndWritesTheTempFile() {
     const keyResponse = await dispatchRequest(keyRequest, PORT, historyPath, createStubClient)
     expect(keyResponse.status).toBe(200)
     const result = (await keyResponse.json()) as RunResult
-    expect(result.outputs).toEqual([output, output])
+    // expect(result.outputs).toEqual([output, output])
+    expect(result.outputs).toEqual([{ ...output, provider: 'TypeSafe' }, { ...output, provider: 'TypeSafe' }])
     expect(result.version.calls).toBe(2)
     expect((await loadHistory(historyPath))[0].outputs.length).toBe(2)
 }

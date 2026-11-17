@@ -34,7 +34,7 @@ afterEach(() => {
 function installOneVersionWithAnEditedState() {
     const elements = {
         data: new FakeBox(), versionLabel: new FakeBox(), costLabel: new FakeBox(), totalCostLabel: new FakeBox(), tokensLabel: new FakeBox(), graphContainerBox: new FakeBox(), winnerBox: new FakeBox(), lastEditedLabel: new FakeBox(), errorLine: new FakeBox(),
-        prevVersionButton: new FakeButton(), deleteVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), submitButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(),
+        prevVersionButton: new FakeButton(), deleteVersionButton: new FakeButton(), nextVersionButton: new FakeButton(), submitButton: new FakeButton(), callsPicker: new FakeInput(), typeSafeKeyEditor: new FakeInput(), providerSwitch: new FakeInput(),
     }
     elements.data.textContent = JSON.stringify({ versions: [], hasEnvKey: true })
     elements.callsPicker.value = '1'

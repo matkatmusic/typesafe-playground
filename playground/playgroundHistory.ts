@@ -5,7 +5,8 @@ import { HARD_CODED_QUESTIONS, HARD_CODED_STATE } from './typeSafeQuery';
 
 export const HISTORY_PATH = `${import.meta.dir}/results/playground-history.json`;
 
-export type RunOutput = SystemOneResult<Questions>;
+export type Provider = 'TypeSafe' | 'SubQ';
+export type RunOutput = SystemOneResult<Questions> & { provider?: Provider };
 // export type Version = { id: number; time: string; state: unknown; questions: unknown; calls: number; outputs: RunOutput[]; note?: string; stateNote?: string; questionsNote?: string; resultNotes?: Record<string, string> };
 // export type Version = { time: string; state: unknown; questions: unknown; calls: number; outputs: RunOutput[]; note?: string; stateNote?: string; questionsNote?: string; resultNotes?: Record<string, string> };
 export type Version = { time: string; state: Record<string, JsonValue>; questions: Questions; calls: number; outputs: RunOutput[]; note?: string; stateNote?: string; questionsNote?: string; resultNotes?: Record<string, string> };
@@ -18,7 +19,8 @@ export async function loadHistory(historyPath: string): Promise<Version[]> {
 }
 
 export function findVersionByIndex(history: Version[], index: unknown): Version | undefined {
-  if (!Number.isInteger(index))
+  const isIndexInteger = Number.isInteger(index);
+  if (!isIndexInteger)
     return undefined;
   return history[index as number];
 }
