@@ -17,7 +17,7 @@ import { refreshVersionBox } from './versionBox';
 import { isJsonTextEdited, NOT_RUN_TIME } from './versionLabel';
 import { renderWinners } from '../runs/winnersDom';
 
-type EditedInputs = { state: Version['state']; questions: Version['questions'] };
+interface EditedInputs { state: Version['state']; questions: Version['questions'] }
 
 function setErrorLineText(message: string): void {
   getElement('errorLine').textContent = message;

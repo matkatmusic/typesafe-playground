@@ -5,7 +5,7 @@ import type { RunClient } from '../server/playgroundRequests';
 export const SUBQ_SYSTEM_ONE_URL = 'https://api.subq.ai/v1/systemone';
 export const SUBQ_MODEL = 'subq-snap-1.2';
 
-type SubqErrorBody = { detail: { error_type: string; message: string } };
+interface SubqErrorBody { detail: { error_type: string; message: string } }
 
 export function createSubqClient(apiKey: string): RunClient {
   async function systemOne(request: { state: EntryType; questions: Questions }): Promise<RunOutput> {

@@ -6,7 +6,7 @@ import { initHistory, loadHistory, type RunOutput } from '../history/playgroundH
 import { hideKeysInMessage, setLastTypedKey } from './serverErrors';
 import { HARD_CODED_QUESTIONS } from '../providers/typeSafeQuery';
 
-type Call = { apiKey: string; provider: unknown };
+interface Call { apiKey: string; provider: unknown }
 
 const OUTPUT = { answers: {}, usage: { input_tokens: 5, output_tokens: 1 } } as unknown as RunOutput;
 const savedTypeSafeKey = Bun.env.TYPESAFE_API_KEY;

@@ -11,9 +11,9 @@ export const SUBQ_MISSING_KEY_MESSAGE = 'Add a SubQ API key';
 export const MIN_CALLS = 1;
 export const MAX_CALLS = 10;
 
-export type RunClient = {
+export interface RunClient {
   systemOne(request: { state: EntryType; questions: Questions }): Promise<RunOutput>;
-};
+}
 export type CreateRunClient = (apiKey: string, provider: Provider) => RunClient;
 
 export function createTypeSafeClient(apiKey: string): RunClient {
@@ -100,7 +100,7 @@ export async function executeRunRequest(request: Request, createClient: CreateRu
   return executeCallsAndWriteHistory(body, typedKey, createClient, historyPath, history, shownVersion);
 }
 
-type RunRequestBody = { index?: unknown; calls?: unknown; apiKey?: unknown; state?: unknown; questions?: unknown; provider?: unknown };
+interface RunRequestBody { index?: unknown; calls?: unknown; apiKey?: unknown; state?: unknown; questions?: unknown; provider?: unknown }
 
 function validateRunBodyShape(body: RunRequestBody): Response | undefined {
   if (body.provider !== undefined) {

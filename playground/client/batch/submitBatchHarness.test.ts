@@ -23,8 +23,8 @@ const realFetch = globalThis.fetch;
 const OUTPUT = { answers: {}, usage: { input_tokens: 1000000, output_tokens: 1 } };
 export const QUESTIONS = { q: { type: 'noul', instructions: 'x' } } as unknown as Questions;
 
-type RunSnapshot = { index: number; calls: number; state: unknown; questions: unknown; buttonText: string; isButtonDisabled: boolean; isToggleDisabled: boolean; isNewDisabled: boolean; areEditorsLocked: boolean; shownIndex: number };
-export type Harness = { elements: Record<string, FakeButton & FakeInput & FakeBox>; history: Version[]; runs: RunSnapshot[]; notes: { index: number; body: Record<string, unknown> }[]; drafts: Record<string, unknown>[]; alerts: string[]; openBodies: Version[][]; locks: boolean[]; stateText: { value: string }; questionsText: { value: string }; fetchOrder: string[] };
+interface RunSnapshot { index: number; calls: number; state: unknown; questions: unknown; buttonText: string; isButtonDisabled: boolean; isToggleDisabled: boolean; isNewDisabled: boolean; areEditorsLocked: boolean; shownIndex: number }
+export interface Harness { elements: Record<string, FakeButton & FakeInput & FakeBox>; history: Version[]; runs: RunSnapshot[]; notes: { index: number; body: Record<string, unknown> }[]; drafts: Record<string, unknown>[]; alerts: string[]; openBodies: Version[][]; locks: boolean[]; stateText: { value: string }; questionsText: { value: string }; fetchOrder: string[] }
 
 export function buildVersion(state: unknown, questions: unknown, outputCount: number, time: string): Version {
   const outputs = [];

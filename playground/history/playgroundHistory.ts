@@ -7,7 +7,7 @@ export const HISTORY_PATH = resolve(import.meta.dir, '..', 'results', 'playgroun
 
 export type Provider = 'TypeSafe' | 'SubQ';
 export type RunOutput = SystemOneResult<Questions> & { provider?: Provider };
-export type Version = { time: string; state: Record<string, JsonValue>; questions: Questions; calls: number; outputs: RunOutput[]; note?: string; stateNote?: string; questionsNote?: string; resultNotes?: Record<string, string> };
+export interface Version { time: string; state: Record<string, JsonValue>; questions: Questions; calls: number; outputs: RunOutput[]; note?: string; stateNote?: string; questionsNote?: string; resultNotes?: Record<string, string> }
 
 export async function loadHistory(historyPath: string): Promise<Version[]> {
   const history: Version[] = await Bun.file(historyPath).json();

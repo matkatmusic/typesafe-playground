@@ -3,7 +3,7 @@ import type { Answer } from '../graphs/graphTypes';
 import { listOptionKeys } from '../graphs/graphValues';
 import { readDescription, readTopKey } from '../infoBox/infoValues';
 
-export type WinnerGroup = { key: string; runs: number[] };
+export interface WinnerGroup { key: string; runs: number[] }
 
 function findWinnerGroup(groups: WinnerGroup[], key: string): WinnerGroup | undefined {
   let group: WinnerGroup | undefined;

@@ -44,7 +44,7 @@ export function listSubmitErrors(state: unknown, questions: unknown): string[] {
   return listUndefinedReferences(state, questions as Record<string, unknown>);
 }
 
-type SubmitInputs = { errorMessage: string; state: unknown; questions: unknown };
+interface SubmitInputs { errorMessage: string; state: unknown; questions: unknown }
 
 function computeSubmitInputs(): SubmitInputs {
   const stateResult = computeJsonParseResult('state', getStateEditor().state.doc.toString());

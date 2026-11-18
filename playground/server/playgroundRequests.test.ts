@@ -8,7 +8,7 @@ import type { RunResult } from '../client/page/types';
 import { hideKeysInMessage } from './serverErrors';
 import { HARD_CODED_QUESTIONS, HARD_CODED_STATE } from '../providers/typeSafeQuery';
 
-type Call = { apiKey: string; request: unknown };
+interface Call { apiKey: string; request: unknown }
 
 const OUTPUT = { answers: {}, usage: { input_tokens: 5, output_tokens: 1 } } as unknown as RunOutput;
 

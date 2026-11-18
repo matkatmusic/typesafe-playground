@@ -5,7 +5,7 @@ import { HARD_CODED_QUESTIONS, HARD_CODED_STATE } from './typeSafeQuery';
 const realFetch = globalThis.fetch;
 const SUBQ_BODY = { model: 'subq-snap-1.2', answers: { requestsAction: { type: 'noul', noul: 0.9 } }, usage: { input_tokens: 7, output_tokens: 0 } };
 
-type FetchCall = { url: string; init: RequestInit };
+interface FetchCall { url: string; init: RequestInit }
 
 function stubFetch(calls: FetchCall[], status: number, body: unknown) {
   async function stubbedFetch(url: string | URL | Request, init?: RequestInit) {

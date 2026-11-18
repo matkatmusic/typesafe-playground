@@ -46,8 +46,6 @@ function parseEditorStates(states: EditorState[]): ParsedEditorValues | null {
 }
 
 function findNameReferenceError(stateValue: unknown, batchItems: unknown[] | null, question: unknown, keyName: string): string | null {
-  // // const isDefined = isNameDefined(states, keyName);
-  //   continue;
   if (batchItems !== null)
     return findBatchReferenceError(batchItems, question, keyName);
   return findReferenceError(stateValue, question, keyName);

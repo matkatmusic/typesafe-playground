@@ -1,6 +1,6 @@
 import type { HtmlChild, SafeHtml } from './renderHtml';
 
-type HtmlAttributes = {
+interface HtmlAttributes {
   id?: string;
   class?: string;
   type?: string;
@@ -28,7 +28,7 @@ type HtmlAttributes = {
   children?: HtmlChild;
   [attribute: `aria-${string}`]: string;
   [attribute: `data-${string}`]: string;
-};
+}
 
 declare global {
   namespace JSX {

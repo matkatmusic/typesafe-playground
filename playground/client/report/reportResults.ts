@@ -4,7 +4,7 @@ import { computeSummary, formatValueText, listAnswers, listValues, NOUL_KEY, rea
 import type { WinnerGroup } from '../runs/winners';
 import { formatWinnerLine, listWinnerGroups } from '../runs/winners';
 
-type Winner = { key: string; average: number };
+interface Winner { key: string; average: number }
 
 export function isNotePresent(note: string | undefined): note is string {
   return note !== undefined && note !== '';

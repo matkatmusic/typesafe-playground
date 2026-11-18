@@ -1,6 +1,6 @@
 import { dirname } from 'node:path';
 
-export type Draft = { state: string; questions: string; isBatch: boolean };
+export interface Draft { state: string; questions: string; isBatch: boolean }
 
 const SESSION_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 

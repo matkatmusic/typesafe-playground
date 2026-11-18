@@ -7,7 +7,7 @@ export const BATCH_NOT_ARRAY_ERROR = 'state must be an array of objects while ba
 export const BATCH_EMPTY_ERROR = 'the state array is empty: add at least one object';
 export const SINGLE_ARRAY_ERROR = 'state must be one JSON object: turn on batch to submit an array';
 
-export type BatchVersions = { versions: Version[]; itemIndexes: number[] };
+export interface BatchVersions { versions: Version[]; itemIndexes: number[] }
 
 export function computeBatchStateError(value: unknown): string | null {
   const isArray = Array.isArray(value);

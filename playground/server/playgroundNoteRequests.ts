@@ -1,7 +1,7 @@
 import { findVersionByIndex, loadHistory, writeHistory, type Version } from '../history/playgroundHistory';
 import { isPlainObject } from './playgroundVersionRequests';
 
-type NoteBody = { index?: unknown; note?: unknown; stateNote?: unknown; questionsNote?: unknown; resultNotes?: unknown };
+interface NoteBody { index?: unknown; note?: unknown; stateNote?: unknown; questionsNote?: unknown; resultNotes?: unknown }
 
 const STRING_NOTE_FIELDS = ['note', 'stateNote', 'questionsNote'] as const;
 
