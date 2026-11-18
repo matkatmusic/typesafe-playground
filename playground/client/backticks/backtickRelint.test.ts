@@ -18,7 +18,7 @@ function buildSourceOverStates(states: EditorState[]) {
 
 function validateRenamedKeyGetsSquiggleInTheQuestionsEditor() {
     const questionsText = '{"instructions": "Does `message.text` ask the reader to do something?"}';
-    const questionsState = createJsonState(questionsText);
+    const questionsState = EditorState.create({ doc: questionsText, extensions: [json(), getQuestionsEditorFacet().of(true)] });
     const view = { state: questionsState } as unknown as EditorView;
     const renamedState = createJsonState('{"userMessage": {"text": "Please send me the report by Friday."}}');
     const originalState = createJsonState('{"message": {"text": "Please send me the report by Friday."}}');

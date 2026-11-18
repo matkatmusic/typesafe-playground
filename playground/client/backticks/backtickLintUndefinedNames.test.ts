@@ -40,7 +40,7 @@ function validateBatchItemWithoutTheNameGetsAnError() {
     ]);
 }
 
-function validateStateEditorNamesResolveFromTheStateOnly() {
+function validateStateEditorGetsNoDiagnosticsForNameOnlyAQuestionDeclares() {
     // Step: the state uses secretWord, which only a question declares.
     const stateText = '{"fruit": "apple", "note": "`secretWord`"}';
     const stateState = createJsonState(stateText);
@@ -49,14 +49,24 @@ function validateStateEditorNamesResolveFromTheStateOnly() {
     }
     const source = buildUndefinedNameSource(getEditorStates);
     const diagnostics = source({ state: stateState } as unknown as EditorView);
-    // Step: the state editor does not read questions, so secretWord is wrong.
-    const nameFrom = stateText.indexOf('secretWord');
-    expect(diagnostics).toEqual([
-        { from: nameFrom, to: nameFrom + 'secretWord'.length, severity: 'error', message: '`secretWord` is not in state or in this question' },
-    ]);
+    // Step: the state editor is not linted, so secretWord gets no error.
+    expect(diagnostics).toEqual([]);
 }
 
+function validateStateEditorGetsNoDiagnosticsForBacktickedStateValue() {
+    // Step: the state holds an earlier assistant message with `sms.xml` in backticks.
+    const stateText = '{"earlierAssistantMessage": "| file |\\n| `sms.xml` |"}';
+    const stateState = createJsonState(stateText);
+    function getEditorStates() {
+        return [stateState, createQuestionsState('{"q":{"type":"noul","instructions":"is `earlierAssistantMessage` polite?"}}')];
+    }
+    const source = buildUndefinedNameSource(getEditorStates);
+    // Step: the state editor is not the Questions editor, so it gets no diagnostics.
+    expect(source({ state: stateState } as unknown as EditorView)).toEqual([]);
+}
+
+test('test_state_editor_gets_no_diagnostics_for_backticked_state_value', validateStateEditorGetsNoDiagnosticsForBacktickedStateValue);
 test('test_name_from_another_question_gets_an_error', validateNameFromAnotherQuestionGetsAnError);
 test('test_batch_item_without_the_name_gets_an_error', validateBatchItemWithoutTheNameGetsAnError);
-test('test_state_editor_names_resolve_from_the_state_only', validateStateEditorNamesResolveFromTheStateOnly);
+test('test_state_editor_gets_no_diagnostics_for_name_only_a_question_declares', validateStateEditorGetsNoDiagnosticsForNameOnlyAQuestionDeclares);
 test('test_undefined_backticked_names_get_error_diagnostics', validateUndefinedBacktickedNamesGetErrorDiagnostics);

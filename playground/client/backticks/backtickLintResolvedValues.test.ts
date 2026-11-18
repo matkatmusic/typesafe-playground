@@ -1,15 +1,12 @@
 import { test, expect } from 'bun:test';
 import { collectQuestionsEditorDiagnostics, getFruitState } from './backtickLintSupport';
 
-function validateNamePointingToBacktickedTextGetsAnError() {
-    // Step: banana is declared in the question, but its text holds another backticked name.
+function validateNamePointingToBacktickedTextGetsNoError() {
+    // Step: banana is declared in the question, and its text holds another backticked name.
     const questionsText = '{"scopeDeclarationInInstructions":{"type":"choice","instructions":{"question":"is `fruit` the same word as `banana`?","banana":"`fruit`"},"criteria":{"Yes":"yes they are the same word","no":"no they are different words","something else":"cannot determine"}}}';
     const diagnostics = collectQuestionsEditorDiagnostics(getFruitState(), questionsText);
-    // Step: only `banana` in the question text is wrong, because TypeSafe resolves one level.
-    const nameFrom = questionsText.indexOf('`banana`') + 1;
-    expect(diagnostics).toEqual([
-        { from: nameFrom, to: nameFrom + 'banana'.length, severity: 'error', message: '`banana` points to text with backticks; TypeSafe resolves only one level' },
-    ]);
+    // Step: no name is wrong, because backticks inside values are not checked.
+    expect(diagnostics).toEqual([]);
 }
 
 function validateBacktickedValuesInChoiceCriteriaGetNoNameError() {
@@ -37,7 +34,7 @@ function validateBacktickedNameInAKeyGetsNoNameError() {
     expect(collectQuestionsEditorDiagnostics(getFruitState(), '{"q": {"`nope`": "x"}}')).toEqual([]);
 }
 
-test('test_name_pointing_to_backticked_text_gets_an_error', validateNamePointingToBacktickedTextGetsAnError);
+test('test_name_pointing_to_backticked_text_gets_no_error', validateNamePointingToBacktickedTextGetsNoError);
 test('test_backticked_values_in_choice_criteria_get_no_name_error', validateBacktickedValuesInChoiceCriteriaGetNoNameError);
 test('test_names_pointing_to_objects_get_errors', validateNamesPointingToObjectsGetErrors);
 test('test_backticked_name_in_a_key_gets_no_name_error', validateBacktickedNameInAKeyGetsNoNameError);

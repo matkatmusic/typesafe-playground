@@ -75,6 +75,9 @@ function listMatchDiagnostics(view: EditorView, parsed: ParsedEditorValues, batc
 
 export function buildUndefinedNameSource(listStates: () => EditorState[]): LintSource {
     function findUndefinedNames(view: EditorView): Diagnostic[] {
+        const isQuestionsEditor = view.state.facet(getQuestionsEditorFacet());
+        if (!isQuestionsEditor)
+            return [];
         const states = listStates();
         const parsed = parseEditorStates(states);
         if (parsed === null)
