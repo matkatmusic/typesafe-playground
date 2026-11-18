@@ -6,6 +6,7 @@ import { parsePortArgument } from '../startup/parsePortArgument';
 import { HISTORY_PATH, initHistory, loadHistory } from '../history/playgroundHistory';
 import { executeDraftGetRequest, executeDraftRequest } from './playgroundDraftRequests';
 // import { executeDraftRequest, readDraft } from './playgroundDraftRequests';
+import { renderPage } from '../page/renderPage';
 import { executeNoteRequest } from './playgroundNoteRequests';
 import { createClientForProvider, executeRunRequest, type CreateRunClient } from './playgroundRequests';
 import { executeNewRequest, executeOpenRequest, executeResetRunsRequest, executeSaveRequest } from './playgroundVersionRequests';
@@ -37,17 +38,17 @@ async function readPageCss(): Promise<string> {
   return css;
 }
 
-function replacePlaceholderWithText(html: string, placeholder: string, text: string): string {
-  function getText() {
-    return text;
-  }
-  return html.replace(placeholder, getText);
-}
+// function replacePlaceholderWithText(html: string, placeholder: string, text: string): string {
+//   function getText() {
+//     return text;
+//   }
+//   return html.replace(placeholder, getText);
+// }
 
 export async function buildPage(historyPath: string): Promise<string> {
   const versions = await loadHistory(historyPath);
-  const htmlFile = Bun.file(`${import.meta.dir}/../page/playground.html`);
-  const html = await htmlFile.text();
+  // const htmlFile = Bun.file(`${import.meta.dir}/../page/playground.html`);
+  // const html = await htmlFile.text();
   const css = await readPageCss();
   const script = await buildClientScript();
   const hasEnvKey = (Bun.env.TYPESAFE_API_KEY ?? '').trim() !== '';
@@ -57,9 +58,10 @@ export async function buildPage(historyPath: string): Promise<string> {
   const hasSubqEnvKey = (Bun.env.SUBQ_AI_API_KEY ?? '').trim() !== '';
   // const safeJson = JSON.stringify({ versions, historyPath, hasEnvKey }).replaceAll('<', '\\u003c');
   const safeJson = JSON.stringify({ versions, historyPath, hasSubqEnvKey, hasEnvKey }).replaceAll('<', '\\u003c');
-  const withCss = replacePlaceholderWithText(html, '/*__PAGE_CSS__*/', css);
-  const withScript = replacePlaceholderWithText(withCss, '__PAGE_SCRIPT__', script);
-  return replacePlaceholderWithText(withScript, '__DATA_JSON__', safeJson);
+  // const withCss = replacePlaceholderWithText(html, '/*__PAGE_CSS__*/', css);
+  // const withScript = replacePlaceholderWithText(withCss, '__PAGE_SCRIPT__', script);
+  // return replacePlaceholderWithText(withScript, '__DATA_JSON__', safeJson);
+  return '<!doctype html>' + renderPage({ css: css, script: script, dataJson: safeJson }).toString();
 }
 
 function dispatchVersionPostRequest(request: Request, pathname: string, historyPath: string): Promise<Response> | Response {

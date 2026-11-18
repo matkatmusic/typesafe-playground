@@ -155,7 +155,7 @@ All code is in the `playground` folder.
 - `history/`: the history file, the version step rules, and the "not run" time.
 - `startup/`: the `--port` and `--lan` options and the network addresses.
 - `shared/`: small helpers that other folders use.
-- `page/`: `playground.html` and the CSS files.
+- `page/`: the page as `.tsx` components (`renderPage.tsx` and its `renderXxx.tsx` parts), `renderHtml.ts` (turns the `.tsx` markup into HTML text), and the CSS files.
 - `client/`: the code that runs in the browser, in these folders:
   - `keys/`: the API key box and the provider switch.
   - `questions/`: the Add Question menu, question names, and the key and value lists.
