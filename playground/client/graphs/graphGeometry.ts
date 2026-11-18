@@ -1,13 +1,11 @@
 import type { Question } from '@typesafe-ai/sdk';
 import type { BarGeometry, BarSpan, RangeLineGeometry, Summary } from './graphTypes';
 
-// export const BAR_W = 8;
 export const BAR_W = 10;
 export const OPTION_GAP = 14;
 export const LEFT = 44;
 export const TOP = 30;
 export const BOTTOM = 14;
-// export const BOTTOM = 25;
 export const MIN_PLOT_H = 40;
 export const TICK_COUNT = 5;
 export const NOUL_BASELINE = 0.5;

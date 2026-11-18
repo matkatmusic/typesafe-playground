@@ -1,13 +1,9 @@
 import { dirname } from 'node:path';
 
-// export type Draft = { state: string; questions: string };
 export type Draft = { state: string; questions: string; isBatch: boolean };
 
 const SESSION_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-// export function computeDraftPath(historyPath: string): string {
-//   return `${dirname(historyPath)}/playground-draft.json`;
-// }
 export function computeDraftPath(historyPath: string, id: string): string {
   return `${dirname(historyPath)}/.currentSession-${id}.json`;
 }
@@ -19,14 +15,6 @@ export function isSessionId(id: unknown): id is string {
   return isUuid;
 }
 
-// export async function readDraft(historyPath: string): Promise<Draft | null> {
-//   const draftFile = Bun.file(computeDraftPath(historyPath));
-//   const isDraftPresent = await draftFile.exists();
-//   if (!isDraftPresent)
-//     return null;
-//   const draft: Draft = await draftFile.json();
-//   return draft;
-// }
 export async function readDraft(historyPath: string, id: string): Promise<Draft | null> {
   const draftFile = Bun.file(computeDraftPath(historyPath, id));
   const isDraftPresent = await draftFile.exists();
@@ -46,7 +34,6 @@ function parseDraftFields(state: unknown, questions: unknown, isBatch: unknown):
   const isBatchBoolean = typeof isBatch === 'boolean';
   if (!isBatchBoolean)
     return new Response('isBatch must be a boolean', { status: 400 });
-  // const draft: Draft = { state, questions };
   const draft: Draft = { state, questions, isBatch };
   return draft;
 }

@@ -120,12 +120,6 @@ async function validatePageHoldsRulesFromEveryCssFile() {
   expect(page).toContain('.cm-tooltip .backtick-tooltip {');
 }
 
-// async function validatePageTemplateStylePlaceholderIsCssComment() {
-//     // read the raw page template file
-//     const template = await Bun.file(`${import.meta.dir}/../page/playground.html`).text()
-//     // the style placeholder is a CSS comment, so the code editor does not parse it as a selector
-//     expect(template).toContain('<style>/*__PAGE_CSS__*/</style>')
-// }
 
 async function validatePageIsRenderedFromComponentsAndStartsWithTheDoctype() {
   // Step: build the page.
@@ -136,7 +130,6 @@ async function validatePageIsRenderedFromComponentsAndStartsWithTheDoctype() {
   expect(page.endsWith('</script></body></html>')).toBe(true);
 }
 
-// test('test_page_template_style_placeholder_is_css_comment', validatePageTemplateStylePlaceholderIsCssComment)
 test('test_page_is_rendered_from_components_and_starts_with_the_doctype', validatePageIsRenderedFromComponentsAndStartsWithTheDoctype);
 test('test_page_holds_rules_from_every_css_file', validatePageHoldsRulesFromEveryCssFile);
 test('test_page_get_returns_200_html_with_css_filled_in', validatePageGetReturns200WithHtmlAndNoMarkersLeft);

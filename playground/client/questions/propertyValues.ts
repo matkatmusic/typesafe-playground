@@ -4,12 +4,7 @@ import type { SyntaxNode, Tree } from '@lezer/common';
 import { listTopLevelProperties, readPropertyName } from './questionNames';
 import { collectAllObjects } from './propertyNames';
 
-// const KEY_PATH_STEP = /\[\d+\]|[^.[\]]+/g;
 const INDEX_STEP = /^\[(\d+)\]$/;
-// export function splitKeyPath(keyName: string): string[] {
-//   const steps = keyName.match(KEY_PATH_STEP);
-//   return steps === null ? [] : steps;
-// }
 
 function collectArrayElementAtIndex(scope: SyntaxNode, index: number): SyntaxNode[] {
   const elements: SyntaxNode[] = [];
@@ -45,21 +40,6 @@ export function collectStepValues(scopes: SyntaxNode[], text: string, step: stri
   return values;
 }
 
-// export function findValueText(tree: Tree, text: string, path: string[]): string | null {
-//   let scopes = collectAllObjects(tree);
-//   for (let i = 0; i < path.length - 1; i++)
-//     scopes = collectNamedObjectValues(scopes, text, path[i]);
-//   for (const scope of scopes) {
-//     for (const property of listTopLevelProperties(scope)) {
-//       const nameNode = property.getChild('PropertyName');
-//       const value = property.lastChild;
-//       const isMatch = nameNode !== null && value !== null && readPropertyName(text, nameNode) === path[path.length - 1];
-//       if (isMatch)
-//         return text.slice(value.from, value.to);
-//     }
-//   }
-//   return null;
-// }
 export function findValueText(tree: Tree, text: string, path: string[]): string | null {
   if (path.length === 0)
     return null;

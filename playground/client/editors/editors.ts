@@ -77,7 +77,6 @@ function buildInputEditor(parentId: string, clearError: (update: ViewUpdate) => 
 }
 
 export function createStateEditor(onEditorChange: (update: ViewUpdate) => void): EditorView {
-  // stateEditor = buildInputEditor('stateJsonEditor', clearStateJsonError, onEditorChange, []);
   stateEditor = buildInputEditor('stateJsonEditor', clearStateJsonError, onEditorChange, [linter(findStateShapeErrors)]);
   return stateEditor;
 }
@@ -89,7 +88,6 @@ export function getStateEditor(): EditorView {
 }
 
 export function createQuestionsEditor(onEditorChange: (update: ViewUpdate) => void): EditorView {
-  // questionsEditor = buildInputEditor('questionsJsonEditor', clearQuestionsJsonError, onEditorChange, [createAddQuestion(), createPlaceholders(), createPlaceholderTab()]);
   questionsEditor = buildInputEditor('questionsJsonEditor', clearQuestionsJsonError, onEditorChange, [createAddQuestion(), createPlaceholders(), createPlaceholderTab(), IS_QUESTIONS_EDITOR.of(true), linter(findQuestionsShapeErrors)]);
   return questionsEditor;
 }
@@ -117,11 +115,9 @@ export function renderResultJson(value: unknown): void {
 }
 
 export function renderStateJson(value: unknown): void {
-  // replaceEditorText(getStateEditor(), formatResultJson(value));
   fillEditorText(getStateEditor(), formatResultJson(value));
 }
 
 export function renderQuestionsJson(value: unknown): void {
-  // replaceEditorText(getQuestionsEditor(), formatResultJson(value));
   fillEditorText(getQuestionsEditor(), formatResultJson(value));
 }

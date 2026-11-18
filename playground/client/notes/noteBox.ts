@@ -21,7 +21,6 @@ export function applyNoteBox(version: Version): void {
   const isRunCompleted = version.outputs.length > 0;
   const noteText = getNoteText();
   noteText.value = computeNoteValue(isRunCompleted, version.note);
-  // noteText.disabled = !isRunCompleted;
   noteText.disabled = !isRunCompleted || isBatchLocked();
   noteText.placeholder = computeNotePlaceholder(isRunCompleted);
 }

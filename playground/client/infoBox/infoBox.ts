@@ -39,8 +39,6 @@ export function attachColumnHits(chart: ChartLayout, tracker: HoverTracker, colu
 export function attachChartInfoBox(chart: ChartLayout): void {
   const tracker: HoverTracker = { block: chart.block, shownHit: null };
   const { answers, keys } = chart;
-  // const blankRows = buildBarInfoRows({ question, answers, key: '', keys, callIndex: null });
-  // updateShownInfo(tracker, createBarInfoBox(blankRows), null);
   const winningKey = readWinningKey(answers, keys);
   let winningHit: ColumnHit | null = null;
   for (let columnIndex = 0; columnIndex < keys.length; columnIndex++) {
@@ -51,7 +49,6 @@ export function attachChartInfoBox(chart: ChartLayout): void {
   }
   if (winningHit === null)
     throw new Error('the winning key has no column');
-  // updateShownInfo(tracker, createBarInfoBox(buildBarInfoRows(winningHit.request)), winningHit.hit);
   updateShownInfo(tracker, createBarInfoBox(buildBarInfoRows(winningHit.request), winningHit.request.question), winningHit.hit);
 }
 

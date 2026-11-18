@@ -71,13 +71,9 @@ function buildShownBarTexts(request: BarInfoRequest, callIndex: number): BarText
   const stat = computeSummary(values);
   const scoreValue = callIndex === -1 ? stat.average : values[callIndex];
   const shownKey = answers[0].type === 'noul' ? readTopKey({ type: 'noul', noul: scoreValue }, keys) : key;
-  // messageText = buildTextFormatter(getShownVersion())(readDescription(question, key));
-  // messageText = buildTextFormatter(getShownVersion())(readDescription(question, shownKey));
   const messageText = buildTextFormatter(getShownVersion(), question)(readDescription(question, shownKey));
-  // scoreText = formatThreeDecimals(callIndex === -1 ? stat.average : values[callIndex]);
   const scoreText = formatThreeDecimals(scoreValue);
   const confidenceText = formatConfidenceText(answers, callIndex);
-  // topCountText = String(countTopRuns(answers, keys, key));
   const topCountText = String(countTopRuns(answers, keys, shownKey));
   const lowText = formatThreeDecimals(stat.low);
   const highText = formatThreeDecimals(stat.high);
@@ -90,7 +86,6 @@ function buildPinnedRow(pinned: NonNullable<BarInfoRequest['pinned']>): InfoRow 
   const pinnedParts = listRangeParts(formatThreeDecimals(pinnedStat.low), formatThreeDecimals(pinnedStat.high), formatThreeDecimals(pinnedStat.average));
   if (pageState.pinnedIndex === null)
     throw new Error('a pinned row needs a pinned version');
-  // rows.push({ label: `Pinned v${pinned.id}:`, parts: pinnedParts });
   return { label: `Pinned v${pageState.pinnedIndex + 1}:`, parts: pinnedParts };
 }
 
@@ -108,7 +103,6 @@ export function buildBarInfoRows(request: BarInfoRequest): InfoRow[] {
   const isBarShown = callIndex !== null;
   const texts = isBarShown ? buildShownBarTexts(request, callIndex) : buildHiddenBarTexts(answers);
   const rows: InfoRow[] = [];
-  // rows.push({ label: 'Choice:', parts: [[isBarShown ? key : '', VALUE]] });
   rows.push({ label: 'Choice:', parts: [[texts.shownKey, VALUE]] });
   rows.push({ label: 'Score:', parts: listScoreParts(texts.scoreText, texts.confidenceText) });
   rows.push({ label: 'Range:', parts: listRangeParts(texts.lowText, texts.highText, texts.averageText) });

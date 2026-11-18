@@ -9,7 +9,6 @@ const scoreAnswer: Answer = { type: 'score', score: 1.4, confidence: 0.5, legend
 const usage = { input_tokens: 1, output_tokens: 1 };
 
 function buildVersion(questions: unknown): Version {
-  // return { id: 1, time: 'now', state: null, questions, calls: 1, outputs: [{ model: 'm', answers: { q: noulAnswer }, usage }] };
   return { time: 'now', state: {}, questions: questions as never, calls: 1, outputs: [{ model: 'm', answers: { q: noulAnswer }, usage }] };
 }
 

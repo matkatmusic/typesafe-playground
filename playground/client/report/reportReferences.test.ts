@@ -15,9 +15,6 @@ function validateShortValueIsReplaced() {
 }
 
 function validateQuestionsAreUsedAfterState() {
-  // const version = buildVersion(1, { state: { a: 'S' }, questions: { a: 'Q', b: ['x', 'y'] } });
-  // const version = buildVersion(1, { state: { a: 'S' }, questions: { a: 'Q', b: ['x', 'y'] } } as never);
-  // expect(replaceVersionReferences(['`a` `b[1]`'], version)).toEqual(["'S' 'y'"]);
   const version = buildVersion(1, { state: { a: 'S' }, questions: { q: { type: 'noul', a: 'Q', b: ['x', 'y'] } } } as never);
   expect(replaceVersionReferences(['#### q', '`a` `b[1]`'], version)).toEqual(['#### q', "'S' 'y'"]);
 }

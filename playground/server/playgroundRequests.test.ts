@@ -4,7 +4,6 @@ import { tmpdir } from 'node:os';
 import { NOT_RUN_TIME } from '../history/notRunTime';
 import { addRunToHistory, executeRunRequest, isCallsInRange, MISSING_KEY_MESSAGE, selectApiKey, type CreateRunClient } from './playgroundRequests';
 import { initHistory, loadHistory, type RunOutput } from '../history/playgroundHistory';
-// import type { RunResult } from '../client/types'
 import type { RunResult } from '../client/page/types';
 import { hideKeysInMessage } from './serverErrors';
 import { HARD_CODED_QUESTIONS, HARD_CODED_STATE } from '../providers/typeSafeQuery';
@@ -116,7 +115,6 @@ async function validateRunAppendsToTheLastVersionAndRespondsWithOutputsAndVersio
   const historyPath = await buildTempHistoryPath();
   const factory = makeStubFactory([]);
   const first = (await (await executeRunRequest(makeRunRequest({ calls: 2, state: HARD_CODED_STATE }), factory, historyPath)).json()) as RunResult;
-  // expect(first.outputs).toEqual([OUTPUT, OUTPUT])
   expect(first.outputs).toEqual([{ ...OUTPUT, provider: 'TypeSafe' }, { ...OUTPUT, provider: 'TypeSafe' }]);
   expect(first.index).toBe(0);
   expect(first.version.calls).toBe(2);

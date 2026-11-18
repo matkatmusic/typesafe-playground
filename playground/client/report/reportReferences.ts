@@ -1,20 +1,10 @@
 import type { Version } from '../../history/playgroundHistory';
-// import { findPathValue, formatReferenceValue, REFERENCE_PATTERN } from '../backticks/references';
 import { findReferenceValue } from '../../typesafe-checks/typesafeChecks';
 import { formatReferenceValue, REFERENCE_PATTERN } from '../backticks/references';
 import { readQuestions } from '../graphs/graphValues';
 
 const SHORT_REFERENCE_LIMIT = 40;
 
-// function findReferenceText(path: string, version: Version): string | undefined {
-//   const stateLookup = findPathValue(version.state, path);
-//   if (stateLookup.isFound)
-//     return formatReferenceValue(stateLookup.value);
-//   const questionsLookup = findPathValue(version.questions, path);
-//   if (questionsLookup.isFound)
-//     return formatReferenceValue(questionsLookup.value);
-//   return undefined;
-// }
 function findReferenceText(path: string, version: Version, question: unknown): string | undefined {
   const lookup = findReferenceValue(version.state, question, path);
   if (lookup.isFound)
@@ -22,10 +12,8 @@ function findReferenceText(path: string, version: Version, question: unknown): s
   return undefined;
 }
 
-// function replaceBlockReferences(block: string, version: Version, longValues: Map<string, string>): string {
 function replaceBlockReferences(block: string, version: Version, question: unknown, longValues: Map<string, string>): string {
   function replaceReference(reference: string, path: string): string {
-    // const text = findReferenceText(path, version);
     const text = findReferenceText(path, version, question);
     const isMissing = text === undefined;
     if (isMissing)
@@ -65,8 +53,6 @@ function findBlockQuestion(block: string, version: Version, previousQuestion: un
 export function replaceVersionReferences(blocks: string[], version: Version): string[] {
   const longValues = new Map<string, string>();
   const replacedBlocks: string[] = [];
-  // for (const block of blocks)
-  //   replacedBlocks.push(replaceBlockReferences(block, version, longValues));
   let question: unknown = undefined;
   for (const block of blocks) {
     question = findBlockQuestion(block, version, question);

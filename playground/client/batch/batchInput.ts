@@ -32,11 +32,6 @@ function listItemReferenceErrors(itemNumber: number, state: Record<string, JsonV
 }
 
 function listItemErrors(states: Record<string, JsonValue>[], questions: Questions): string[] {
-  // const itemErrors: string[] = [];
-  // for (let i = 0; i < states.length; i++) {
-  //   for (const error of listSubmitErrors(states[i], questions))
-  //     itemErrors.push(`item ${i + 1}: ${error}`);
-  // }
   const questionsErrors = listQuestionsErrors(questions);
   const itemErrors: string[] = [...questionsErrors];
   for (let i = 0; i < states.length; i++) {
@@ -70,7 +65,6 @@ export function parseBatchInput(): BatchInputResult {
   const questionsResult = parseBatchQuestions();
   if (!questionsResult.isValid)
     return { isValid: false, errorMessage: questionsResult.errorMessage };
-  // const states = stateResult.value as unknown[];
   const states = stateResult.value as Record<string, JsonValue>[];
   return buildBatchInputResult(states, questionsResult.questions);
 }

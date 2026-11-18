@@ -58,7 +58,6 @@ function removeFakeDocument() {
 }
 
 const usage = { input_tokens: 1, output_tokens: 1 };
-// const empty: Version = { id: 1, time: 'now', state: null, questions: {}, calls: 0, outputs: [] };
 const empty: Version = { time: 'now', state: {}, questions: {}, calls: 0, outputs: [] };
 const filled: Version = { ...empty, calls: 1, outputs: [{ model: 'm', answers: { q: { type: 'noul', noul: 0.5 } }, usage }] };
 const twoQuestions: Version = { ...filled, questions: { q: { type: 'noul', instructions: 'Is it?' }, other: { type: 'noul' } } };
@@ -130,10 +129,6 @@ function validateChartsTallerBlocksAreDrawnAgainAfterTheInfoBox() {
   }
   renderGraphs(twoQuestions, container as unknown as HTMLElement, growBoxOnFirstDraw);
   expect(drawn.length).toBe(2);
-  // expect(drawn[0][0].plotH).toBe(156);
-  // expect(drawn[1][0].plotH).toBe(356);
-  // expect(drawn[0][0].plotH).toBe(145);
-  // expect(drawn[1][0].plotH).toBe(345);
   expect(drawn[0][0].plotH).toBe(156);
   expect(drawn[1][0].plotH).toBe(356);
   renderStaleCharts(drawn[1], growBoxOnFirstDraw);

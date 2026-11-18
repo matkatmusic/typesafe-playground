@@ -20,7 +20,6 @@ class FakeBox {
 const realFetch = globalThis.fetch;
 
 function buildVersion(stateNote: string | undefined): Version {
-  // return { time: 't', state: { a: 1 }, questions: {}, calls: 1, outputs: [], stateNote: stateNote, questionsNote: stateNote && 'questions of ' + stateNote }
   return { time: 't', state: { a: 1 }, questions: { q: { type: 'noul' } }, calls: 1, outputs: [], stateNote: stateNote, questionsNote: stateNote && 'questions of ' + stateNote };
 }
 
@@ -63,7 +62,6 @@ function removeFakeState() {
 
 async function validateAChangedQuestionsTextIsReportedAsChanged() {
   const created = buildVersion(undefined);
-  // const saveSpy = installSubmit('{"a":1}', '{"q":2}', created, 1)
   const saveSpy = installSubmit('{"a":1}', '{"r":{"type":"noul"}}', created, 1);
   pageState.versions = [buildVersion('base note')];
   await executeSubmit();
@@ -73,7 +71,6 @@ async function validateAChangedQuestionsTextIsReportedAsChanged() {
 
 async function validateAChangedStateIsReportedAsChanged() {
   const created = buildVersion(undefined);
-  // const saveSpy = installSubmit('{"a":2}', '{}', created, 1)
   const saveSpy = installSubmit('{"a":2}', '{"q":{"type":"noul"}}', created, 1);
   pageState.versions = [buildVersion('base note')];
   await executeSubmit();
@@ -83,7 +80,6 @@ async function validateAChangedStateIsReportedAsChanged() {
 
 async function validateARunOnTheSameVersionLeavesTheNotesAlone() {
   const base = buildVersion('base note');
-  // const saveSpy = installSubmit('{"a":1}', '{}', base, 0)
   const saveSpy = installSubmit('{"a":1}', '{"q":{"type":"noul"}}', base, 0);
   pageState.versions = [base];
   await executeSubmit();

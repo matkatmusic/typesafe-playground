@@ -3,14 +3,10 @@ import { jsonLanguage } from '@codemirror/lang-json';
 import { syntaxTree } from '@codemirror/language';
 import type { EditorState } from '@codemirror/state';
 import { listBatchItems } from './backtickBatchItems';
-// import { findEditorValueText, listEditorChildNames, listEditorNames, mergeNames, splitKeyPath } from '../questions/propertyNames';
-// import { findPathValue } from './references';
-// import { collectPropertyNames, listChildNames, listEditorChildNames, listEditorNames, mergeNames } from '../questions/propertyNames';
 import { collectPropertyNames, listChildNames, listEditorChildNames, mergeNames } from '../questions/propertyNames';
 import { findEnclosingQuestionProperty, findTopLevelObject, IS_QUESTIONS_EDITOR, listTopLevelKeys } from '../questions/questionNames';
 
 const NAME_TYPING = /^[^`\s]*$/;
-// const KEY_PATH_TYPING = /`([^`\s.]+(?:\.[^`\s.]+)*)\.$/;
 const KEY_PATH_TYPING = /(?<!\\)`([^`\s.]+(?:\.[^`\s.]+)*)\.$/;
 
 export function buildNameOptions(names: string[]): Completion[] {
@@ -59,9 +55,6 @@ function listKeysInEveryBatchItem(batchItems: unknown[]): string[] {
 
 function listNamesAfterBacktick(states: EditorState[], questionText: string | null): string[] {
   let names: string[] = [];
-  // for (let i = 0; i < states.length; i++)
-  //   names = mergeNames(names, listEditorNames(states[i]));
-  // names = listEditorNames(states[0]);
   const stateRoot = findTopLevelObject(syntaxTree(states[0]));
   if (stateRoot !== null)
     names = listTopLevelKeys(stateRoot, states[0].doc.toString());
@@ -77,8 +70,6 @@ function findKeyPathResult(context: CompletionContext, states: EditorState[], qu
   const keyPath = readKeyPath(context);
   if (keyPath === null)
     return null;
-  // for (let i = 0; i < states.length; i++)
-  //   names = mergeNames(names, listEditorChildNames(states[i], keyPath));
   let names = listEditorChildNames(states[0], keyPath);
   if (questionText !== null)
     names = mergeNames(names, listChildNames(jsonLanguage.parser.parse(questionText), questionText, keyPath));

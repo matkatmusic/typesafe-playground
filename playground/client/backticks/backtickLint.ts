@@ -7,30 +7,9 @@ import { listBatchItems } from './backtickBatchItems';
 import { computeJsonParseResult } from '../editors/jsonParse';
 import { findEnclosingQuestionName, IS_QUESTIONS_EDITOR } from '../questions/questionNames';
 
-// const BACKTICKED_NAME = /`([^`\s]+)`/g;
 const BACKTICKED_NAME = /(?<!\\)`([^`\s]+)`/g;
 
-// export function isNameDefined(states: EditorState[], keyName: string): boolean {
-//   const path = keyName.split('.');
-//   const lastSegment = path[path.length - 1];
-//   for (let i = 0; i < states.length; i++) {
-//     const siblingNames = path.length === 1 ? listEditorNames(states[i]) : listEditorChildNames(states[i], path.slice(0, -1));
-//     const hasLastSegment = siblingNames.includes(lastSegment);
-//     if (hasLastSegment)
-//       return true;
-//   }
-//   return false;
-// }
 
-// export function isNameDefined(states: EditorState[], keyName: string): boolean {
-//   const path = splitKeyPath(keyName);
-//   for (let i = 0; i < states.length; i++) {
-//     const hasValue = findEditorValueText(states[i], path) !== null;
-//     if (hasValue)
-//       return true;
-//   }
-//   return false;
-// }
 
 export function findEnclosingQuestion(state: EditorState, parsedQuestions: unknown, offset: number): unknown {
   const isQuestionsEditor = state.facet(IS_QUESTIONS_EDITOR);
@@ -68,8 +47,6 @@ function parseEditorStates(states: EditorState[]): ParsedEditorValues | null {
 
 function findNameReferenceError(stateValue: unknown, batchItems: unknown[] | null, question: unknown, keyName: string): string | null {
   // // const isDefined = isNameDefined(states, keyName);
-  // const isDefined = batchItems === null ? isNameDefined(states, keyName) : isNameDefinedInBatch(states[1], batchItems, keyName);
-  // if (isDefined)
   //   continue;
   if (batchItems !== null)
     return findBatchReferenceError(batchItems, question, keyName);
@@ -88,7 +65,6 @@ function buildMatchDiagnostic(view: EditorView, parsed: ParsedEditorValues, batc
   const referenceError = findNameReferenceError(parsed.stateValue, batchItems, question, keyName);
   if (referenceError === null)
     return null;
-  // message: `${keyName} is not defined in either JSON editor`,
   return { from: nameFrom, to: nameFrom + keyName.length, severity: 'error', message: referenceError };
 }
 

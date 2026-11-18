@@ -38,7 +38,6 @@ function buildStubStateEditor(text: string) {
 }
 
 function makeVersion(id: number, state: unknown) {
-  // return { id: id, time: ISO_TIME, state: state, questions: {}, calls: id, outputs: [] }
   return { id: id, time: ISO_TIME, state: state as never, questions: {}, calls: id, outputs: [] };
 }
 

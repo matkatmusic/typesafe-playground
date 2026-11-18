@@ -21,7 +21,6 @@ class FakeBox {
 
 const realFetch = globalThis.fetch;
 const OUTPUT = { answers: {}, usage: { input_tokens: 1000000, output_tokens: 1 } };
-// const QUESTIONS = { q: { type: 'noul', instructions: 'x' } }
 export const QUESTIONS = { q: { type: 'noul', instructions: 'x' } } as unknown as Questions;
 
 type RunSnapshot = { index: number; calls: number; state: unknown; questions: unknown; buttonText: string; isButtonDisabled: boolean; isToggleDisabled: boolean; isNewDisabled: boolean; areEditorsLocked: boolean; shownIndex: number };

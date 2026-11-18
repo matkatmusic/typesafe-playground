@@ -32,7 +32,6 @@ function validateQuestionsTextIsComparedToTheQuestions() {
   installState('{ "a": 1 }');
   spyOn(editors, 'getQuestionsEditor').mockReturnValue({ state: { doc: { toString: () => '{ "q": 1 }' } } } as unknown as EditorView);
   expect(isKindTextEdited('questions')).toBe(true);
-  // pageState.versions[0].questions = { q: 1 }
   pageState.versions[0].questions = { q: 1 } as never;
   expect(isKindTextEdited('questions')).toBe(false);
 }

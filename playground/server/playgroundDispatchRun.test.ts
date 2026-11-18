@@ -3,7 +3,6 @@ import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dispatchRequest } from './playground';
 import { initHistory, loadHistory, type RunOutput } from '../history/playgroundHistory';
-// import type { RunResult } from '../client/types'
 import type { RunResult } from '../client/page/types';
 import { HARD_CODED_QUESTIONS, HARD_CODED_STATE } from '../providers/typeSafeQuery';
 
@@ -38,7 +37,6 @@ async function validateRunPostUsesTheStubClientAndWritesTheTempFile() {
   const keyResponse = await dispatchRequest(keyRequest, PORT, historyPath, createStubClient);
   expect(keyResponse.status).toBe(200);
   const result = (await keyResponse.json()) as RunResult;
-  // expect(result.outputs).toEqual([output, output])
   expect(result.outputs).toEqual([{ ...output, provider: 'TypeSafe' }, { ...output, provider: 'TypeSafe' }]);
   expect(result.version.calls).toBe(2);
   expect((await loadHistory(historyPath))[0].outputs.length).toBe(2);

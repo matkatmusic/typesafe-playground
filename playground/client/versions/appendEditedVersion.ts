@@ -52,7 +52,6 @@ function readEditedInputs(stateText: string, questionsText: string): EditedInput
 }
 
 function buildSentVersions(shownVersion: Version, inputs: EditedInputs, isOverwriting: boolean): Version[] {
-  // const newVersion: Version = { id: pageState.versions.length + 1, time: NOT_RUN_TIME, state: stateResult.value, questions: questionsResult.value, calls: 0, outputs: [] };
   const newVersion: Version = { time: NOT_RUN_TIME, state: inputs.state, questions: inputs.questions, calls: 0, outputs: [] };
   const overwrittenVersion: Version = { ...shownVersion, state: inputs.state, questions: inputs.questions };
   const sentVersions = [...pageState.versions];

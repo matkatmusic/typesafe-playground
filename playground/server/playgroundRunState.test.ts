@@ -139,7 +139,6 @@ async function validateOnlyVersionWithDefaultStateAndEditedQuestionsIsOverwritte
   expect(history.length).toBe(1);
   expect(history[0].state).toEqual({ typed: 'edited' });
   expect(history[0].questions).toEqual(editedQuestions);
-  // expect(history[0].outputs).toEqual([OUTPUT])
   expect(history[0].outputs).toEqual([{ ...OUTPUT, provider: 'TypeSafe' }]);
 }
 
@@ -153,7 +152,6 @@ async function validateVersionWithResultsAndChangedStateMakesASecondVersion() {
   expect(result.index).toBe(1);
   const history = await loadHistory(historyPath);
   expect(history.length).toBe(2);
-  // expect(history[0].outputs).toEqual([OUTPUT])
   expect(history[0].outputs).toEqual([{ ...OUTPUT, provider: 'TypeSafe' }]);
   expect(history[1].state).toEqual({ typed: 'changed' });
 }

@@ -2,23 +2,11 @@ import type { Version } from '../../history/playgroundHistory';
 import { listChangeBlocks } from './reportChanges';
 import { replaceVersionReferences } from './reportReferences';
 import { isNotePresent, listResultBlocks } from './reportResults';
-// import { formatValueText, listAnswers, readQuestions } from '../graphs/graphValues';
-// import { formatWinnerLine, listWinnerGroups } from '../runs/winners';
 
-// export const NO_NOTES_TEXT = 'No notes yet.';
 export const NO_NOTES_TEXT = 'No notes or runs yet.';
 export const PLACEHOLDER_NOTE_TEXT = 'Placeholders (`name`) are used. See the References table below for the actual values.';
 
-// function isNotePresent(note: string | undefined): note is string {
-//   return note !== undefined && note !== '';
-// }
 
-// function buildQuote(text: string): string {
-//   const quotedLines: string[] = [];
-//   for (const line of text.split('\n'))
-//     quotedLines.push('> ' + line);
-//   return quotedLines.join('\n');
-// }
 
 function listSectionBlocks(title: string, note: string | undefined): string[] {
   const isPresent = isNotePresent(note);
@@ -27,28 +15,7 @@ function listSectionBlocks(title: string, note: string | undefined): string[] {
   return [`### ${title}`, note];
 }
 
-// function listResultNoteBlocks(version: Version, name: string, note: string): string[] {
-//   const question = readQuestions(version)[name];
-//   const blocks = [`#### ${name}`, buildQuote(formatValueText(question.instructions))];
-//   for (const group of listWinnerGroups(listAnswers(version, name)))
-//     blocks.push(formatWinnerLine(question, group));
-//   blocks.push(note);
-//   return blocks;
-// }
 
-// function listResultSectionBlocks(version: Version): string[] {
-//   const notes = version.resultNotes ?? {};
-//   const questionBlocks: string[] = [];
-//   for (const name of Object.keys(notes)) {
-//     const isPresent = isNotePresent(notes[name]);
-//     if (isPresent)
-//       questionBlocks.push(...listResultNoteBlocks(version, name, notes[name]));
-//   }
-//   const hasQuestionBlocks = questionBlocks.length > 0;
-//   if (!hasQuestionBlocks)
-//     return [];
-//   return ['### Result notes', ...questionBlocks];
-// }
 
 function listVersionNoteBlocks(version: Version, previous: Version | undefined): string[] {
   const isStateNoteNew = version.stateNote !== previous?.stateNote;
@@ -68,19 +35,15 @@ function listVersionBlocks(versions: Version[], index: number): string[] {
   const hasContent = noteBlocks.length > 0 || resultBlocks.length > 0;
   if (!hasContent)
     return [];
-  // return [`## Version ${version.id} (${version.time})`, ...listChangeBlocks(version, previous), ...noteBlocks, ...resultBlocks];
   const textBlocks = replaceVersionReferences([...noteBlocks, ...resultBlocks], version);
   const hasReferences = textBlocks.includes('### References');
   const placeholderBlocks = hasReferences ? [PLACEHOLDER_NOTE_TEXT] : [];
-  // return [`## Version ${version.id} (${version.time})`, ...listChangeBlocks(version, previous), ...textBlocks];
-  // return [`## Version ${version.id} (${version.time})`, ...placeholderBlocks, ...listChangeBlocks(version, previous), ...textBlocks];
   return [`## Version ${index + 1} (${version.time})`, ...placeholderBlocks, ...listChangeBlocks(version, previous), ...textBlocks];
 }
 
 export function buildReportMarkdown(versions: Version[]): string {
   const blocks = ['# Notes report'];
   const versionBlocks: string[] = [];
-  // for (let i = 0; i < versions.length; i++)
   for (let i = versions.length - 1; i >= 0; i--) {
     const blocksOfVersion = listVersionBlocks(versions, i);
     const needsDivider = blocksOfVersion.length > 0 && versionBlocks.length > 0;

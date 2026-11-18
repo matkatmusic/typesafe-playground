@@ -1,4 +1,3 @@
-// import type { Questions, SystemOneResult } from '@typesafe-ai/sdk';
 import type { JsonValue, Questions, SystemOneResult } from '@typesafe-ai/sdk';
 import { resolve } from 'node:path';
 import { NOT_RUN_TIME } from './notRunTime';
@@ -8,8 +7,6 @@ export const HISTORY_PATH = resolve(import.meta.dir, '..', 'results', 'playgroun
 
 export type Provider = 'TypeSafe' | 'SubQ';
 export type RunOutput = SystemOneResult<Questions> & { provider?: Provider };
-// export type Version = { id: number; time: string; state: unknown; questions: unknown; calls: number; outputs: RunOutput[]; note?: string; stateNote?: string; questionsNote?: string; resultNotes?: Record<string, string> };
-// export type Version = { time: string; state: unknown; questions: unknown; calls: number; outputs: RunOutput[]; note?: string; stateNote?: string; questionsNote?: string; resultNotes?: Record<string, string> };
 export type Version = { time: string; state: Record<string, JsonValue>; questions: Questions; calls: number; outputs: RunOutput[]; note?: string; stateNote?: string; questionsNote?: string; resultNotes?: Record<string, string> };
 
 export async function loadHistory(historyPath: string): Promise<Version[]> {
@@ -31,8 +28,6 @@ export async function writeHistory(historyPath: string, versions: Version[]): Pr
 }
 
 export function buildBlankVersion(): Version {
-  // return { id: 1, time: new Date().toISOString(), state: HARD_CODED_STATE, questions: HARD_CODED_QUESTIONS, calls: 0, outputs: [] };
-  // return { time: new Date().toISOString(), state: HARD_CODED_STATE, questions: HARD_CODED_QUESTIONS, calls: 0, outputs: [] };
   return { time: NOT_RUN_TIME, state: HARD_CODED_STATE, questions: HARD_CODED_QUESTIONS, calls: 0, outputs: [] };
 }
 

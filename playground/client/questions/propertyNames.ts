@@ -4,13 +4,6 @@ import type { SyntaxNode, Tree } from '@lezer/common';
 import { listTopLevelProperties, readPropertyName } from './questionNames';
 export { splitKeyPath } from '../../typesafe-checks/typesafeChecks';
 
-// export function readKeyName(text: string, nameNode: SyntaxNode): string {
-//   const afterQuote = text.slice(nameNode.from + 1, nameNode.to);
-//   const endsWithQuote = afterQuote.endsWith('"');
-//   if (endsWithQuote)
-//     return afterQuote.slice(0, -1);
-//   return afterQuote;
-// }
 
 export function collectPropertyNames(tree: Tree, text: string): string[] {
   const names: string[] = [];

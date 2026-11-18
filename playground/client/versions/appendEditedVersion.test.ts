@@ -25,7 +25,6 @@ afterEach(() => {
 });
 
 function buildVersion() {
-  // return { time: 't', state: { a: 1 }, questions: { q: 1 }, calls: 2, outputs: [], note: 'old note' }
   return { time: 't', state: { a: 1 }, questions: { q: 1 } as unknown as Questions, calls: 2, outputs: [], note: 'old note' };
 }
 

@@ -14,7 +14,6 @@ export const MAX_CALLS = 10;
 export type RunClient = {
   systemOne(request: { state: EntryType; questions: Questions }): Promise<RunOutput>;
 };
-// export type CreateRunClient = (apiKey: string) => RunClient;
 export type CreateRunClient = (apiKey: string, provider: Provider) => RunClient;
 
 export function createTypeSafeClient(apiKey: string): RunClient {
@@ -54,7 +53,6 @@ export function isCallsInRange(calls: unknown): calls is number {
   return calls <= MAX_CALLS;
 }
 
-// export async function collectOutputs(client: RunClient, calls: number, state: Record<string, JsonValue>, questions: Questions): Promise<RunOutput[]> {
 export async function collectOutputs(client: RunClient, calls: number, state: Record<string, JsonValue>, questions: Questions, provider: Provider): Promise<RunOutput[]> {
   const outputs: RunOutput[] = [];
   for (let i = 0; i < calls; i++) {
@@ -64,24 +62,7 @@ export async function collectOutputs(client: RunClient, calls: number, state: Re
   return outputs;
 }
 
-// export function isInputUnchanged(version: Version, state: unknown, questions: unknown): boolean {
-//   const versionStateText = JSON.stringify(version.state);
-//   const stateText = JSON.stringify(state);
-//   const isStateSame = versionStateText === stateText;
-//   if (!isStateSame)
-//     return false;
-//   const versionQuestionsText = JSON.stringify(version.questions);
-//   const questionsText = JSON.stringify(questions);
-//   return versionQuestionsText === questionsText;
-// }
 
-// export function findVersionById(history: Version[], id: unknown): Version | undefined {
-//   for (const version of history) {
-//     if (version.id === id)
-//       return version;
-//   }
-//   return undefined;
-// }
 
 function appendOutputsToVersion(version: Version, outputs: RunOutput[]): Version {
   if (version.time === NOT_RUN_TIME)
@@ -91,17 +72,7 @@ function appendOutputsToVersion(version: Version, outputs: RunOutput[]): Version
   return version;
 }
 
-// export function addRunToHistory(history: Version[], shownVersion: Version, outputs: RunOutput[], state: unknown, questions: unknown): Version {
 export function addRunToHistory(history: Version[], shownVersion: Version, outputs: RunOutput[], state: Record<string, JsonValue>, questions: Questions): Version {
-  // const lastVersion = history[history.length - 1];
-  // const isUnchanged = isInputUnchanged(shownVersion, state, questions);
-  // const isOnlyVersionNeverRun = history.length === 1 && shownVersion.calls === 0;
-  // if (isOnlyVersionNeverRun) {
-  //   shownVersion.state = state;
-  //   shownVersion.questions = questions;
-  // }
-  // const isAppendingToShown = isUnchanged || isOnlyVersionNeverRun;
-  // if (isAppendingToShown) {
   const step = computeVersionStep(shownVersion, state, questions);
   if (step === 'overwrite') {
     shownVersion.state = state;
@@ -110,14 +81,12 @@ export function addRunToHistory(history: Version[], shownVersion: Version, outpu
   const isRecordingOnShown = step !== 'create';
   if (isRecordingOnShown)
     return appendOutputsToVersion(shownVersion, outputs);
-  // const version: Version = { id: lastVersion.id + 1, time: new Date().toISOString(), state: state, questions: questions, calls: outputs.length, outputs };
   const version: Version = { time: new Date().toISOString(), state: state, questions: questions, calls: outputs.length, outputs };
   history.push(version);
   return version;
 }
 
 export async function executeRunRequest(request: Request, createClient: CreateRunClient, historyPath: string): Promise<Response> {
-  // const body = (await request.json()) as { id?: unknown; calls?: unknown; apiKey?: unknown; state?: unknown; questions?: unknown };
   const body = (await request.json()) as { index?: unknown; calls?: unknown; apiKey?: unknown; state?: unknown; questions?: unknown };
   const typedKey = typeof body.apiKey === 'string' ? body.apiKey.trim() : '';
   setLastTypedKey(typedKey);
@@ -125,7 +94,6 @@ export async function executeRunRequest(request: Request, createClient: CreateRu
   if (invalidBodyResponse !== undefined)
     return invalidBodyResponse;
   const history = await loadHistory(historyPath);
-  // const shownVersion = findVersionById(history, body.id);
   const shownVersion = findVersionByIndex(history, body.index);
   if (shownVersion === undefined)
     return new Response('index must be the integer index of an existing version', { status: 400 });
@@ -153,14 +121,11 @@ function validateRunBodyShape(body: RunRequestBody): Response | undefined {
 
 async function executeCallsAndWriteHistory(body: RunRequestBody, typedKey: string, createClient: CreateRunClient, historyPath: string, history: Version[], shownVersion: Version): Promise<Response> {
   const provider: Provider = body.provider === undefined ? 'TypeSafe' : (body.provider as Provider);
-  // const envKey = (Bun.env.TYPESAFE_API_KEY ?? '').trim();
-  // const apiKey = selectApiKey(typedKey, envKey);
   const apiKey = selectApiKeyForProvider(provider, typedKey);
   if (apiKey === '')
     return new Response(provider === 'SubQ' ? SUBQ_MISSING_KEY_MESSAGE : MISSING_KEY_MESSAGE, { status: 400 });
   const state = body.state as Record<string, JsonValue>;
   const questions = body.questions as Questions;
-  // const outputs = await collectOutputs(createClient(apiKey), body.calls as number, state, questions);
   const outputs = await collectOutputs(createClient(apiKey, provider), body.calls as number, state, questions, provider);
   const version = addRunToHistory(history, shownVersion, outputs, state, questions);
   await writeHistory(historyPath, history);

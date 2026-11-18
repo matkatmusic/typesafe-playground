@@ -5,7 +5,6 @@ import { isRequestAllowed } from './playgroundGuard';
 import { parsePortArgument } from '../startup/parsePortArgument';
 import { HISTORY_PATH, initHistory, loadHistory } from '../history/playgroundHistory';
 import { executeDraftGetRequest, executeDraftRequest } from './playgroundDraftRequests';
-// import { executeDraftRequest, readDraft } from './playgroundDraftRequests';
 import { renderPage } from '../page/renderPage';
 import { executeNoteRequest } from './playgroundNoteRequests';
 import { createClientForProvider, executeRunRequest, type CreateRunClient } from './playgroundRequests';
@@ -17,7 +16,6 @@ const LAN_HOSTNAME = '0.0.0.0';
 
 async function buildClientScript(): Promise<string> {
   const result = await Bun.build({
-    // entrypoints: [`${import.meta.dir}/../client/main.ts`],
     entrypoints: [`${import.meta.dir}/../client/page/main.ts`],
     target: 'browser',
     format: 'esm',
@@ -38,29 +36,14 @@ async function readPageCss(): Promise<string> {
   return css;
 }
 
-// function replacePlaceholderWithText(html: string, placeholder: string, text: string): string {
-//   function getText() {
-//     return text;
-//   }
-//   return html.replace(placeholder, getText);
-// }
 
 export async function buildPage(historyPath: string): Promise<string> {
   const versions = await loadHistory(historyPath);
-  // const htmlFile = Bun.file(`${import.meta.dir}/../page/playground.html`);
-  // const html = await htmlFile.text();
   const css = await readPageCss();
   const script = await buildClientScript();
   const hasEnvKey = (Bun.env.TYPESAFE_API_KEY ?? '').trim() !== '';
-  // const draft = await readDraft(historyPath);
-  // const safeJson = JSON.stringify({ versions, draft, hasEnvKey }).replaceAll('<', '\\u003c');
-  // const safeJson = JSON.stringify({ versions, hasEnvKey }).replaceAll('<', '\\u003c');
   const hasSubqEnvKey = (Bun.env.SUBQ_AI_API_KEY ?? '').trim() !== '';
-  // const safeJson = JSON.stringify({ versions, historyPath, hasEnvKey }).replaceAll('<', '\\u003c');
   const safeJson = JSON.stringify({ versions, historyPath, hasSubqEnvKey, hasEnvKey }).replaceAll('<', '\\u003c');
-  // const withCss = replacePlaceholderWithText(html, '/*__PAGE_CSS__*/', css);
-  // const withScript = replacePlaceholderWithText(withCss, '__PAGE_SCRIPT__', script);
-  // return replacePlaceholderWithText(withScript, '__DATA_JSON__', safeJson);
   return '<!doctype html>' + renderPage({ css: css, script: script, dataJson: safeJson }).toString();
 }
 

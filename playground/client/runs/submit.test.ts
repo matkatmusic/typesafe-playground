@@ -18,7 +18,6 @@ class FakeBox {
 }
 
 const ISO_TIME = '2026-03-04T05:06:07.000Z';
-// const VERSION = { time: ISO_TIME, state: { a: 1 }, questions: {}, calls: 1, outputs: [{ usage: { input_tokens: 1000000, output_tokens: 1 } }] } as unknown as Version
 const VERSION = { time: ISO_TIME, state: { a: 1 }, questions: { q: { type: 'noul' } }, calls: 1, outputs: [{ usage: { input_tokens: 1000000, output_tokens: 1 } }] } as unknown as Version;
 const realFetch = globalThis.fetch;
 
@@ -82,7 +81,6 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
   const renderWinnersSpy = spyOn(winnersDom, 'renderWinners').mockImplementation(() => {});
   const renderStateSpy = spyOn(editors, 'renderStateJson').mockImplementation(recordShownValue);
   const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{"a":1}'));
-  // const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubStateEditor('{}'))
   const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubStateEditor('{"q":{"type":"noul"}}'));
   const newVersion = { ...VERSION };
   pageState.versions = [VERSION];
@@ -106,8 +104,6 @@ async function validateSubmitPostsRunAndShowsTheOutputsAndLabels() {
   renderStateSpy.mockRestore();
   stateSpy.mockRestore();
   questionsSpy.mockRestore();
-  // expect(JSON.parse(seenBody)).toEqual({ index: 0, calls: 3, apiKey: '', state: { a: 1 }, questions: {} })
-  // expect(JSON.parse(seenBody)).toEqual({ index: 0, calls: 3, apiKey: '', state: { a: 1 }, questions: { q: { type: 'noul' } } })
   expect(JSON.parse(seenBody)).toEqual({ index: 0, calls: 3, apiKey: '', provider: 'TypeSafe', state: { a: 1 }, questions: { q: { type: 'noul' } } });
   expect(wasDisabledWhileRunning).toBe(true);
   expect(textWhileRunning).toBe(RUNNING_TEXT);
@@ -129,7 +125,6 @@ async function validateFailedSubmitShowsTheErrorLineAndLeavesTheResultAlone() {
   const elements = installFakeDom(true);
   const renderSpy = spyOn(editors, 'renderResultJson');
   const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(buildStubStateEditor('{}'));
-  // const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubStateEditor('{}'))
   const questionsSpy = spyOn(editors, 'getQuestionsEditor').mockReturnValue(buildStubStateEditor('{"q":{"type":"noul"}}'));
   pageState.versions = [VERSION];
   async function stubFetch() {

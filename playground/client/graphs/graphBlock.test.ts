@@ -55,7 +55,6 @@ function removeFakeDocument() {
   graphState.isReferencesReplaced = false;
 }
 
-// const version: Version = { id: 1, time: 'now', state: {}, questions: {}, calls: 0, outputs: [] };
 const version: Version = { time: 'now', state: {}, questions: {}, calls: 0, outputs: [] };
 
 function noop() {}

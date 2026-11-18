@@ -16,8 +16,6 @@ export const SUBMIT_TEXT = 'Submit (paid)';
 export const RUNNING_TEXT = 'running…';
 
 export function buildRunBody(state: unknown, questions: unknown): RunBody {
-  // return { id: getShownVersion().id, calls: Number(getInput('callsPicker').value), apiKey: readTypedKey(), state: state, questions: questions };
-  // return { index: pageState.index, calls: Number(getInput('callsPicker').value), apiKey: readTypedKey(), state: state, questions: questions };
   return { index: pageState.index, calls: Number(getInput('callsPicker').value), apiKey: readTypedKey(), provider: readProvider(), state: state, questions: questions };
 }
 
@@ -65,14 +63,12 @@ function computeSubmitInputs(): SubmitInputs {
 async function saveRunResult(result: RunResult, baseVersion: ReturnType<typeof getShownVersion>, isStateUnchanged: boolean, isQuestionsUnchanged: boolean): Promise<void> {
   // pageState.versions[result.version.id - 1] = result.version;
   pageState.versions[result.index] = result.version;
-  // const isNewVersion = result.version.id !== baseVersion.id;
   const isInputUnchanged = isStateUnchanged && isQuestionsUnchanged;
   pageState.index = result.index;
   if (!isInputUnchanged) {
     await saveInheritedNote('state', baseVersion.stateNote, isStateUnchanged, result.version);
     await saveInheritedNote('questions', baseVersion.questionsNote, isQuestionsUnchanged, result.version);
   }
-  // pageState.index = result.version.id - 1;
   pageState.editedDraft = null;
   markPageChanged('last run');
   renderShownVersion();

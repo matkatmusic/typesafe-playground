@@ -2,10 +2,6 @@ import { test, expect } from 'bun:test';
 import { parsePageData, readPageData } from './pageData';
 
 function validateParsePageDataReadsVersionsAndHasEnvKey() {
-  // expect(parsePageData('{"versions":[],"draft":null,"hasEnvKey":true}')).toEqual({ versions: [], draft: null, hasEnvKey: true })
-  // expect(parsePageData('{"versions":[],"draft":{"state":"s","questions":"q"},"hasEnvKey":false}')).toEqual({ versions: [], draft: { state: 's', questions: 'q' }, hasEnvKey: false })
-  // expect(parsePageData('{"versions":[],"historyPath":"h.json","hasEnvKey":true}')).toEqual({ versions: [], historyPath: 'h.json', hasEnvKey: true })
-  // expect(parsePageData('{"versions":[],"historyPath":"h.json","hasEnvKey":false}')).toEqual({ versions: [], historyPath: 'h.json', hasEnvKey: false })
   expect(parsePageData('{"versions":[],"historyPath":"h.json","hasSubqEnvKey":false,"hasEnvKey":true}')).toEqual({ versions: [], historyPath: 'h.json', hasSubqEnvKey: false, hasEnvKey: true });
   expect(parsePageData('{"versions":[],"historyPath":"h.json","hasSubqEnvKey":false,"hasEnvKey":false}')).toEqual({ versions: [], historyPath: 'h.json', hasSubqEnvKey: false, hasEnvKey: false });
 }

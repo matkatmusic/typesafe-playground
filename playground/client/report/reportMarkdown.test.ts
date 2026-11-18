@@ -51,28 +51,12 @@ function validateCopiedForwardStateAndQuestionsNotesAreSkipped() {
   expect(markdown).not.toContain('Questions notes\n\nsame q\n\n### Run comments');
 }
 
-// const taskQuestions = { needsTask: { type: 'noul', instructions: 'Is it a task?', criteria: { true: 'a task', false: 'not a task' } } };
 const taskQuestions: Questions = { needsTask: { type: 'noul', instructions: 'Is it a task?', criteria: { true: 'a task', false: 'not a task' } } };
 
 function buildTaskOutputs(noul: number) {
   return [{ answers: { needsTask: { type: 'noul', noul: noul } } }] as never;
 }
 
-// function validateResultNotesIncludeInstructionsAndWinnerLine() {
-//   const questions = { needsTask: { type: 'noul', instructions: 'Is it a task?', criteria: { true: 'a task', false: 'not a task' } } };
-//   const outputs = [{ answers: { needsTask: { type: 'noul', noul: 0.9 } } }] as never;
-//   const versions = [buildVersion(1, { questions, outputs, calls: 1, resultNotes: { needsTask: 'looks right', other: '' } })];
-//   const expected = [
-//     '# Notes report',
-//     '## Version 1 (t1)',
-//     '### Result notes',
-//     '#### needsTask',
-//     '> Is it a task?',
-//     'a task (1)',
-//     'looks right',
-//   ].join('\n\n') + '\n';
-//   expect(buildReportMarkdown(versions)).toBe(expected);
-// }
 
 function validateResultsIncludeInstructionsMetricLineAndNote() {
   const versions = [buildVersion(1, { questions: taskQuestions, outputs: buildTaskOutputs(0.9), calls: 1, resultNotes: { needsTask: 'looks right', other: '' } })];
@@ -151,7 +135,6 @@ test('test_versions_without_notes_give_no_notes_yet', validateVersionsWithoutNot
 test('test_mixed_sections_appear_in_order', validateMixedSectionsAppearInOrder);
 test('test_versions_without_notes_are_skipped', validateVersionsWithoutNotesAreSkipped);
 test('test_copied_forward_state_and_questions_notes_are_skipped', validateCopiedForwardStateAndQuestionsNotesAreSkipped);
-// test('test_result_notes_include_instructions_and_winner_line', validateResultNotesIncludeInstructionsAndWinnerLine);
 test('test_results_include_instructions_metric_line_and_note', validateResultsIncludeInstructionsMetricLineAndNote);
 test('test_version_with_runs_but_no_notes_appears', validateVersionWithRunsButNoNotesAppears);
 test('test_result_note_without_runs_shows_no_runs_instead_of_throwing', validateResultNoteWithoutRunsShowsNoRunsInsteadOfThrowing);

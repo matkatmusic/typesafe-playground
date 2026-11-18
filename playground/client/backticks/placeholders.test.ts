@@ -1,14 +1,9 @@
 import { test, expect } from 'bun:test';
-// import { snippet } from '@codemirror/autocomplete';
-// import { json } from '@codemirror/lang-json';
-// import { syntaxTree } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
-// import type { Transaction } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
 import { addPlaceholderRanges } from './placeholderRanges';
 import { buildPlaceholderDecorations, createPlaceholders, isAnyPlaceholderSelected, placeholderField } from './placeholders';
-// import { buildInsertPlan } from '../questions/questionSnippets';
 
 const DOC = '{"a": "instruction", "b": "description"}';
 
@@ -144,7 +139,3 @@ function validateEditorGetsAClassOnlyWhileAPlaceholderIsSelected() {
 test('test_editor_gets_a_class_only_while_a_placeholder_is_selected', validateEditorGetsAClassOnlyWhileAPlaceholderIsSelected);
 test('test_only_a_fully_selected_placeholder_gets_the_selected_class',validateOnlyAFullySelectedPlaceholderGetsTheSelectedClass);
 test('test_selection_change_alone_rebuilds_the_decorations', validateSelectionChangeAloneRebuildsTheDecorations);
-// test('test_placeholders_stay_found_after_typing_over_one',validatePlaceholdersSurviveTypingOverOne);
-// test('test_generated_names_and_defaults_are_found', validateGeneratedNamesAndDefaultsAreFoundButUserTextIsNot);
-// test('test_edited_names_are_regular_text', validateEditedNamesAreRegularText);
-// test('test_escaped_quote_does_not_end_the_string', validateEscapedQuoteDoesNotEndTheString);

@@ -1,9 +1,7 @@
 import { test, expect } from 'bun:test';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-// import type { Questions } from '@typesafe-ai/sdk'
 import type { JsonValue, Questions } from '@typesafe-ai/sdk';
-// import { buildBatchVersions } from '../client/batchPlan'
 import { buildBatchVersions } from '../client/batch/batchPlan';
 import { dispatchRequest } from './playground';
 import { initHistory, loadHistory, type RunOutput, type Version } from '../history/playgroundHistory';
@@ -36,7 +34,6 @@ function buildCountingClientFactory(failOnCall: number | null) {
   return { seenStates, createClient: () => ({ systemOne }) };
 }
 
-// async function openBatchAndRunEachItem(historyPath: string, shownIndex: number, states: unknown[], questions: unknown, createClient: () => { systemOne: (request: never) => Promise<RunOutput> }) {
 async function openBatchAndRunEachItem(historyPath: string, shownIndex: number, states: Record<string, JsonValue>[], questions: Questions, createClient: () => { systemOne: (request: never) => Promise<RunOutput> }) {
   const history = await loadHistory(historyPath);
   const plan = buildBatchVersions(history, shownIndex, states, questions);
@@ -78,7 +75,6 @@ async function validateVersionFourExampleAddsResultsToVersionFourAndStampsVersio
   // Step: write 4 versions, version 4 holds results and the state {"a":1}.
   const historyPath = await buildTempHistoryPath();
   const output = { answers: {}, usage: { input_tokens: 7, output_tokens: 1 } };
-  // const questions = { q: { type: 'noul', instructions: 'x' } }
   const questions = { q: { type: 'noul', instructions: 'x' } } as unknown as Questions;
   const versions: Version[] = [];
   for (let i = 0; i < 3; i++)

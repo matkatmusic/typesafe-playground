@@ -8,7 +8,6 @@ import { getShownVersion, pageState } from '../page/state';
 import { sendJson } from '../versions/versionActions';
 
 export async function saveVersionNote(version: Version, location: NoteLocation, text: string): Promise<void> {
-  // const response = await sendJson('/note', { id: version.id, ...buildNoteBody(location, text) });
   const response = await sendJson('/note', { index: pageState.versions.indexOf(version), ...buildNoteBody(location, text) });
   const saved: Version = await response.json();
   storeSavedNote(version, saved, location);

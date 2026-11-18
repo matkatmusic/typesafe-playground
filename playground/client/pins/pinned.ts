@@ -19,8 +19,6 @@ export function readPinnedData(pinnedVersion: Version | null, name: string): Pin
   if (!hasQuestion)
     return null;
   const answers = listAnswers(pinnedVersion, name);
-  // return { id: pinnedVersion.id, answers: answers, keys: listOptionKeys(answers[0]) };
-  // return { answers: answers, keys: listOptionKeys(answers[0]) };
   return { answers: answers, providers: listProviders(pinnedVersion), keys: listOptionKeys(answers[0]) };
 }
 
@@ -30,6 +28,5 @@ export function readPinnedValues(pinned: PinnedData | null, key: string): Pinned
   const hasKey = pinned.keys.includes(key);
   if (!hasKey)
     return null;
-  // return { id: pinned.id, values: listValues(pinned.answers, key) };
   return { values: listValues(pinned.answers, key) };
 }

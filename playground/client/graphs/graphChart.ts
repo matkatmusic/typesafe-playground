@@ -1,7 +1,6 @@
 import type { Question } from '@typesafe-ai/sdk';
 import type { Answer, ChartLayout, GraphBlock, PinnedData } from './graphTypes';
 import { BOTTOM, computeBaseline, computePlotHeight, computeSlotLeft, computeSlotWidth, computeY, LEFT, NOUL_BASELINE, TICK_COUNT, TOP } from './graphGeometry';
-// import { renderOption, renderProviderLetters } from './graphOption';
 import { renderOption } from './graphOption';
 import type { Provider } from '../../history/playgroundHistory';
 import { graphState } from './graphState';
@@ -47,18 +46,11 @@ function renderAxisForQuestion(svg: Element, question: Question, plotRight: numb
 function renderAllOptions(svg: Element, keys: string[], answers: Answer[], providers: Provider[], pinned: PinnedData | null, slot: number, plotH: number, isAverageShown: boolean, baseline: number): void {
   for (let i = 0; i < keys.length; i++) {
     const pinnedValues = readPinnedValues(pinned, keys[i]);
-    // if (pinnedValues !== null)
-    //   renderOption(svg, pinnedValues.values, computeSlotLeft(i, slot), plotH, isAverageShown, baseline, true);
     if (pinned !== null) {
       if (pinnedValues !== null)
         renderOption(svg, pinnedValues.values, computeSlotLeft(i, slot), plotH, isAverageShown, baseline, true, pinned.providers);
     }
     renderOption(svg, listValues(answers, keys[i]), computeSlotLeft(i, slot), plotH, isAverageShown, baseline, false, providers);
-    // renderProviderLetters(svg, providers, computeSlotLeft(i, slot), plotH, isAverageShown, false);
-    // if (pinned !== null) {
-    //   if (pinnedValues !== null)
-    //     renderProviderLetters(svg, pinned.providers, computeSlotLeft(i, slot), plotH, isAverageShown, true);
-    // }
   }
 }
 

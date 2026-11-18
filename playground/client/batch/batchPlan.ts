@@ -25,7 +25,6 @@ export function computeBatchStateError(value: unknown): string | null {
   return null;
 }
 
-// function buildNotRunVersion(state: unknown, questions: unknown): Version {
 function buildNotRunVersion(state: Record<string, JsonValue>, questions: Questions): Version {
   return { time: NOT_RUN_TIME, state: state, questions: structuredClone(questions), calls: 0, outputs: [] };
 }
@@ -45,7 +44,6 @@ function applyFirstStateStep(batchVersions: Version[], itemIndexes: number[], sh
     itemIndexes.push(shownIndex);
 }
 
-// export function buildBatchVersions(versions: Version[], shownIndex: number, states: unknown[], questions: unknown): BatchVersions {
 export function buildBatchVersions(versions: Version[], shownIndex: number, states: Record<string, JsonValue>[], questions: Questions): BatchVersions {
   const batchVersions = [...versions];
   const itemIndexes: number[] = [];

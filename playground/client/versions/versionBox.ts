@@ -2,7 +2,6 @@ import type { ViewUpdate } from '@codemirror/view';
 import { renderCostAndTokens } from '../runs/costTokens';
 import { getElement } from '../page/dom';
 import { computePositionCount, isEditorTextEdited, isEditorTextOverwritingShownVersion } from './editedPosition';
-// import { FILL_ANNOTATION, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson, replaceEditorText } from '../editors/editors';
 import { FILL_ANNOTATION, fillEditorText, getQuestionsEditor, getStateEditor, renderQuestionsJson, renderResultJson, renderStateJson } from '../editors/editors';
 import { renderGraphs } from '../graphs/graphs';
 import { attachInfoBox } from '../infoBox/infoBox';
@@ -24,13 +23,9 @@ export function refreshVersionBox(): void {
   const isStateEdited = isJsonTextEdited(stateText, shownVersion.state);
   const isQuestionsEdited = isJsonTextEdited(questionsText, shownVersion.questions);
   const isEdited = isStateEdited || isQuestionsEdited;
-  // const version = isEdited ? createEditedVersion(shownVersion, versions.length) : shownVersion;
   const version = isEdited ? createEditedVersion(shownVersion) : shownVersion;
   const isOverwriting = isEditorTextOverwritingShownVersion();
-  // const shownNumber = isEdited ? versions.length + 1 : index + 1;
   const shownNumber = isEdited && !isOverwriting ? versions.length + 1 : index + 1;
-  // const versionCount = isEdited ? versions.length + 1 : versions.length;
-  // const versionCount = computePositionCount();
   const versionCount = isOverwriting ? versions.length : computePositionCount();
   applyNoteBox(version);
   getElement('versionLabel').textContent = formatVersionLabel(shownNumber, versionCount, version.time, version.calls);
@@ -65,8 +60,6 @@ function renderEditedDraft(): void {
     throw new Error('the edited position has no draft');
   pageState.index = draft.baseIndex;
   renderShownVersion();
-  // replaceEditorText(getStateEditor(), draft.state);
-  // replaceEditorText(getQuestionsEditor(), draft.questions);
   fillEditorText(getStateEditor(), draft.state);
   fillEditorText(getQuestionsEditor(), draft.questions);
   refreshVersionBox();
@@ -82,8 +75,6 @@ function renderTargetPosition(targetPosition: number): void {
   renderShownVersion();
 }
 
-// pageState.index = computeWrappedIndex(pageState.index, step, pageState.versions.length);
-// renderShownVersion();
 export function moveByVersions(step: number): void {
   const isMovePossible = isVersionMovePossible();
   if (!isMovePossible)

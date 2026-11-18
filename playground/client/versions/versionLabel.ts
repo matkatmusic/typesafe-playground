@@ -4,7 +4,6 @@ import { computeJsonParseResult } from '../editors/jsonParse';
 import { NOT_RUN_TIME } from '../../history/notRunTime';
 
 export { NOT_RUN_TIME };
-// export const NOT_RUN_TIME = 'not run yet';
 const SEPARATOR = ' · ';
 
 export function computeWrappedIndex(index: number, step: number, count: number): number {
@@ -24,9 +23,6 @@ export function isJsonTextEdited(text: string, savedValue: unknown): boolean {
   return JSON.stringify(parseResult.value) !== JSON.stringify(savedValue);
 }
 
-// export function createEditedVersion(shownVersion: Version, versionCount: number): Version {
-//   return { ...shownVersion, id: versionCount + 1, time: NOT_RUN_TIME, calls: 0, outputs: [] };
-// }
 export function createEditedVersion(shownVersion: Version): Version {
   return { ...shownVersion, time: NOT_RUN_TIME, calls: 0, outputs: [] };
 }

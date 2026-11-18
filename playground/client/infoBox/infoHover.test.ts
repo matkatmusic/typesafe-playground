@@ -23,7 +23,6 @@ function validateOutlineMovesToTheLatestHit() {
   const second = createFakeHit();
   const info = {} as HTMLElement;
   updateShownInfo(tracker, info, first as unknown as Element);
-  // expect(first.attrs.stroke).toBe('hotpink');
   expect(first.attrs.stroke).toBe('var(--hit-stroke)');
   updateShownInfo(tracker, info, second as unknown as Element);
   expect(first.attrs.stroke).toBeUndefined();

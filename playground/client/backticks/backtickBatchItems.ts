@@ -17,14 +17,3 @@ export function listBatchItems(states: EditorState[]): unknown[] | null {
   return items;
 }
 
-// export function isNameDefinedInBatch(questionsState: EditorState, items: unknown[], keyName: string): boolean {
-//   const isDefinedByQuestions = isNameDefined([questionsState], keyName);
-//   if (isDefinedByQuestions)
-//     return true;
-//   for (const item of items) {
-//     const isInItem = findPathValue(item, keyName).isFound;
-//     if (!isInItem)
-//       return false;
-//   }
-//   return true;
-// }

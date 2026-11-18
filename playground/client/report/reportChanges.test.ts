@@ -17,8 +17,6 @@ function validateNothingChangedGivesNoBlocks() {
 }
 
 function validateAddedRemovedAndChangedLeavesAreListed() {
-  // const before = buildVersion({ state: { gone: 1, same: 2, nested: { x: 'a' } }, questions: { q: { criteria: { 1: 'low', 2: 'high' } } } });
-  // const after = buildVersion({ state: { same: 2, fresh: 3, nested: { x: 'b' } }, questions: { q: { criteria: { 1: 'changed', 2: 'high' } } } });
   const before = buildVersion({ state: { gone: 1, same: 2, nested: { x: 'a' } }, questions: { q: { criteria: { 1: 'low', 2: 'high' } } } } as never);
   const after = buildVersion({ state: { same: 2, fresh: 3, nested: { x: 'b' } }, questions: { q: { criteria: { 1: 'changed', 2: 'high' } } } } as never);
   const expected = [

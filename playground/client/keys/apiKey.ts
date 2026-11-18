@@ -77,11 +77,8 @@ export function refreshKeyTexts(): void {
 }
 
 export function refreshSubmitAvailability(): void {
-  // const isMissing = isKeyMissing(readPageData().hasEnvKey, readTypedKey());
   const isMissing = isKeyMissing(readHasEnvKeyForProvider(), readTypedKey());
-  // getButton('submitButton').disabled = isMissing;
   getButton('submitButton').disabled = isMissing || pageState.batchRun !== null;
-  // getElement('errorLine').textContent = isMissing ? SUBMIT_KEY_MESSAGE : '';
   getElement('errorLine').textContent = isMissing ? computeSubmitKeyMessage(readProvider()) : '';
 }
 

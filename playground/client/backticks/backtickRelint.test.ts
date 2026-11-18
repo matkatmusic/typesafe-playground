@@ -28,7 +28,6 @@ function validateRenamedKeyGetsSquiggleInTheQuestionsEditor() {
 
 function validateArrayIndexNamesAreDefinedOnlyInsideTheArray() {
   const questionsText = '{"q": {"criteria": {"0": "`userMessageArray[0]`", "1": "`userMessageArray[1]`", "x": "`userMessageArray[2]` `q.criteria.0` `userMessageArray.0`"}}}';
-  // const questionsState = createJsonState(questionsText);
   const questionsState = EditorState.create({ doc: questionsText, extensions: [json(), IS_QUESTIONS_EDITOR.of(true)] });
   const view = { state: questionsState } as unknown as EditorView;
   const stateState = createJsonState('{"userMessageArray": ["a", "b"]}');

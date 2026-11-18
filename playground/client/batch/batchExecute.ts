@@ -9,8 +9,6 @@ import { isKindTextEdited } from '../notes/noteKind';
 import { markPageChanged } from '../page/pageChanged';
 import { saveVersionNote } from '../notes/saveVersionNote';
 import { buildEmptyPendingNotes, getShownVersion, pageState } from '../page/state';
-// import { buildRunBody, executeSubmit, formatRunFailure, sendRun, setEditorsLocked } from '../runs/submit';
-// import { buildRunBody, executeSubmit, formatRunFailure, listSubmitErrors, sendRun, setEditorsLocked } from '../runs/submit';
 import { buildRunBody, formatRunFailure, sendRun, setEditorsLocked } from '../runs/submit';
 import type { RunResult } from '../page/types';
 import { sendJson } from '../versions/versionActions';

@@ -86,9 +86,7 @@ function createGraphBlockElement(name: string): HTMLDivElement {
 function createGraphTitle(questionLabel: string, name: string, instructionsText: string, question: Question, version: Version): HTMLDivElement {
   const title = document.createElement('div');
   title.className = 'graph-title';
-  // title.textContent = titleText;
   title.appendChild(createQuestionLink(questionLabel, name));
-  // appendReferenceText(title, instructionsText, version.state, version.questions);
   appendReferenceText(title, instructionsText, version.state, question);
   title.title = questionLabel + instructionsText;
   return title;
@@ -109,7 +107,6 @@ function createGraphTitleRow(name: string, title: HTMLDivElement, onChange: Rend
 export function createGraphBlock(questionNumber: number, name: string, question: Question, onChange: RenderCallback, version: Version): GraphBlock {
   const questionLabel = 'Q' + questionNumber + ' ' + name;
   const formattedInstructions = formatGraphTitle(questionNumber, name, question).slice(questionLabel.length);
-  // const instructionsText = graphState.isReferencesReplaced ? replaceReferences(formattedInstructions, version.state, version.questions) : formattedInstructions;
   const instructionsText = graphState.isReferencesReplaced ? replaceReferences(formattedInstructions, version.state, question) : formattedInstructions;
   const block = createGraphBlockElement(name);
   const title = createGraphTitle(questionLabel, name, instructionsText, question, version);

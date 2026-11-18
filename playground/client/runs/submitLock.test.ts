@@ -56,7 +56,6 @@ function spyOnLockCalls() {
     lockedEditors.push(editor);
   }
   const stateEditor = buildStubEditor('{"a":1}');
-  // const questionsEditor = buildStubEditor('{"q":1}')
   const questionsEditor = buildStubEditor('{"q":{"type":"noul"}}');
   const lockSpy = spyOn(editors, 'setEditorLocked').mockImplementation(recordLock);
   const stateSpy = spyOn(editors, 'getStateEditor').mockReturnValue(stateEditor);

@@ -3,7 +3,6 @@ import { createBarInfoBox } from './infoDom';
 import { removeValueLabels, renderValueLabels } from './infoLabels';
 import { buildBarInfoRows } from './infoRows';
 
-// export const HIT_STROKE_COLOR = 'hotpink';
 export const HIT_STROKE_COLOR = 'var(--hit-stroke)';
 
 export function updateShownInfo(tracker: HoverTracker, info: HTMLElement, hit: Element | null): void {
@@ -21,7 +20,6 @@ export function updateShownInfo(tracker: HoverTracker, info: HTMLElement, hit: E
 export function attachHover(context: HoverContext): void {
   const { tracker, svg, hit, request, values, slotX, plotH, isAverageShown, baseline } = context;
   function updateOnEnter(): void {
-    // const info = createBarInfoBox(buildBarInfoRows(request));
     const info = createBarInfoBox(buildBarInfoRows(request), request.question);
     updateShownInfo(tracker, info, hit);
     renderValueLabels(svg, values, slotX, plotH, isAverageShown, baseline);

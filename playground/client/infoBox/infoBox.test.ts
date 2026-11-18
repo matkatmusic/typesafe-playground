@@ -70,7 +70,6 @@ function removeFakeDocument() {
 
 const usage = { input_tokens: 1, output_tokens: 1 };
 const noulVersion: Version = {
-  // time: 'now', state: null, calls: 1, questions: { q: { type: 'noul', criteria: { true: 'is yes' } } },
   time: 'now', state: {}, calls: 1, questions: { q: { type: 'noul', criteria: { true: 'is yes' } } },
   outputs: [{ model: 'm', answers: { q: { type: 'noul', noul: 0.8 } }, usage }],
 };
@@ -80,14 +79,11 @@ const lowNoulVersion: Version = {
   outputs: [{ model: 'm', answers: { q: { type: 'noul', noul: 0.07 } }, usage }],
 };
 
-// function drawNoulBlock(): FakeElement {
 function drawNoulBlock(version: Version = noulVersion): FakeElement {
   Object.assign(globalThis, { document: { createElementNS: createFakeElementNamed, createElement: createFakeTag, createTextNode: createFakeText } });
-  // pageState.versions = [noulVersion];
   pageState.versions = [version];
   pageState.index = 0;
   const container = new FakeElement();
-  // renderGraphs(noulVersion, container as unknown as HTMLElement, attachInfoBox);
   renderGraphs(version, container as unknown as HTMLElement, attachInfoBox);
   return container.children[0];
 }
@@ -114,12 +110,9 @@ function validateNoulHoverDoesNotThrowAndShowsTheValue() {
   expect(defaultBox.className).toBe('bar-info');
   expect(defaultBox.children.length).toBe(10);
   expect(defaultBox.children[1].children[0].textContent).toBe('yes');
-  // expect(hits[0].attrs.stroke).toBe('hotpink');
   expect(hits[0].attrs.stroke).toBe('var(--hit-stroke)');
   hits[0].listeners.mouseenter();
-  // expect(hits[0].attrs.stroke).toBe('hotpink');
   expect(hits[0].attrs.stroke).toBe('var(--hit-stroke)');
-  // const labels = listByName(svg.children, 'g');
   const labels = listByName(svg.children, 'g').filter((group) => group.attrs.class === 'value-labels');
   expect(labels.length).toBe(1);
   expect(labels[0].children[0].textContent).toBe('0.800');

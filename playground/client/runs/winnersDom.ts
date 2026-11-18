@@ -12,15 +12,11 @@ export function createQuestionResultLabel(question: Question, answers: Answer[],
   const label = document.createElement('div');
   const instructionLine = document.createElement('div');
   instructionLine.className = 'winner-instructions';
-  // instructionLine.textContent = formatText(formatValueText(question.instructions));
-  // appendReferenceText(instructionLine, formatText(formatValueText(question.instructions)), version.state, version.questions);
   appendReferenceText(instructionLine, formatText(formatValueText(question.instructions)), version.state, question);
   label.appendChild(instructionLine);
   for (const group of listWinnerGroups(answers)) {
     const winnerLine = document.createElement('div');
     winnerLine.className = 'winner-line';
-    // winnerLine.textContent = formatText(formatWinnerLine(question, group));
-    // appendReferenceText(winnerLine, formatText(formatWinnerLine(question, group)), version.state, version.questions);
     appendReferenceText(winnerLine, formatText(formatWinnerLine(question, group)), version.state, question);
     label.appendChild(winnerLine);
   }
@@ -31,10 +27,8 @@ function copyText(text: string): string {
   return text;
 }
 
-// export function buildTextFormatter(version: Version): (text: string) => string {
 export function buildTextFormatter(version: Version, question: Question): (text: string) => string {
   function replaceVersionReferences(text: string): string {
-    // return replaceReferences(text, version.state, version.questions);
     return replaceReferences(text, version.state, question);
   }
   return graphState.isReferencesReplaced ? replaceVersionReferences : copyText;
@@ -47,7 +41,6 @@ export function renderWinners(version: Version, container: HTMLElement): void {
   title.textContent = 'Winners:';
   container.replaceChildren(title);
   const questions = readQuestions(version);
-  // const formatText = buildTextFormatter(version);
   for (const name of Object.keys(questions)) {
     const isDataPresent = isRunDataPresent(version, name);
     const formatText = buildTextFormatter(version, questions[name]);

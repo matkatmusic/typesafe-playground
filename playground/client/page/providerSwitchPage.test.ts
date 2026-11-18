@@ -2,7 +2,6 @@ import { test, expect } from 'bun:test';
 
 import { renderPage } from '../../page/renderPage';
 
-// const PAGE_HTML = await Bun.file(`${import.meta.dir}/../../page/playground.html`).text()
 const PAGE_HTML = renderPage({ css: '', script: '', dataJson: '{}' }).toString();
 const PAGE_CSS = await Bun.file(`${import.meta.dir}/../../page/playgroundBase.css`).text();
 

@@ -40,13 +40,10 @@ export function renderProviderLetters(svg: Element, providers: Provider[], slotX
 
 export function computeProviderFill(provider: Provider): string {
   if (provider === 'SubQ')
-    // return 'rgb(77, 121, 57)';
     return '#56B4E9';
-  // return 'rgb(201, 112, 157)';
   return '#009E73';
 }
 
-// export function renderOption(svg: Element, values: number[], slotX: number, plotH: number, isAverageShown: boolean, baseline: number, isPinned: boolean): void {
 export function renderOption(svg: Element, values: number[], slotX: number, plotH: number, isAverageShown: boolean, baseline: number, isPinned: boolean, providers: Provider[]): void {
   const stat = computeSummary(values);
   const offset = computeBarOffset(isAverageShown);
@@ -59,7 +56,6 @@ export function renderOption(svg: Element, values: number[], slotX: number, plot
   }
   for (let k = 0; k < values.length; k++) {
     const callBar = computeShownBar(computeCallBar(slotX, offset, k, values[k], plotH, baseline), isPinned);
-    // svg.appendChild(createBarRect(callBar, isPinned ? PINNED_FILL : 'var(--score)', opacity));
     svg.appendChild(createBarRect(callBar, computeProviderFill(providers[k]), opacity));
   }
 }

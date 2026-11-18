@@ -17,8 +17,6 @@ export function applyPinButtons(): void {
   const pinButton = getButton('pinButton');
   pinButton.textContent = computePinButtonText(pinnedIndex, shownIndex);
   const isLocked = isBatchLocked();
-  // pinButton.disabled = pinnedIndex === shownIndex;
   pinButton.disabled = pinnedIndex === shownIndex || isLocked;
-  // getButton('unpinButton').disabled = pinnedIndex === null;
   getButton('unpinButton').disabled = pinnedIndex === null || isLocked;
 }

@@ -69,15 +69,8 @@ async function validateDraftGetReturnsNullForAMissingFileAndTheFileJsonOtherwise
   expect(await found.json()).toEqual({ state: 's', questions: 'q', isBatch: false });
 }
 
-// async function validatePageDataHoldsTheDraftOnlyWhenOneWasWritten() {
-//   const historyPath = await buildTempHistoryPath()
-//   expect((await buildPage(historyPath)).includes('"draft":null')).toBe(true)
-//   await dispatchRequest(buildDraftRequest({ state: 's', questions: 'q' }), PORT, historyPath)
-//   expect((await buildPage(historyPath)).includes('"draft":{"state":"s","questions":"q"}')).toBe(true)
-// }
 
 test('test_draft_post_writes_the_raw_text_in_a_session_file_beside_the_history_file', validateDraftPostWritesTheRawTextInASessionFileBesideTheHistoryFile);
 test('test_draft_post_rejects_non_string_fields', validateDraftPostRejectsNonStringFields);
 test('test_draft_routes_reject_an_id_that_is_not_a_lowercase_uuid', validateDraftRoutesRejectAnIdThatIsNotALowercaseUuid);
 test('test_draft_get_returns_null_for_a_missing_file_and_the_file_json_otherwise', validateDraftGetReturnsNullForAMissingFileAndTheFileJsonOtherwise);
-// test('test_page_data_holds_the_draft_only_when_one_was_written', validatePageDataHoldsTheDraftOnlyWhenOneWasWritten)
