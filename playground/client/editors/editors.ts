@@ -11,113 +11,130 @@ import { findBacktickedKeys } from '../backticks/backtickKeys';
 import { createBacktickHover } from '../backticks/backtickTooltip';
 import { getElement } from '../page/dom';
 import { findDuplicateKeys } from './duplicateKeys';
-import { jsonHighlight } from './editorHighlight';
+import { getJsonHighlight } from './editorHighlight';
 import { createPlaceholders } from '../backticks/placeholders';
-import { findQuestionsShapeErrors, findStateShapeErrors, IS_QUESTIONS_EDITOR } from '../questions/questionNames';
+import { findQuestionsShapeErrors, findStateShapeErrors, getQuestionsEditorFacet } from '../questions/questionNames';
 import { createPlaceholderTab } from '../backticks/placeholderTab';
 import { clearQuestionsJsonError, clearStateJsonError } from './stateErrorClear';
 
-export const EDITOR_THEME_RULES = {
-  '&': { height: '100%', background: 'var(--panel)', color: 'var(--text)', border: '1px solid var(--grid)', borderRadius: '6px' },
-  '.cm-scroller': { overflow: 'auto', fontFamily: 'ui-monospace, Menlo, monospace', fontSize: '13px' },
-  '.cm-gutters': { background: 'var(--panel)', color: 'var(--text-muted)', border: 'none' },
-};
+export class EditorSingletons {
+    private static instance: EditorSingletons | undefined;
+    public readonly themeRules = {
+        '&': { height: '100%', background: 'var(--panel)', color: 'var(--text)', border: '1px solid var(--grid)', borderRadius: '6px' },
+        '.cm-scroller': { overflow: 'auto', fontFamily: 'ui-monospace, Menlo, monospace', fontSize: '13px' },
+        '.cm-gutters': { background: 'var(--panel)', color: 'var(--text-muted)', border: 'none' },
+    };
+    public readonly fillAnnotation = Annotation.define<boolean>();
+    public readonly lockCompartment = new Compartment();
+    public readonly lockedExtensions: Extension[] = [EditorView.editable.of(false), EditorState.readOnly.of(true)];
+    public resultEditor: EditorView | null = null;
+    public stateEditor: EditorView | null = null;
+    public questionsEditor: EditorView | null = null;
+    private constructor() {}
+    public static getInstance() {
+        EditorSingletons.instance ??= new EditorSingletons();
+        return EditorSingletons.instance;
+    }
+}
 
-export const FILL_ANNOTATION = Annotation.define<boolean>();
-export const LOCK_COMPARTMENT = new Compartment();
-export const LOCKED_EXTENSIONS: Extension[] = [EditorView.editable.of(false), EditorState.readOnly.of(true)];
-
-let resultEditor: EditorView | null = null;
-let stateEditor: EditorView | null = null;
-let questionsEditor: EditorView | null = null;
+export function getFillAnnotation() {
+    return EditorSingletons.getInstance().fillAnnotation;
+}
 
 export function buildResultExtensions(): Extension[] {
-  return [
-    basicSetup,
-    json(),
-    EditorView.lineWrapping,
-    EditorView.theme(EDITOR_THEME_RULES),
-    EditorState.readOnly.of(true),
-  ];
+    return [
+        basicSetup,
+        json(),
+        EditorView.lineWrapping,
+        EditorView.theme(EditorSingletons.getInstance().themeRules),
+        EditorState.readOnly.of(true),
+    ];
 }
 
 export function buildJsonExtensions(): Extension[] {
-  return [
-    basicSetup,
-    json(),
-    EditorView.lineWrapping,
-    syntaxHighlighting(jsonHighlight),
-    EditorView.theme(EDITOR_THEME_RULES),
-    linter(jsonParseLinter()), linter(findDuplicateKeys), linter(findBacktickedKeys), lintGutter(),
-    createBacktickKeyNames(),
-    createBacktickHover(),
-    keymap.of([indentWithTab]),
-    LOCK_COMPARTMENT.of([]),
-  ];
+    return [
+        basicSetup,
+        json(),
+        EditorView.lineWrapping,
+        syntaxHighlighting(getJsonHighlight()),
+        EditorView.theme(EditorSingletons.getInstance().themeRules),
+        linter(jsonParseLinter()), linter(findDuplicateKeys), linter(findBacktickedKeys), lintGutter(),
+        createBacktickKeyNames(),
+        createBacktickHover(),
+        keymap.of([indentWithTab]),
+        EditorSingletons.getInstance().lockCompartment.of([]),
+    ];
 }
 
 export function formatResultJson(value: unknown): string {
-  return JSON.stringify(value, null, 2);
+    return JSON.stringify(value, null, 2);
 }
 
 export function createResultEditor(): EditorView {
-  resultEditor = new EditorView({ doc: '{}', extensions: buildResultExtensions(), parent: getElement('resultJsonEditor') });
-  return resultEditor;
+    const singletons = EditorSingletons.getInstance();
+    singletons.resultEditor = new EditorView({ doc: '{}', extensions: buildResultExtensions(), parent: getElement('resultJsonEditor') });
+    return singletons.resultEditor;
 }
 
 export function getResultEditor(): EditorView {
-  if (resultEditor === null)
-    throw new Error('result editor is not created yet');
-  return resultEditor;
+    const { resultEditor } = EditorSingletons.getInstance();
+    if (resultEditor === null)
+        throw new Error('result editor is not created yet');
+    return resultEditor;
 }
 
 function buildInputEditor(parentId: string, clearError: (update: ViewUpdate) => void, onEditorChange: (update: ViewUpdate) => void, extraExtensions: Extension[]): EditorView {
-  const extensions = [buildJsonExtensions(), EditorView.updateListener.of(clearError), EditorView.updateListener.of(onEditorChange), extraExtensions];
-  return new EditorView({ doc: '', extensions: extensions, parent: getElement(parentId) });
+    const extensions = [buildJsonExtensions(), EditorView.updateListener.of(clearError), EditorView.updateListener.of(onEditorChange), extraExtensions];
+    return new EditorView({ doc: '', extensions: extensions, parent: getElement(parentId) });
 }
 
 export function createStateEditor(onEditorChange: (update: ViewUpdate) => void): EditorView {
-  stateEditor = buildInputEditor('stateJsonEditor', clearStateJsonError, onEditorChange, [linter(findStateShapeErrors)]);
-  return stateEditor;
+    const singletons = EditorSingletons.getInstance();
+    singletons.stateEditor = buildInputEditor('stateJsonEditor', clearStateJsonError, onEditorChange, [linter(findStateShapeErrors)]);
+    return singletons.stateEditor;
 }
 
 export function getStateEditor(): EditorView {
-  if (stateEditor === null)
-    throw new Error('state editor is not created yet');
-  return stateEditor;
+    const { stateEditor } = EditorSingletons.getInstance();
+    if (stateEditor === null)
+        throw new Error('state editor is not created yet');
+    return stateEditor;
 }
 
 export function createQuestionsEditor(onEditorChange: (update: ViewUpdate) => void): EditorView {
-  questionsEditor = buildInputEditor('questionsJsonEditor', clearQuestionsJsonError, onEditorChange, [createAddQuestion(), createPlaceholders(), createPlaceholderTab(), IS_QUESTIONS_EDITOR.of(true), linter(findQuestionsShapeErrors)]);
-  return questionsEditor;
+    const singletons = EditorSingletons.getInstance();
+    singletons.questionsEditor = buildInputEditor('questionsJsonEditor', clearQuestionsJsonError, onEditorChange, [createAddQuestion(), createPlaceholders(), createPlaceholderTab(), getQuestionsEditorFacet().of(true), linter(findQuestionsShapeErrors)]);
+    return singletons.questionsEditor;
 }
 
 export function getQuestionsEditor(): EditorView {
-  if (questionsEditor === null)
-    throw new Error('questions editor is not created yet');
-  return questionsEditor;
+    const { questionsEditor } = EditorSingletons.getInstance();
+    if (questionsEditor === null)
+        throw new Error('questions editor is not created yet');
+    return questionsEditor;
 }
 
 export function replaceEditorText(editor: EditorView, text: string): void {
-  editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: text }, annotations: FILL_ANNOTATION.of(true) });
+    editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: text }, annotations: getFillAnnotation().of(true) });
 }
 
 export function fillEditorText(editor: EditorView, text: string): void {
-  editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: text }, annotations: [FILL_ANNOTATION.of(true), Transaction.addToHistory.of(false)] });
+    editor.dispatch({ changes: { from: 0, to: editor.state.doc.length, insert: text }, annotations: [getFillAnnotation().of(true),Transaction.addToHistory.of(false)] });
 }
 
 export function setEditorLocked(editor: EditorView, isLocked: boolean): void {
-  editor.dispatch({ effects: LOCK_COMPARTMENT.reconfigure(isLocked ? LOCKED_EXTENSIONS : []), annotations: FILL_ANNOTATION.of(true) });
+    const { lockCompartment, lockedExtensions } = EditorSingletons.getInstance();
+    editor.dispatch({ effects: lockCompartment.reconfigure(isLocked ? lockedExtensions : []), annotations: getFillAnnotation().of(true) });
 }
 
 export function renderResultJson(value: unknown): void {
-  replaceEditorText(getResultEditor(), formatResultJson(value));
+    replaceEditorText(getResultEditor(), formatResultJson(value));
 }
 
 export function renderStateJson(value: unknown): void {
-  fillEditorText(getStateEditor(), formatResultJson(value));
+    fillEditorText(getStateEditor(), formatResultJson(value));
 }
 
 export function renderQuestionsJson(value: unknown): void {
-  fillEditorText(getQuestionsEditor(), formatResultJson(value));
+    fillEditorText(getQuestionsEditor(), formatResultJson(value));
 }

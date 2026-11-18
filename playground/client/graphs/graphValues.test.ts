@@ -1,71 +1,85 @@
 import { test, expect } from 'bun:test';
 import type { Version } from '../../history/playgroundHistory';
 import type { Answer } from './graphTypes';
-import { computeSummary, formatValueText, listAnswers, listOptionKeys, listProviders, listValues, NOUL_KEY, readQuestions, readValue } from './graphValues';
+import { computeSummary, formatValueText, listAnswers, listOptionKeys, listProviders, getNoulKey, listValues, readQuestions, readValue } from './graphValues';
 
-const choiceAnswer: Answer = { type: 'choice', choice: 'a', confidence: 0.9, probabilities: { a: 0.7, b: 0.3 } };
-const noulAnswer: Answer = { type: 'noul', noul: 0.8 };
-const scoreAnswer: Answer = { type: 'score', score: 1.4, confidence: 0.5, legend: { 0: 'low', 1: 'high' }, probabilities: { 0: 0.2, 1: 0.8 } };
-const usage = { input_tokens: 1, output_tokens: 1 };
+function buildChoiceAnswer(): Answer {
+    return { type: 'choice', choice: 'a', confidence: 0.9, probabilities: { a: 0.7, b: 0.3 } };
+}
+
+function buildNoulAnswer(): Answer {
+    return { type: 'noul', noul: 0.8 };
+}
+
+function buildScoreAnswer(): Answer {
+    return { type: 'score', score: 1.4, confidence: 0.5, legend: { 0: 'low', 1: 'high' }, probabilities: { 0: 0.2, 1: 0.8 } };
+}
+
+function buildUsage() {
+    return { input_tokens: 1, output_tokens: 1 };
+}
 
 function buildVersion(questions: unknown): Version {
-  return { time: 'now', state: {}, questions: questions as never, calls: 1, outputs: [{ model: 'm', answers: { q: noulAnswer }, usage }] };
+    return { time: 'now', state: {}, questions: questions as never, calls: 1, outputs: [{ model: 'm', answers: { q: buildNoulAnswer() }, usage: buildUsage() }] };
 }
 
 function validateFormatValueText() {
-  expect(formatValueText(undefined)).toBe('(none)');
-  expect(formatValueText(null)).toBe('(none)');
-  expect(formatValueText('text')).toBe('text');
-  expect(formatValueText({ a: 1 })).toBe('{"a":1}');
+    expect(formatValueText(undefined)).toBe('(none)');
+    expect(formatValueText(null)).toBe('(none)');
+    expect(formatValueText('text')).toBe('text');
+    expect(formatValueText({ a: 1 })).toBe('{"a":1}');
 }
 
 function validateNoulIsOneYesOptionAtTheNoulValue() {
-  expect(NOUL_KEY).toBe('yes');
-  expect(listOptionKeys(noulAnswer)).toEqual(['yes']);
-  expect(readValue(noulAnswer, 'yes')).toBe(0.8);
-  expect(listValues([noulAnswer, noulAnswer], 'yes')).toEqual([0.8, 0.8]);
+    const noulAnswer = buildNoulAnswer();
+    expect(getNoulKey()).toBe('yes');
+    expect(listOptionKeys(noulAnswer)).toEqual(['yes']);
+    expect(readValue(noulAnswer, 'yes')).toBe(0.8);
+    expect(listValues([noulAnswer, noulAnswer], 'yes')).toEqual([0.8, 0.8]);
 }
 
 function validateBadKeysThrow() {
-  function readNoulNo() {
-    return readValue(noulAnswer, 'no');
-  }
-  function readChoiceMissing() {
-    return readValue(choiceAnswer, 'zzz');
-  }
-  expect(readNoulNo).toThrow();
-  expect(readChoiceMissing).toThrow();
+    function readNoulNo() {
+        return readValue(buildNoulAnswer(), 'no');
+    }
+    function readChoiceMissing() {
+        return readValue(buildChoiceAnswer(), 'zzz');
+    }
+    expect(readNoulNo).toThrow();
+    expect(readChoiceMissing).toThrow();
 }
 
 function validateChoiceAndScoreValues() {
-  expect(listOptionKeys(choiceAnswer)).toEqual(['a', 'b']);
-  expect(listOptionKeys(scoreAnswer)).toEqual(['0', '1']);
-  expect(readValue(choiceAnswer, 'b')).toBe(0.3);
-  expect(readValue(scoreAnswer, '1')).toBe(0.8);
+    const choiceAnswer = buildChoiceAnswer();
+    const scoreAnswer = buildScoreAnswer();
+    expect(listOptionKeys(choiceAnswer)).toEqual(['a', 'b']);
+    expect(listOptionKeys(scoreAnswer)).toEqual(['0', '1']);
+    expect(readValue(choiceAnswer, 'b')).toBe(0.3);
+    expect(readValue(scoreAnswer, '1')).toBe(0.8);
 }
 
 function validateComputeSummary() {
-  const summary = computeSummary([0.2, 0.8, 0.5]);
-  expect(summary.low).toBe(0.2);
-  expect(summary.high).toBe(0.8);
-  expect(summary.average).toBeCloseTo(0.5);
+    const summary = computeSummary([0.2, 0.8, 0.5]);
+    expect(summary.low).toBe(0.2);
+    expect(summary.high).toBe(0.8);
+    expect(summary.average).toBeCloseTo(0.5);
 }
 
 function validateListAnswersReadsOneNamePerOutput() {
-  expect(listAnswers(buildVersion({}), 'q')).toEqual([noulAnswer]);
+    expect(listAnswers(buildVersion({}), 'q')).toEqual([buildNoulAnswer()]);
 }
 
 function validateReadQuestionsRejectsNonObjects() {
-  const questions = { q: { type: 'noul' as const } };
-  expect(readQuestions(buildVersion(questions))).toBe(questions);
-  function readNull() {
-    return readQuestions(buildVersion(null));
-  }
-  function readArray() {
-    return readQuestions(buildVersion([]));
-  }
-  expect(readNull).toThrow();
-  expect(readArray).toThrow();
+    const questions = { q: { type: 'noul' as const } };
+    expect(readQuestions(buildVersion(questions))).toBe(questions);
+    function readNull() {
+        return readQuestions(buildVersion(null));
+    }
+    function readArray() {
+        return readQuestions(buildVersion([]));
+    }
+    expect(readNull).toThrow();
+    expect(readArray).toThrow();
 }
 
 test('test_format_value_text_handles_missing_text_and_json', validateFormatValueText);
@@ -76,8 +90,9 @@ test('test_compute_summary_finds_low_high_average', validateComputeSummary);
 test('test_list_answers_reads_one_name_per_output', validateListAnswersReadsOneNamePerOutput);
 
 function validateListProvidersReadsOneProviderPerOutputAndTreatsOldOutputsAsTypeSafe() {
-  const version = { ...buildVersion({}), outputs: [{ model: 'm', answers: {}, usage, provider: 'SubQ' }, { model: 'm', answers: {}, usage }] } as unknown as Version;
-  expect(listProviders(version)).toEqual(['SubQ', 'TypeSafe']);
+    const usage = buildUsage();
+    const version = { ...buildVersion({}), outputs: [{ model: 'm', answers: {}, usage, provider: 'SubQ' }, { model: 'm', answers: {}, usage }] } as unknown as Version;
+    expect(listProviders(version)).toEqual(['SubQ', 'TypeSafe']);
 }
 test('test_list_providers_reads_one_provider_per_output_and_treats_old_outputs_as_typesafe', validateListProvidersReadsOneProviderPerOutputAndTreatsOldOutputsAsTypeSafe);
 test('test_read_questions_rejects_non_objects', validateReadQuestionsRejectsNonObjects);

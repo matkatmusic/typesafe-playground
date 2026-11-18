@@ -3,37 +3,39 @@ import type { Version } from '../../history/playgroundHistory';
 import { findPinned, readPinnedData, readPinnedValues } from './pinned';
 
 function buildVersion(outputs: unknown[]): Version {
-  return { time: 't', state: {}, questions: {}, calls: outputs.length, outputs: outputs as Version['outputs'] };
+    return { time: 't', state: {}, questions: {}, calls: outputs.length, outputs: outputs as Version['outputs'] };
 }
 
-const noulOutput = { answers: { q: { type: 'noul', noul: 0.8 } } };
+function buildNoulOutput() {
+    return { answers: { q: { type: 'noul', noul: 0.8 } } };
+}
 
 function validateFindPinnedMatchesByIndex() {
-  const versions = [buildVersion([]), buildVersion([])];
-  expect(findPinned(versions, 1)).toBe(versions[1]);
-  expect(findPinned(versions, null)).toBeNull();
-  expect(findPinned(versions, 9)).toBeNull();
+    const versions = [buildVersion([]), buildVersion([])];
+    expect(findPinned(versions, 1)).toBe(versions[1]);
+    expect(findPinned(versions, null)).toBeNull();
+    expect(findPinned(versions, 9)).toBeNull();
 }
 
 function validateReadPinnedDataNeedsRunsAndTheQuestion() {
-  expect(readPinnedData(null, 'q')).toBeNull();
-  expect(readPinnedData(buildVersion([]), 'q')).toBeNull();
-  expect(readPinnedData(buildVersion([noulOutput]), 'other')).toBeNull();
-  const data = readPinnedData(buildVersion([noulOutput, noulOutput]), 'q');
-  expect(data?.keys).toEqual(['yes']);
-  expect(data?.answers.length).toBe(2);
+    expect(readPinnedData(null, 'q')).toBeNull();
+    expect(readPinnedData(buildVersion([]), 'q')).toBeNull();
+    expect(readPinnedData(buildVersion([buildNoulOutput()]), 'other')).toBeNull();
+    const data = readPinnedData(buildVersion([buildNoulOutput(), buildNoulOutput()]), 'q');
+    expect(data?.keys).toEqual(['yes']);
+    expect(data?.answers.length).toBe(2);
 }
 
 function validateReadPinnedDataListsOneProviderPerOutputAndTreatsOldOutputsAsTypeSafe() {
-  const data = readPinnedData(buildVersion([{ ...noulOutput, provider: 'SubQ' }, noulOutput]), 'q');
-  expect(data?.providers).toEqual(['SubQ', 'TypeSafe']);
+    const data = readPinnedData(buildVersion([{ ...buildNoulOutput(), provider: 'SubQ' }, buildNoulOutput()]), 'q');
+    expect(data?.providers).toEqual(['SubQ', 'TypeSafe']);
 }
 
 function validateReadPinnedValuesNeedsTheKey() {
-  const data = readPinnedData(buildVersion([noulOutput, noulOutput]), 'q');
-  expect(readPinnedValues(null, 'yes')).toBeNull();
-  expect(readPinnedValues(data, 'no')).toBeNull();
-  expect(readPinnedValues(data, 'yes')).toEqual({ values: [0.8, 0.8] });
+    const data = readPinnedData(buildVersion([buildNoulOutput(), buildNoulOutput()]), 'q');
+    expect(readPinnedValues(null, 'yes')).toBeNull();
+    expect(readPinnedValues(data, 'no')).toBeNull();
+    expect(readPinnedValues(data, 'yes')).toEqual({ values: [0.8, 0.8] });
 }
 
 test('test_find_pinned_matches_by_index', validateFindPinnedMatchesByIndex);

@@ -17,28 +17,29 @@ export interface RunBody { index: number; calls: number; apiKey: string; provide
 export interface RunResult { outputs: RunOutput[]; version: Version; index: number }
 
 // Minimal File System Access API members (Chromium only)
+// eslint-disable-next-line no-restricted-syntax
 declare global {
-  interface FilePickerAcceptType {
-    description?: string;
-    accept: Record<string, string[]>;
-  }
+    interface FilePickerAcceptType {
+        description?: string;
+        accept: Record<string, string[]>;
+    }
 
-  interface FilePickerOptions {
-    types?: FilePickerAcceptType[];
-    suggestedName?: string;
-  }
+    interface FilePickerOptions {
+        types?: FilePickerAcceptType[];
+        suggestedName?: string;
+    }
 
-  interface FileSystemWritableFileStream {
-    write(data: string): Promise<void>;
-    close(): Promise<void>;
-  }
+    interface FileSystemWritableFileStream {
+        write(data: string): Promise<void>;
+        close(): Promise<void>;
+    }
 
-  interface FileSystemFileHandle {
-    createWritable(): Promise<FileSystemWritableFileStream>;
-  }
+    interface FileSystemFileHandle {
+        createWritable(): Promise<FileSystemWritableFileStream>;
+    }
 
-  interface Window {
-    showOpenFilePicker(options?: FilePickerOptions): Promise<FileSystemFileHandle[]>;
-    showSaveFilePicker(options?: FilePickerOptions): Promise<FileSystemFileHandle>;
-  }
+    interface Window {
+        showOpenFilePicker(options?: FilePickerOptions): Promise<FileSystemFileHandle[]>;
+        showSaveFilePicker(options?: FilePickerOptions): Promise<FileSystemFileHandle>;
+    }
 }

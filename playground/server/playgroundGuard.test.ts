@@ -1,62 +1,67 @@
 import { test, expect } from 'bun:test';
 import { isRequestAllowed, listAllowedHosts } from './playgroundGuard';
 
-const HOSTNAME = '127.0.0.1';
-const PORT = 4318;
+function getHostname() {
+    return '127.0.0.1';
+}
 
-function makeRequest(method: string, headers: Record<string, string>) {
-  return new Request('http://127.0.0.1:4318/run', { method, headers });
+function getPort() {
+    return 4318;
+}
+
+function buildRequest(method: string, headers: Record<string, string>) {
+    return new Request('http://127.0.0.1:4318/run', { method, headers });
 }
 
 function validateAllowedHostsUseHostnameAndLocalhost() {
-  expect(listAllowedHosts(HOSTNAME, PORT)).toEqual(['127.0.0.1:4318', 'localhost:4318']);
+    expect(listAllowedHosts(getHostname(), getPort())).toEqual(['127.0.0.1:4318', 'localhost:4318']);
 }
 
 function validateGetWithAllowedHostPasses() {
-  expect(isRequestAllowed(makeRequest('GET', { host: '127.0.0.1:4318' }), HOSTNAME, PORT)).toBe(true);
-  expect(isRequestAllowed(makeRequest('GET', { host: 'localhost:4318' }), HOSTNAME, PORT)).toBe(true);
+    expect(isRequestAllowed(buildRequest('GET', { host: '127.0.0.1:4318' }), getHostname(), getPort())).toBe(true);
+    expect(isRequestAllowed(buildRequest('GET', { host: 'localhost:4318' }), getHostname(), getPort())).toBe(true);
 }
 
 function validatePostWithAllowedHostOriginAndJsonPasses() {
-  const headers = { host: 'localhost:4318', origin: 'http://localhost:4318', 'content-type': 'application/json' };
-  expect(isRequestAllowed(makeRequest('POST', headers), HOSTNAME, PORT)).toBe(true);
-  const charsetHeaders = { host: '127.0.0.1:4318', origin: 'http://127.0.0.1:4318', 'content-type': 'application/json; charset=utf-8' };
-  expect(isRequestAllowed(makeRequest('POST', charsetHeaders), HOSTNAME, PORT)).toBe(true);
+    const headers = { host: 'localhost:4318', origin: 'http://localhost:4318', 'content-type': 'application/json' };
+    expect(isRequestAllowed(buildRequest('POST', headers), getHostname(), getPort())).toBe(true);
+    const charsetHeaders = { host: '127.0.0.1:4318', origin: 'http://127.0.0.1:4318', 'content-type': 'application/json; charset=utf-8' };
+    expect(isRequestAllowed(buildRequest('POST', charsetHeaders), getHostname(), getPort())).toBe(true);
 }
 
 function validateWrongHostFails() {
-  expect(isRequestAllowed(makeRequest('GET', { host: 'evil.example:4318' }), HOSTNAME, PORT)).toBe(false);
-  expect(isRequestAllowed(makeRequest('GET', { host: '127.0.0.1:9999' }), HOSTNAME, PORT)).toBe(false);
+    expect(isRequestAllowed(buildRequest('GET', { host: 'evil.example:4318' }), getHostname(), getPort())).toBe(false);
+    expect(isRequestAllowed(buildRequest('GET', { host: '127.0.0.1:9999' }), getHostname(), getPort())).toBe(false);
 }
 
 function validateForeignOriginFails() {
-  const headers = { host: '127.0.0.1:4318', origin: 'https://evil.example', 'content-type': 'application/json' };
-  expect(isRequestAllowed(makeRequest('POST', headers), HOSTNAME, PORT)).toBe(false);
+    const headers = { host: '127.0.0.1:4318', origin: 'https://evil.example', 'content-type': 'application/json' };
+    expect(isRequestAllowed(buildRequest('POST', headers), getHostname(), getPort())).toBe(false);
 }
 
 function validateMissingOriginOnPostFails() {
-  const headers = { host: '127.0.0.1:4318', 'content-type': 'application/json' };
-  expect(isRequestAllowed(makeRequest('POST', headers), HOSTNAME, PORT)).toBe(false);
+    const headers = { host: '127.0.0.1:4318', 'content-type': 'application/json' };
+    expect(isRequestAllowed(buildRequest('POST', headers), getHostname(), getPort())).toBe(false);
 }
 
 function validateTextPlainContentTypeFails() {
-  const headers = { host: '127.0.0.1:4318', origin: 'http://127.0.0.1:4318', 'content-type': 'text/plain' };
-  expect(isRequestAllowed(makeRequest('POST', headers), HOSTNAME, PORT)).toBe(false);
+    const headers = { host: '127.0.0.1:4318', origin: 'http://127.0.0.1:4318', 'content-type': 'text/plain' };
+    expect(isRequestAllowed(buildRequest('POST', headers), getHostname(), getPort())).toBe(false);
 }
 
 function validateLanHostPassesOnlyWhenItIsInThePassedList() {
-  const getHeaders = { host: '192.168.1.20:4318' };
-  const postHeaders = { host: '192.168.1.20:4318', origin: 'http://192.168.1.20:4318', 'content-type': 'application/json' };
-  expect(listAllowedHosts(HOSTNAME, PORT, ['192.168.1.20'])).toEqual(['127.0.0.1:4318', 'localhost:4318', '192.168.1.20:4318']);
-  expect(isRequestAllowed(makeRequest('GET', getHeaders), HOSTNAME, PORT, ['192.168.1.20'])).toBe(true);
-  expect(isRequestAllowed(makeRequest('POST', postHeaders), HOSTNAME, PORT, ['192.168.1.20'])).toBe(true);
-  expect(isRequestAllowed(makeRequest('GET', getHeaders), HOSTNAME, PORT, ['10.0.0.5'])).toBe(false);
+    const getHeaders = { host: '192.168.1.20:4318' };
+    const postHeaders = { host: '192.168.1.20:4318', origin: 'http://192.168.1.20:4318', 'content-type': 'application/json' };
+    expect(listAllowedHosts(getHostname(), getPort(), ['192.168.1.20'])).toEqual(['127.0.0.1:4318', 'localhost:4318', '192.168.1.20:4318']);
+    expect(isRequestAllowed(buildRequest('GET', getHeaders), getHostname(), getPort(), ['192.168.1.20'])).toBe(true);
+    expect(isRequestAllowed(buildRequest('POST', postHeaders), getHostname(), getPort(), ['192.168.1.20'])).toBe(true);
+    expect(isRequestAllowed(buildRequest('GET', getHeaders), getHostname(), getPort(), ['10.0.0.5'])).toBe(false);
 }
 
 function validateLanHostIsRefusedWithoutTheLanList() {
-  const postHeaders = { host: '192.168.1.20:4318', origin: 'http://192.168.1.20:4318', 'content-type': 'application/json' };
-  expect(isRequestAllowed(makeRequest('GET', { host: '192.168.1.20:4318' }), HOSTNAME, PORT)).toBe(false);
-  expect(isRequestAllowed(makeRequest('POST', postHeaders), HOSTNAME, PORT)).toBe(false);
+    const postHeaders = { host: '192.168.1.20:4318', origin: 'http://192.168.1.20:4318', 'content-type': 'application/json' };
+    expect(isRequestAllowed(buildRequest('GET', { host: '192.168.1.20:4318' }), getHostname(), getPort())).toBe(false);
+    expect(isRequestAllowed(buildRequest('POST', postHeaders), getHostname(), getPort())).toBe(false);
 }
 
 test('test_lan_host_passes_only_when_it_is_in_the_passed_list', validateLanHostPassesOnlyWhenItIsInThePassedList);

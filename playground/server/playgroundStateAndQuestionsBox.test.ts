@@ -5,99 +5,121 @@ import { buildPage } from './playground';
 import { initHistory } from '../history/playgroundHistory';
 
 async function buildTempHistoryPath() {
-  const historyPath = `${mkdtempSync(`${tmpdir()}/playground-test-`)}/results/playground-history.json`;
-  await initHistory(historyPath);
-  return historyPath;
+    const historyPath = `${mkdtempSync(`${tmpdir()}/playground-test-`)}/results/playground-history.json`;
+    await initHistory(historyPath);
+    return historyPath;
+}
+
+function findLineStartingWith(page: string, prefix: string) {
+    for (const line of page.split('\n')) {
+        const startsWithPrefix = line.startsWith(prefix);
+        if (startsWithPrefix) {
+            return line;
+        }
+    }
+    return undefined;
+}
+
+function findLockGreyRuleLine(page: string) {
+    for (const line of page.split('\n')) {
+        const hasOpacity = line.includes('opacity: 0.5');
+        const hasEditorHas = line.includes('.cm-editor:has(');
+        const isLockRule = hasOpacity && hasEditorHas;
+        if (isLockRule) {
+            return line;
+        }
+    }
+    return undefined;
 }
 
 async function validateStateAndQuestionsBoxHoldsTwoRowsAndADragBarInOrder() {
-  const page = await buildPage(await buildTempHistoryPath());
-  const parentIndex = page.indexOf('id="stateAndQuestionsBox"');
-  const stateIndex = page.indexOf('id="stateJsonEditor"');
-  const barIndex = page.indexOf('id="rowResizer"');
-  const questionsIndex = page.indexOf('id="questionsJsonEditor"');
-  const columnBarIndex = page.indexOf('id="columnResizer"');
-  expect(parentIndex).toBeGreaterThan(page.indexOf('id="errorLine"'));
-  expect(parentIndex).toBeLessThan(columnBarIndex);
-  expect(stateIndex).toBeGreaterThan(parentIndex);
-  expect(barIndex).toBeGreaterThan(stateIndex);
-  expect(questionsIndex).toBeGreaterThan(barIndex);
-  expect(questionsIndex).toBeLessThan(columnBarIndex);
+    const page = await buildPage(await buildTempHistoryPath());
+    const parentIndex = page.indexOf('id="stateAndQuestionsBox"');
+    const stateIndex = page.indexOf('id="stateJsonEditor"');
+    const barIndex = page.indexOf('id="rowResizer"');
+    const questionsIndex = page.indexOf('id="questionsJsonEditor"');
+    const columnBarIndex = page.indexOf('id="columnResizer"');
+    expect(parentIndex).toBeGreaterThan(page.indexOf('id="errorLine"'));
+    expect(parentIndex).toBeLessThan(columnBarIndex);
+    expect(stateIndex).toBeGreaterThan(parentIndex);
+    expect(barIndex).toBeGreaterThan(stateIndex);
+    expect(questionsIndex).toBeGreaterThan(barIndex);
+    expect(questionsIndex).toBeLessThan(columnBarIndex);
 }
 
 async function validateEachRowStartsWithItsTitleLabelInsideTheSizedBox() {
-  const page = await buildPage(await buildTempHistoryPath());
-  const stateUndoRedo = '<button class="format-json-button" id="stateUndoButton">Undo</button><button class="format-json-button" id="stateRedoButton">Redo</button>';
-  const questionsUndoRedo = '<button class="format-json-button" id="questionsUndoButton">Undo</button><button class="format-json-button" id="questionsRedoButton">Redo</button>';
-  const stateOpening = `<div id="stateJsonEditor"><div id="stateTitleRow"><span class="other-label">state</span><label id="batchToggle"><input type="checkbox" id="batchCheckbox"> batch</label>${stateUndoRedo}<button class="format-json-button" id="stateFormatJsonButton">Format JSON</button></div></div>`;
-  const questionsOpening = `<div id="questionsJsonEditor"><div id="questionsTitleRow"><span class="other-label">questions</span><div id="questionsAddQuestion"></div>${questionsUndoRedo}<button class="format-json-button" id="questionsFormatJsonButton">Format JSON</button></div>`;
-  expect(page).toContain('.format-json-button { margin-inline-start: auto;');
-  expect(page).toContain('.format-json-button + .format-json-button { margin-inline-start: 0; }');
-  expect(page).toContain(stateOpening);
-  expect(page).toContain(questionsOpening);
-  expect(page.indexOf(stateOpening)).toBeLessThan(page.indexOf('id="rowResizer"'));
-  expect(page.indexOf(questionsOpening)).toBeGreaterThan(page.indexOf('id="rowResizer"'));
+    const page = await buildPage(await buildTempHistoryPath());
+    const stateUndoRedo = '<button class="format-json-button" id="stateUndoButton">Undo</button><button class="format-json-button" id="stateRedoButton">Redo</button>';
+    const questionsUndoRedo = '<button class="format-json-button" id="questionsUndoButton">Undo</button><button class="format-json-button" id="questionsRedoButton">Redo</button>';
+    const stateOpening = `<div id="stateJsonEditor"><div id="stateTitleRow"><span class="other-label">state</span><label id="batchToggle"><input type="checkbox" id="batchCheckbox"> batch</label>${stateUndoRedo}<button class="format-json-button" id="stateFormatJsonButton">Format JSON</button></div></div>`;
+    const questionsOpening = `<div id="questionsJsonEditor"><div id="questionsTitleRow"><span class="other-label">questions</span><div id="questionsAddQuestion"></div>${questionsUndoRedo}<button class="format-json-button" id="questionsFormatJsonButton">Format JSON</button></div>`;
+    expect(page).toContain('.format-json-button { margin-inline-start: auto;');
+    expect(page).toContain('.format-json-button + .format-json-button { margin-inline-start: 0; }');
+    expect(page).toContain(stateOpening);
+    expect(page).toContain(questionsOpening);
+    expect(page.indexOf(stateOpening)).toBeLessThan(page.indexOf('id="rowResizer"'));
+    expect(page.indexOf(questionsOpening)).toBeGreaterThan(page.indexOf('id="rowResizer"'));
 }
 
 async function validateTitleLabelColorChangesWithTheTheme() {
-  const page = await buildPage(await buildTempHistoryPath());
-  const lightColor = page.match(/:root \{[^}]*--label-other: (#\w+);/)?.[1];
-  const darkColor = page.match(/:root\[data-theme="dark"\] \{[^}]*--label-other: (#\w+);/)?.[1];
-  expect(lightColor).toBeDefined();
-  expect(darkColor).toBeDefined();
-  expect(lightColor).not.toBe(darkColor);
-  expect(page).toContain('.other-label { flex: none; color: var(--label-other, #8a6d00); }');
+    const page = await buildPage(await buildTempHistoryPath());
+    const lightColor = page.match(/:root \{[^}]*--label-other: (#\w+);/)?.[1];
+    const darkColor = page.match(/:root\[data-theme="dark"\] \{[^}]*--label-other: (#\w+);/)?.[1];
+    expect(lightColor).toBeDefined();
+    expect(darkColor).toBeDefined();
+    expect(lightColor).not.toBe(darkColor);
+    expect(page).toContain('.other-label { flex: none; color: var(--label-other, #8a6d00); }');
 }
 
 async function validateLockGreyCueOnlyMatchesTheLockedContentElement() {
-  const page = await buildPage(await buildTempHistoryPath());
-  const lockRule = page.split('\n').find((line) => line.includes('opacity: 0.5') && line.includes('.cm-editor:has('));
-  expect(lockRule).toBeDefined();
-  expect(lockRule).toContain('.cm-editor:has(> .cm-scroller > .cm-content[contenteditable="false"])');
-  expect(lockRule).not.toContain('has([contenteditable');
+    const page = await buildPage(await buildTempHistoryPath());
+    const lockRule = findLockGreyRuleLine(page);
+    expect(lockRule).toBeDefined();
+    expect(lockRule).toContain('.cm-editor:has(> .cm-scroller > .cm-content[contenteditable="false"])');
+    expect(lockRule).not.toContain('has([contenteditable');
 }
 
 async function validatePlaceholderHighlightDoesNotChangeTheTextBox() {
-  const page = await buildPage(await buildTempHistoryPath());
-  const rule = page.split('\n').find((line) => line.startsWith('#questionsJsonEditor .cm-placeholderValue {'));
-  const selectedRule = page.split('\n').find((line) => line.startsWith('#questionsJsonEditor .cm-placeholderValue.cm-placeholderSelected {'));
-  expect(rule).toBeDefined();
-  expect(selectedRule).toBeDefined();
-  expect(selectedRule).toContain('outline: 1px dashed');
-  for (const boxProperty of ['border:', 'padding', 'margin', 'display', 'line-height', 'font-size']) {
-    expect(rule).not.toContain(boxProperty);
-    expect(selectedRule).not.toContain(boxProperty);
-  }
+    const page = await buildPage(await buildTempHistoryPath());
+    const rule = findLineStartingWith(page, '#questionsJsonEditor .cm-placeholderValue {');
+    const selectedRule = findLineStartingWith(page, '#questionsJsonEditor .cm-placeholderValue.cm-placeholderSelected {');
+    expect(rule).toBeDefined();
+    expect(selectedRule).toBeDefined();
+    expect(selectedRule).toContain('outline: 1px dashed');
+    for (const boxProperty of ['border:', 'padding', 'margin', 'display', 'line-height', 'font-size']) {
+        expect(rule).not.toContain(boxProperty);
+        expect(selectedRule).not.toContain(boxProperty);
+    }
 }
 
 async function validateIssue26DarkModeHoverBoxRuleBeatsCodeMirrorsLightTooltipRule() {
-  const page = await buildPage(await buildTempHistoryPath());
-  const rule = page.match(/body \.cm-editor \.cm-tooltip \{([^}]*)\}/)?.[1];
-  expect(rule).toBeDefined();
-  expect(rule).toContain('background: var(--panel, #f3f2ef);');
-  expect(rule).toContain('color: var(--text, #0b0b0b);');
-  expect(rule).toContain('border: 1px solid var(--grid, #dddcd7);');
-  expect(page).not.toContain('body .cm-tooltip {');
+    const page = await buildPage(await buildTempHistoryPath());
+    const rule = page.match(/body \.cm-editor \.cm-tooltip \{([^}]*)\}/)?.[1];
+    expect(rule).toBeDefined();
+    expect(rule).toContain('background: var(--panel, #f3f2ef);');
+    expect(rule).toContain('color: var(--text, #0b0b0b);');
+    expect(rule).toContain('border: 1px solid var(--grid, #dddcd7);');
+    expect(page).not.toContain('body .cm-tooltip {');
 }
 
 async function validateIssue32FindReplaceButtonsAreStyledInAllThreeEditors() {
-  const page = await buildPage(await buildTempHistoryPath());
-  const selector = ':is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-button {';
-  const rule = page.split('\n').find((line) => line.startsWith(selector));
-  expect(rule).toBeDefined();
-  expect(rule).toContain('background: var(--surface, #fcfcfb);');
-  expect(rule).toContain('color: var(--text, #0b0b0b);');
-  expect(rule).toContain('border: 1px solid var(--button-border, #4a4945);');
+    const page = await buildPage(await buildTempHistoryPath());
+    const selector = ':is(#resultJsonEditor, #stateJsonEditor, #questionsJsonEditor) .cm-button {';
+    const rule = findLineStartingWith(page, selector);
+    expect(rule).toBeDefined();
+    expect(rule).toContain('background: var(--surface, #fcfcfb);');
+    expect(rule).toContain('color: var(--text, #0b0b0b);');
+    expect(rule).toContain('border: 1px solid var(--button-border, #4a4945);');
 }
 
 async function validateQuestionQuickNavStartsSmallAndGrowsOnlyIntoFreeSpace() {
-  const page = await buildPage(await buildTempHistoryPath());
-  const selector = '#questionsTitleRow .question-quick-nav {';
-  const rule = page.split('\n').find((line) => line.startsWith(selector));
-  expect(rule).toBeDefined();
-  expect(rule).toContain('flex: 1 1 100px;');
-  expect(rule).toContain('min-inline-size: 100px;');
-  expect(rule).toContain('max-inline-size: 200px;');
+    const page = await buildPage(await buildTempHistoryPath());
+    const selector = '#questionsTitleRow .question-quick-nav {';
+    const rule = findLineStartingWith(page, selector);
+    expect(rule).toBeDefined();
+    expect(rule).toContain('flex: 1 1 100px;');
+    expect(rule).toContain('min-inline-size: 100px;');
+    expect(rule).toContain('max-inline-size: 200px;');
 }
 
 test('test_question_quick_nav_starts_small_and_grows_only_into_free_space_so_header_items_do_not_wrap', validateQuestionQuickNavStartsSmallAndGrowsOnlyIntoFreeSpace);

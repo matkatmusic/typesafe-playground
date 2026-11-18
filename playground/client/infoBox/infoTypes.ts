@@ -10,6 +10,6 @@ export interface BarInfoRequest { question: Question; answers: Answer[]; key: st
 export interface ColumnHit { hit: Element; request: BarInfoRequest }
 export interface HoverTracker{ block: HTMLElement; shownHit: Element | null }
 export interface HoverContext {
-  tracker: HoverTracker; svg: Element; hit: Element; request: BarInfoRequest;
-  values: number[]; slotX: number; plotH: number; isAverageShown: boolean; baseline: number;
+    tracker: HoverTracker; svg: Element; hit: Element; request: BarInfoRequest;
+    values: number[]; slotX: number; plotH: number; isAverageShown: boolean; baseline: number;
 }

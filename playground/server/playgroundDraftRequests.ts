@@ -2,66 +2,65 @@ import { dirname } from 'node:path';
 
 export interface Draft { state: string; questions: string; isBatch: boolean }
 
-const SESSION_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-
 export function computeDraftPath(historyPath: string, id: string): string {
-  return `${dirname(historyPath)}/.currentSession-${id}.json`;
+    return `${dirname(historyPath)}/.currentSession-${id}.json`;
 }
 
 export function isSessionId(id: unknown): id is string {
-  if (typeof id !== 'string')
-    return false;
-  const isUuid = SESSION_ID_PATTERN.test(id);
-  return isUuid;
+    if (typeof id !== 'string')
+        return false;
+    const sessionIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+    const isUuid = sessionIdPattern.test(id);
+    return isUuid;
 }
 
 export async function readDraft(historyPath: string, id: string): Promise<Draft | null> {
-  const draftFile = Bun.file(computeDraftPath(historyPath, id));
-  const isDraftPresent = await draftFile.exists();
-  if (!isDraftPresent)
-    return null;
-  const draft: Draft = await draftFile.json();
-  return draft;
+    const draftFile = Bun.file(computeDraftPath(historyPath, id));
+    const isDraftPresent = await draftFile.exists();
+    if (!isDraftPresent)
+        return null;
+    const draft: Draft = await draftFile.json();
+    return draft;
 }
 
 function parseDraftFields(state: unknown, questions: unknown, isBatch: unknown): Draft | Response {
-  const isStateString = typeof state === 'string';
-  if (!isStateString)
-    return new Response('state must be a string', { status: 400 });
-  const isQuestionsString = typeof questions === 'string';
-  if (!isQuestionsString)
-    return new Response('questions must be a string', { status: 400 });
-  const isBatchBoolean = typeof isBatch === 'boolean';
-  if (!isBatchBoolean)
-    return new Response('isBatch must be a boolean', { status: 400 });
-  const draft: Draft = { state, questions, isBatch };
-  return draft;
+    const isStateString = typeof state === 'string';
+    if (!isStateString)
+        return new Response('state must be a string', { status: 400 });
+    const isQuestionsString = typeof questions === 'string';
+    if (!isQuestionsString)
+        return new Response('questions must be a string', { status: 400 });
+    const isBatchBoolean = typeof isBatch === 'boolean';
+    if (!isBatchBoolean)
+        return new Response('isBatch must be a boolean', { status: 400 });
+    const draft: Draft = { state, questions, isBatch };
+    return draft;
 }
 
 function parseDraftBody(body: { id?: unknown; state?: unknown; questions?: unknown; isBatch?: unknown }): { id: string; draft: Draft } | Response {
-  const { id, state, questions, isBatch } = body;
-  const isIdValid = isSessionId(id);
-  if (!isIdValid)
-    return new Response('id must be a lowercase uuid', { status: 400 });
-  const draft = parseDraftFields(state, questions, isBatch);
-  if (draft instanceof Response)
-    return draft;
-  return { id, draft };
+    const { id, state, questions, isBatch } = body;
+    const isIdValid = isSessionId(id);
+    if (!isIdValid)
+        return new Response('id must be a lowercase uuid', { status: 400 });
+    const draft = parseDraftFields(state, questions, isBatch);
+    if (draft instanceof Response)
+        return draft;
+    return { id, draft };
 }
 
 export async function executeDraftRequest(request: Request, historyPath: string): Promise<Response> {
-  const body = (await request.json()) as { id?: unknown; state?: unknown; questions?: unknown; isBatch?: unknown };
-  const parsed = parseDraftBody(body);
-  if (parsed instanceof Response)
-    return parsed;
-  await Bun.write(computeDraftPath(historyPath, parsed.id), JSON.stringify(parsed.draft));
-  return new Response('ok');
+    const body = (await request.json()) as { id?: unknown; state?: unknown; questions?: unknown; isBatch?: unknown };
+    const parsed = parseDraftBody(body);
+    if (parsed instanceof Response)
+        return parsed;
+    await Bun.write(computeDraftPath(historyPath, parsed.id), JSON.stringify(parsed.draft));
+    return new Response('ok');
 }
 
 export async function executeDraftGetRequest(request: Request, historyPath: string): Promise<Response> {
-  const id = new URL(request.url).searchParams.get('id');
-  const isIdValid = isSessionId(id);
-  if (!isIdValid)
-    return new Response('id must be a lowercase uuid', { status: 400 });
-  return Response.json(await readDraft(historyPath, id));
+    const id = new URL(request.url).searchParams.get('id');
+    const isIdValid = isSessionId(id);
+    if (!isIdValid)
+        return new Response('id must be a lowercase uuid', { status: 400 });
+    return Response.json(await readDraft(historyPath, id));
 }

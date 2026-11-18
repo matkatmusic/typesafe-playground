@@ -2,12 +2,16 @@ import { test, expect } from 'bun:test';
 import { formatTabTitle, refreshFileView } from './fileView';
 
 function validateTabTitleShowsFileNameOrUntitled() {
-  expect(formatTabTitle(null)).toBe('Playground - Untitled');
-  expect(formatTabTitle('playground-versions.json')).toBe('Playground - playground-versions.json');
+    expect(formatTabTitle(null)).toBe('Playground - Untitled');
+    expect(formatTabTitle('playground-versions.json')).toBe('Playground - playground-versions.json');
+}
+
+function executeRefreshFileView() {
+    refreshFileView();
 }
 
 function validateRefreshWithoutDocumentThrows() {
-  expect(() => refreshFileView()).toThrow();
+    expect(executeRefreshFileView).toThrow();
 }
 
 test('test_tab_title_shows_file_name_or_untitled', validateTabTitleShowsFileNameOrUntitled);

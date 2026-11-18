@@ -3,36 +3,36 @@ import { appendReferenceText } from '../backticks/backtickTooltip';
 import { getShownVersion } from '../page/state';
 
 export function addPart(parent: HTMLElement, text: string, className: string, question: unknown): void {
-  const span = document.createElement('span');
-  span.className = className;
-  const isMessage = className.includes('info-message');
-  if (isMessage) {
-    const version = getShownVersion();
-    appendReferenceText(span, text, version.state, question);
+    const span = document.createElement('span');
+    span.className = className;
+    const isMessage = className.includes('info-message');
+    if (isMessage) {
+        const version = getShownVersion();
+        appendReferenceText(span, text, version.state, question);
+        parent.appendChild(span);
+        return;
+    }
+    span.textContent = text;
     parent.appendChild(span);
-    return;
-  }
-  span.textContent = text;
-  parent.appendChild(span);
 }
 
 export function addParts(parent: HTMLElement, parts: InfoPart[], question: unknown): void {
-  for (const part of parts)
-    addPart(parent, part[0], part[1], question);
+    for (const part of parts)
+        addPart(parent, part[0], part[1], question);
 }
 
 export function addInfoRow(box: HTMLElement, row: InfoRow, question: unknown): void {
-  addPart(box, row.label, 'info-label', question);
-  const valueCell = document.createElement('span');
-  valueCell.className = 'info-cell';
-  addParts(valueCell, row.parts, question);
-  box.appendChild(valueCell);
+    addPart(box, row.label, 'info-label', question);
+    const valueCell = document.createElement('span');
+    valueCell.className = 'info-cell';
+    addParts(valueCell, row.parts, question);
+    box.appendChild(valueCell);
 }
 
 export function createBarInfoBox(rows: InfoRow[], question: unknown): HTMLDivElement {
-  const box = document.createElement('div');
-  box.className = 'bar-info';
-  for (const row of rows)
-    addInfoRow(box, row, question);
-  return box;
+    const box = document.createElement('div');
+    box.className = 'bar-info';
+    for (const row of rows)
+        addInfoRow(box, row, question);
+    return box;
 }

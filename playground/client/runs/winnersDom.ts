@@ -9,42 +9,42 @@ import { replaceReferences } from '../backticks/references';
 import { formatWinnerLine, listWinnerGroups } from './winners';
 
 export function createQuestionResultLabel(question: Question, answers: Answer[], formatText: (text: string) => string, version: Version): HTMLDivElement {
-  const label = document.createElement('div');
-  const instructionLine = document.createElement('div');
-  instructionLine.className = 'winner-instructions';
-  appendReferenceText(instructionLine, formatText(formatValueText(question.instructions)), version.state, question);
-  label.appendChild(instructionLine);
-  for (const group of listWinnerGroups(answers)) {
-    const winnerLine = document.createElement('div');
-    winnerLine.className = 'winner-line';
-    appendReferenceText(winnerLine, formatText(formatWinnerLine(question, group)), version.state, question);
-    label.appendChild(winnerLine);
-  }
-  return label;
+    const label = document.createElement('div');
+    const instructionLine = document.createElement('div');
+    instructionLine.className = 'winner-instructions';
+    appendReferenceText(instructionLine, formatText(formatValueText(question.instructions)), version.state, question);
+    label.appendChild(instructionLine);
+    for (const group of listWinnerGroups(answers)) {
+        const winnerLine = document.createElement('div');
+        winnerLine.className = 'winner-line';
+        appendReferenceText(winnerLine, formatText(formatWinnerLine(question, group)), version.state, question);
+        label.appendChild(winnerLine);
+    }
+    return label;
 }
 
 function copyText(text: string): string {
-  return text;
+    return text;
 }
 
 export function buildTextFormatter(version: Version, question: Question): (text: string) => string {
-  function replaceVersionReferences(text: string): string {
-    return replaceReferences(text, version.state, question);
-  }
-  return graphState.isReferencesReplaced ? replaceVersionReferences : copyText;
+    function replaceVersionReferences(text: string): string {
+        return replaceReferences(text, version.state, question);
+    }
+    return graphState.isReferencesReplaced ? replaceVersionReferences : copyText;
 }
 
 export function renderWinners(version: Version, container: HTMLElement): void {
-  const title = document.createElement('div');
-  title.id = 'winnerLabel';
-  title.className = 'other-label';
-  title.textContent = 'Winners:';
-  container.replaceChildren(title);
-  const questions = readQuestions(version);
-  for (const name of Object.keys(questions)) {
-    const isDataPresent = isRunDataPresent(version, name);
-    const formatText = buildTextFormatter(version, questions[name]);
-    if (isDataPresent)
-      container.appendChild(createQuestionResultLabel(questions[name], listAnswers(version, name), formatText, version));
-  }
+    const title = document.createElement('div');
+    title.id = 'winnerLabel';
+    title.className = 'other-label';
+    title.textContent = 'Winners:';
+    container.replaceChildren(title);
+    const questions = readQuestions(version);
+    for (const name of Object.keys(questions)) {
+        const isDataPresent = isRunDataPresent(version, name);
+        const formatText = buildTextFormatter(version, questions[name]);
+        if (isDataPresent)
+            container.appendChild(createQuestionResultLabel(questions[name], listAnswers(version, name), formatText, version));
+    }
 }

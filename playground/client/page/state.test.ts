@@ -2,21 +2,21 @@ import { test, expect } from 'bun:test';
 import { getShownVersion, pageState } from './state';
 
 function validatePageStateStartsClean() {
-  expect(pageState.isDirty).toBe(false);
-  expect(pageState.fileHandle).toBeNull();
-  expect(pageState.versions).toEqual([]);
-  expect(pageState.index).toBe(0);
-  expect(pageState.pinnedIndex).toBeNull();
+    expect(pageState.isDirty).toBe(false);
+    expect(pageState.fileHandle).toBeNull();
+    expect(pageState.versions).toEqual([]);
+    expect(pageState.index).toBe(0);
+    expect(pageState.pinnedIndex).toBeNull();
 }
 
 function validateShownVersionFollowsTheIndex() {
-  const first = { time: 'a', state: {}, questions: {}, calls: 0, outputs: [] };
-  const second = { time: 'b', state: {}, questions: {}, calls: 0, outputs: [] };
-  pageState.versions = [first, second];
-  pageState.index = 1;
-  expect(getShownVersion()).toBe(second);
-  pageState.versions = [];
-  pageState.index = 0;
+    const first = { time: 'a', state: {}, questions: {}, calls: 0, outputs: [] };
+    const second = { time: 'b', state: {}, questions: {}, calls: 0, outputs: [] };
+    pageState.versions = [first, second];
+    pageState.index = 1;
+    expect(getShownVersion()).toBe(second);
+    pageState.versions = [];
+    pageState.index = 0;
 }
 
 test('test_page_state_starts_clean', validatePageStateStartsClean);

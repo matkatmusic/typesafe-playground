@@ -6,20 +6,20 @@ import { attachInfoBox } from '../infoBox/infoBox';
 import { getShownVersion } from '../page/state';
 
 export function updateCollapsedNames(names: string[], isCollapsed: boolean): void {
-  for (const name of names)
-    graphState.collapsedByName[name] = isCollapsed;
+    for (const name of names)
+        graphState.collapsedByName[name] = isCollapsed;
 }
 
 export function setAllGraphsCollapsed(isCollapsed: boolean): void {
-  const version = getShownVersion();
-  updateCollapsedNames(Object.keys(readQuestions(version)), isCollapsed);
-  renderGraphs(version, getElement('graphContainerBox'), attachInfoBox);
+    const version = getShownVersion();
+    updateCollapsedNames(Object.keys(readQuestions(version)), isCollapsed);
+    renderGraphs(version, getElement('graphContainerBox'), attachInfoBox);
 }
 
 export function setAllGraphsToCollapsed(): void {
-  setAllGraphsCollapsed(true);
+    setAllGraphsCollapsed(true);
 }
 
 export function setAllGraphsToExpanded(): void {
-  setAllGraphsCollapsed(false);
+    setAllGraphsCollapsed(false);
 }

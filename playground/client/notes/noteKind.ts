@@ -6,27 +6,29 @@ import { isJsonTextEdited } from '../versions/versionLabel';
 export type NoteKind = 'state' | 'questions';
 
 function readStateText(): string {
-  return getStateEditor().state.doc.toString();
+    return getStateEditor().state.doc.toString();
 }
 
 function getStateValue(version: Version): unknown {
-  return version.state;
+    return version.state;
 }
 
 function readQuestionsText(): string {
-  return getQuestionsEditor().state.doc.toString();
+    return getQuestionsEditor().state.doc.toString();
 }
 
 function getQuestionsValue(version: Version): unknown {
-  return version.questions;
+    return version.questions;
 }
 
-const KIND_SOURCES = {
-  state: { readText: readStateText, getValue: getStateValue },
-  questions: { readText: readQuestionsText, getValue: getQuestionsValue },
-};
+function getKindSources() {
+    return {
+        state: { readText: readStateText, getValue: getStateValue },
+        questions: { readText: readQuestionsText, getValue: getQuestionsValue },
+    };
+}
 
 export function isKindTextEdited(kind: NoteKind): boolean {
-  const source = KIND_SOURCES[kind];
-  return isJsonTextEdited(source.readText(), source.getValue(getShownVersion()));
+    const source = getKindSources()[kind];
+    return isJsonTextEdited(source.readText(), source.getValue(getShownVersion()));
 }

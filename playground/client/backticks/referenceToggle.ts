@@ -6,7 +6,7 @@ import { getShownVersion } from '../page/state';
 import { renderWinners } from '../runs/winnersDom';
 
 export function updateReferencesReplaced(): void {
-  graphState.isReferencesReplaced = getInput('replaceReferencesCheckbox').checked;
-  renderGraphs(getShownVersion(), getElement('graphContainerBox'), attachInfoBox);
-  renderWinners(getShownVersion(), getElement('winnerBox'));
+    graphState.isReferencesReplaced = getInput('replaceReferencesCheckbox').checked;
+    renderGraphs(getShownVersion(), getElement('graphContainerBox'), attachInfoBox);
+    renderWinners(getShownVersion(), getElement('winnerBox'));
 }

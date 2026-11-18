@@ -2,17 +2,17 @@ import { redo, undo } from '@codemirror/commands';
 import { getQuestionsEditor, getStateEditor } from './editors';
 
 export function applyStateUndo(): void {
-  undo(getStateEditor());
+    undo(getStateEditor());
 }
 
 export function applyStateRedo(): void {
-  redo(getStateEditor());
+    redo(getStateEditor());
 }
 
 export function applyQuestionsUndo(): void {
-  undo(getQuestionsEditor());
+    undo(getQuestionsEditor());
 }
 
 export function applyQuestionsRedo(): void {
-  redo(getQuestionsEditor());
+    redo(getQuestionsEditor());
 }

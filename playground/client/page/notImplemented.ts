@@ -1,3 +1,3 @@
 export function triggerNotImplementedError(): never {
-  throw new Error('not implemented yet');
+    throw new Error('not implemented yet');
 }

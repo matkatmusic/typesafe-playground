@@ -12,18 +12,18 @@ export interface RangeLineGeometry { x: number; y1: number; y2: number }
 export interface PinnedData { answers: Answer[]; providers: Provider[]; keys: string[] }
 export interface GraphBlock { block: HTMLDivElement; box: HTMLDivElement }
 export interface ChartLayout {
-  name: string;
-  block: HTMLElement;
-  box: HTMLElement;
-  svg: Element;
-  question: Question;
-  answers: Answer[];
-  providers: Provider[];
-  keys: string[];
-  slot: number;
-  plotH: number;
-  isAverageShown: boolean;
-  baseline: number;
-  pinned: PinnedData | null;
+    name: string;
+    block: HTMLElement;
+    box: HTMLElement;
+    svg: Element;
+    question: Question;
+    answers: Answer[];
+    providers: Provider[];
+    keys: string[];
+    slot: number;
+    plotH: number;
+    isAverageShown: boolean;
+    baseline: number;
+    pinned: PinnedData | null;
 }
 export type ChartsHook = (charts: ChartLayout[]) => void;

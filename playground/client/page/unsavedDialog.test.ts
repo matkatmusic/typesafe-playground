@@ -2,18 +2,26 @@ import { test, expect } from 'bun:test';
 import { computeUnsavedStep, readUnsavedChoice } from './unsavedDialog';
 
 function validateEachChoiceMapsToOneStep() {
-  expect(computeUnsavedStep('save')).toBe('save');
-  expect(computeUnsavedStep('discard')).toBe('continue');
-  expect(computeUnsavedStep('cancel')).toBe('stop');
+    expect(computeUnsavedStep('save')).toBe('save');
+    expect(computeUnsavedStep('discard')).toBe('continue');
+    expect(computeUnsavedStep('cancel')).toBe('stop');
+}
+
+function computeStepForEmptyChoice() {
+    return computeUnsavedStep('');
+}
+
+function computeStepForUnknownChoice() {
+    return computeUnsavedStep('maybe');
 }
 
 function validateUnknownChoiceThrows() {
-  expect(() => computeUnsavedStep('')).toThrow();
-  expect(() => computeUnsavedStep('maybe')).toThrow();
+    expect(computeStepForEmptyChoice).toThrow();
+    expect(computeStepForUnknownChoice).toThrow();
 }
 
 function validateReadChoiceWithoutDocumentThrows() {
-  expect(() => readUnsavedChoice()).toThrow();
+    expect(readUnsavedChoice).toThrow();
 }
 
 test('test_each_unsaved_choice_maps_to_one_step', validateEachChoiceMapsToOneStep);

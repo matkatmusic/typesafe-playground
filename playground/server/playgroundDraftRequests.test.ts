@@ -5,68 +5,76 @@ import { dispatchRequest } from './playground';
 import { initHistory } from '../history/playgroundHistory';
 import { computeDraftPath, readDraft } from './playgroundDraftRequests';
 
-const PORT = 4321;
-const ALLOWED_HOST = `127.0.0.1:${PORT}`;
-const SESSION_ID = '0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d';
+function getPort() {
+    return 4321;
+}
+
+function getAllowedHost() {
+    return `127.0.0.1:${getPort()}`;
+}
+
+function getSessionId() {
+    return '0a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d';
+}
 
 async function buildTempHistoryPath() {
-  const historyPath = `${mkdtempSync(`${tmpdir()}/playground-draft-test-`)}/results/playground-history.json`;
-  await initHistory(historyPath);
-  return historyPath;
+    const historyPath = `${mkdtempSync(`${tmpdir()}/playground-draft-test-`)}/results/playground-history.json`;
+    await initHistory(historyPath);
+    return historyPath;
 }
 
 function buildDraftRequest(body: unknown) {
-  const headers = { host: ALLOWED_HOST, origin: `http://${ALLOWED_HOST}`, 'content-type': 'application/json' };
-  return new Request(`http://${ALLOWED_HOST}/draft`, { method: 'POST', headers: headers, body: JSON.stringify(body) });
+    const headers = { host: getAllowedHost(), origin: `http://${getAllowedHost()}`, 'content-type': 'application/json' };
+    return new Request(`http://${getAllowedHost()}/draft`, { method: 'POST', headers: headers, body: JSON.stringify(body) });
 }
 
 function buildDraftGetRequest(id: string) {
-  return new Request(`http://${ALLOWED_HOST}/draft?id=${id}`, { headers: { host: ALLOWED_HOST } });
+    return new Request(`http://${getAllowedHost()}/draft?id=${id}`, { headers: { host: getAllowedHost() } });
 }
 
 async function validateDraftPostWritesTheRawTextInASessionFileBesideTheHistoryFile() {
-  const historyPath = await buildTempHistoryPath();
-  const body = { state: '{"a": ', questions: '[1,', isBatch: true };
-  const response = await dispatchRequest(buildDraftRequest({ id: SESSION_ID, ...body }), PORT, historyPath);
-  expect(response.status).toBe(200);
-  expect(computeDraftPath(historyPath, SESSION_ID)).toBe(historyPath.replace('playground-history.json', `.currentSession-${SESSION_ID}.json`));
-  expect(await readDraft(historyPath, SESSION_ID)).toEqual(body);
+    const historyPath = await buildTempHistoryPath();
+    const body = { state: '{"a": ', questions: '[1,', isBatch: true };
+    const response = await dispatchRequest(buildDraftRequest({ id: getSessionId(), ...body }), getPort(), historyPath);
+    expect(response.status).toBe(200);
+    expect(computeDraftPath(historyPath, getSessionId())).toBe(historyPath.replace('playground-history.json', `.currentSession-${getSessionId()}.json`));
+    expect(await readDraft(historyPath, getSessionId())).toEqual(body);
 }
 
 async function validateDraftPostRejectsNonStringFields() {
-  const historyPath = await buildTempHistoryPath();
-  const badState = await dispatchRequest(buildDraftRequest({ id: SESSION_ID, state: {}, questions: '', isBatch: false }), PORT, historyPath);
-  expect(badState.status).toBe(400);
-  const badQuestions = await dispatchRequest(buildDraftRequest({ id: SESSION_ID, state: '', questions: 3, isBatch: false }), PORT, historyPath);
-  expect(badQuestions.status).toBe(400);
-  const badBatch = await dispatchRequest(buildDraftRequest({ id: SESSION_ID, state: '', questions: '', isBatch: 'yes' }), PORT, historyPath);
-  expect(badBatch.status).toBe(400);
-  expect(await readDraft(historyPath, SESSION_ID)).toBeNull();
+    const historyPath = await buildTempHistoryPath();
+    const badState = await dispatchRequest(buildDraftRequest({ id: getSessionId(), state: {}, questions: '', isBatch: false }), getPort(), historyPath);
+    expect(badState.status).toBe(400);
+    const badQuestions = await dispatchRequest(buildDraftRequest({ id: getSessionId(), state: '', questions: 3, isBatch: false }), getPort(), historyPath);
+    expect(badQuestions.status).toBe(400);
+    const badBatch = await dispatchRequest(buildDraftRequest({ id: getSessionId(), state: '', questions: '', isBatch: 'yes' }), getPort(), historyPath);
+    expect(badBatch.status).toBe(400);
+    expect(await readDraft(historyPath, getSessionId())).toBeNull();
 }
 
 async function validateDraftRoutesRejectAnIdThatIsNotALowercaseUuid() {
-  const historyPath = await buildTempHistoryPath();
-  const badIds = ['../escape', '', 'ABCDEF01-4e5f-4a6b-8c7d-9e0f1a2b3c4d', `${SESSION_ID}x`];
-  for (const badId of badIds) {
-    const postResponse = await dispatchRequest(buildDraftRequest({ id: badId, state: '', questions: '' }), PORT, historyPath);
-    expect(postResponse.status).toBe(400);
-    const getResponse = await dispatchRequest(buildDraftGetRequest(encodeURIComponent(badId)), PORT, historyPath);
-    expect(getResponse.status).toBe(400);
-  }
-  const missingIdPost = await dispatchRequest(buildDraftRequest({ state: '', questions: '' }), PORT, historyPath);
-  expect(missingIdPost.status).toBe(400);
-  const missingIdGet = await dispatchRequest(new Request(`http://${ALLOWED_HOST}/draft`, { headers: { host: ALLOWED_HOST } }), PORT, historyPath);
-  expect(missingIdGet.status).toBe(400);
+    const historyPath = await buildTempHistoryPath();
+    const badIds = ['../escape', '', 'ABCDEF01-4e5f-4a6b-8c7d-9e0f1a2b3c4d', `${getSessionId()}x`];
+    for (const badId of badIds) {
+        const postResponse = await dispatchRequest(buildDraftRequest({ id: badId, state: '', questions: '' }), getPort(), historyPath);
+        expect(postResponse.status).toBe(400);
+        const getResponse = await dispatchRequest(buildDraftGetRequest(encodeURIComponent(badId)), getPort(), historyPath);
+        expect(getResponse.status).toBe(400);
+    }
+    const missingIdPost = await dispatchRequest(buildDraftRequest({ state: '', questions: '' }), getPort(), historyPath);
+    expect(missingIdPost.status).toBe(400);
+    const missingIdGet = await dispatchRequest(new Request(`http://${getAllowedHost()}/draft`, { headers: { host: getAllowedHost() } }), getPort(), historyPath);
+    expect(missingIdGet.status).toBe(400);
 }
 
 async function validateDraftGetReturnsNullForAMissingFileAndTheFileJsonOtherwise() {
-  const historyPath = await buildTempHistoryPath();
-  const missing = await dispatchRequest(buildDraftGetRequest(SESSION_ID), PORT, historyPath);
-  expect(missing.status).toBe(200);
-  expect(await missing.json()).toBeNull();
-  await dispatchRequest(buildDraftRequest({ id: SESSION_ID, state: 's', questions: 'q', isBatch: false }), PORT, historyPath);
-  const found = await dispatchRequest(buildDraftGetRequest(SESSION_ID), PORT, historyPath);
-  expect(await found.json()).toEqual({ state: 's', questions: 'q', isBatch: false });
+    const historyPath = await buildTempHistoryPath();
+    const missing = await dispatchRequest(buildDraftGetRequest(getSessionId()), getPort(), historyPath);
+    expect(missing.status).toBe(200);
+    expect(await missing.json()).toBeNull();
+    await dispatchRequest(buildDraftRequest({ id: getSessionId(), state: 's', questions: 'q', isBatch: false }), getPort(), historyPath);
+    const found = await dispatchRequest(buildDraftGetRequest(getSessionId()), getPort(), historyPath);
+    expect(await found.json()).toEqual({ state: 's', questions: 'q', isBatch: false });
 }
 
 

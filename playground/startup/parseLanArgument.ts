@@ -1,3 +1,3 @@
 export function isLanArgument(argumentList: string[]): boolean {
-  return argumentList.includes('--lan');
+    return argumentList.includes('--lan');
 }
