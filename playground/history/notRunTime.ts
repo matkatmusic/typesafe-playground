@@ -1,1 +1,3 @@
-export const NOT_RUN_TIME = 'not run yet';
+export function getNotRunTime(): string {
+    return 'not run yet';
+}

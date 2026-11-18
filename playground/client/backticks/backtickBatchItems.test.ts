@@ -1,12 +1,12 @@
-import { test, expect, afterEach } from 'bun:test';
+import { describe, test, expect, afterEach } from 'bun:test';
 import { json } from '@codemirror/lang-json';
 import { EditorState } from '@codemirror/state';
 import { listBatchItems } from './backtickBatchItems';
 import { pageState } from '../page/state';
 
-afterEach(() => {
+function resetBatchOff() {
     pageState.isBatchOn = false;
-});
+}
 
 function createJsonState(text: string): EditorState {
     return EditorState.create({ doc: text, extensions: [json()] });
@@ -37,8 +37,13 @@ function validateBatchOnListsNoItemsForAnEmptyArray() {
     expect(listBatchItems([createJsonState('[]')])).toBe(null);
 }
 
-test('test_batch_off_lists_no_items', validateBatchOffListsNoItems);
-test('test_batch_on_lists_the_array_items', validateBatchOnListsTheArrayItems);
-test('test_batch_on_lists_no_items_for_broken_json', validateBatchOnListsNoItemsForBrokenJson);
-test('test_batch_on_lists_no_items_for_an_object', validateBatchOnListsNoItemsForAnObject);
-test('test_batch_on_lists_no_items_for_an_empty_array', validateBatchOnListsNoItemsForAnEmptyArray);
+function registerBatchItemsTests() {
+    afterEach(resetBatchOff);
+    test('test_batch_off_lists_no_items', validateBatchOffListsNoItems);
+    test('test_batch_on_lists_the_array_items', validateBatchOnListsTheArrayItems);
+    test('test_batch_on_lists_no_items_for_broken_json', validateBatchOnListsNoItemsForBrokenJson);
+    test('test_batch_on_lists_no_items_for_an_object', validateBatchOnListsNoItemsForAnObject);
+    test('test_batch_on_lists_no_items_for_an_empty_array', validateBatchOnListsNoItemsForAnEmptyArray);
+}
+
+describe('backtick batch items', registerBatchItemsTests);

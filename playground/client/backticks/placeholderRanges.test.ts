@@ -4,63 +4,68 @@ import { EditorState, Transaction } from '@codemirror/state';
 import type { TransactionSpec } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
 import { insertQuestion } from '../questions/addQuestion';
-import { FILL_ANNOTATION } from '../editors/editors';
-import { addPlaceholderRanges, findInsertedRanges, listTemplateFieldTexts, placeholderRangesField, readPlaceholderRanges } from './placeholderRanges';
+import { getFillAnnotation } from '../editors/editors';
+import { getAddPlaceholderRangesEffect, findInsertedRanges, listTemplateFieldTexts, getPlaceholderRangesField, readPlaceholderRanges } from './placeholderRanges';
 
-const DOC = '{"a": "one", "b": "two", "c": "three"}';
+function getMarkedDoc(): string {
+    return '{"a": "one", "b": "two", "c": "three"}';
+}
 
 function buildMarkedState(): EditorState {
-  const ranges = findInsertedRanges(DOC, ['one', 'two', 'three'], 0);
-  const state = EditorState.create({ doc: DOC, extensions: [placeholderRangesField] });
-  return state.update({ effects: addPlaceholderRanges.of(ranges) }).state;
+    const DOC = getMarkedDoc();
+    const ranges = findInsertedRanges(DOC, ['one', 'two', 'three'], 0);
+    const state = EditorState.create({ doc: DOC, extensions: [getPlaceholderRangesField()] });
+    return state.update({ effects: getAddPlaceholderRangesEffect().of(ranges) }).state;
 }
 
 function listRangeTexts(state: EditorState): string[] {
-  const texts: string[] = [];
-  for (const range of readPlaceholderRanges(state))
-    texts.push(state.sliceDoc(range.from + 1, range.to - 1));
-  return texts;
+    const texts: string[] = [];
+    for (const range of readPlaceholderRanges(state))
+        texts.push(state.sliceDoc(range.from + 1, range.to - 1));
+    return texts;
 }
 
 function validateFieldTextsAndInsertedRangesFollowTheTemplate() {
-  const texts = listTemplateFieldTexts(',\n"${1:new_noul_1}": {\n  "instructions": "${2:instruction}"\n}');
-  expect(texts).toEqual(['new_noul_1', 'instruction']);
-  const doc = ',\n  "new_noul_1": {\n    "instructions": "instruction"\n}';
-  const ranges = findInsertedRanges(doc, texts, 0);
-  expect(doc.slice(ranges[0].from, ranges[0].to)).toBe('"new_noul_1"');
-  expect(doc.slice(ranges[1].from, ranges[1].to)).toBe('"instruction"');
+    const texts = listTemplateFieldTexts(',\n"${1:new_noul_1}": {\n  "instructions": "${2:instruction}"\n}');
+    expect(texts).toEqual(['new_noul_1', 'instruction']);
+    const doc = ',\n  "new_noul_1": {\n    "instructions": "instruction"\n}';
+    const ranges = findInsertedRanges(doc, texts, 0);
+    expect(doc.slice(ranges[0].from, ranges[0].to)).toBe('"new_noul_1"');
+    expect(doc.slice(ranges[1].from, ranges[1].to)).toBe('"instruction"');
 }
 
 function validateInsertRegistersEveryPlaceholderRange() {
-  const view = { state: EditorState.create({ doc: '{}', extensions: [json(), placeholderRangesField] }), focus: (): void => {} };
-  function applyDispatch(spec: Transaction | TransactionSpec): void {
-    view.state = (spec instanceof Transaction ? spec : view.state.update(spec)).state;
-  }
-  Object.assign(view, { dispatch: applyDispatch });
-  insertQuestion(view as unknown as EditorView, 'noul');
-  expect(listRangeTexts(view.state)).toEqual(['new_noul_1', 'instruction', 'description', 'description']);
+    const view = { state: EditorState.create({ doc: '{}', extensions: [json(), getPlaceholderRangesField()] }), focus: (): void => {} };
+    function applyDispatch(spec: Transaction | TransactionSpec): void {
+        view.state = (spec instanceof Transaction ? spec : view.state.update(spec)).state;
+    }
+    Object.assign(view, { dispatch: applyDispatch });
+    insertQuestion(view as unknown as EditorView, 'noul');
+    expect(listRangeTexts(view.state)).toEqual(['new_noul_1', 'instruction', 'description', 'description']);
 }
 
 function validateTypingInsideOneDropsOnlyThatOne() {
-  const state = buildMarkedState();
-  const typed = state.update({ changes: { from: DOC.indexOf('two') + 1, insert: 'X' } }).state;
-  expect(listRangeTexts(typed)).toEqual(['one', 'three']);
-  const typedOver = state.update({ changes: { from: DOC.indexOf('one'), to: DOC.indexOf('one') + 3, insert: 'new' } }).state;
-  expect(listRangeTexts(typedOver)).toEqual(['two', 'three']);
+    const DOC = getMarkedDoc();
+    const state = buildMarkedState();
+    const typed =state.update({ changes: { from: DOC.indexOf('two') + 1, insert: 'X' } }).state;
+    expect(listRangeTexts(typed)).toEqual(['one', 'three']);
+    const typedOver = state.update({ changes: { from: DOC.indexOf('one'), to: DOC.indexOf('one') + 3, insert: 'new' } }).state;
+    expect(listRangeTexts(typedOver)).toEqual(['two', 'three']);
 }
 
 function validateEditsElsewhereMoveTheOtherRanges() {
-  const state = buildMarkedState();
-  const moved = state.update({ changes: { from: 1, insert: '"x": 1, ' } }).state;
-  expect(listRangeTexts(moved)).toEqual(['one', 'two', 'three']);
-  const shifted = moved.update({ changes: { from: moved.doc.length - 1, insert: ' ' } }).state;
-  expect(listRangeTexts(shifted)).toEqual(['one', 'two', 'three']);
+    const state = buildMarkedState();
+    const moved = state.update({ changes: { from: 1, insert: '"x": 1, ' } }).state;
+    expect(listRangeTexts(moved)).toEqual(['one', 'two', 'three']);
+    const shifted = moved.update({ changes: { from: moved.doc.length - 1, insert: ' ' } }).state;
+    expect(listRangeTexts(shifted)).toEqual(['one', 'two', 'three']);
 }
 
 function validateFillClearsEveryRange() {
-  const state = buildMarkedState();
-  const filled = state.update({ changes: { from: 0, to: DOC.length, insert: DOC }, annotations: FILL_ANNOTATION.of(true) }).state;
-  expect(readPlaceholderRanges(filled)).toEqual([]);
+    const DOC = getMarkedDoc();
+    const state = buildMarkedState();
+    const filled =state.update({ changes: { from: 0, to: DOC.length, insert: DOC }, annotations: getFillAnnotation().of(true) }).state;
+    expect(readPlaceholderRanges(filled)).toEqual([]);
 }
 
 test('test_field_texts_and_inserted_ranges_follow_the_template', validateFieldTextsAndInsertedRangesFollowTheTemplate);

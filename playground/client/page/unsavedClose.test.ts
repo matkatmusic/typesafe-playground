@@ -1,39 +1,46 @@
-import { test, expect, afterEach } from 'bun:test'
-import { pageState } from './state'
-import { notifyOnUnsavedClose } from './unsavedClose'
+import { describe, test, expect, afterEach } from 'bun:test';
+import { pageState } from './state';
+import { notifyOnUnsavedClose } from './unsavedClose';
 
-afterEach(() => {
-  pageState.isDirty = false
-})
+function resetDirtyState() {
+    pageState.isDirty = false;
+}
 
 function buildStubEvent() {
-  const stub = { preventDefaultCount: 0, preventDefault() { stub.preventDefaultCount += 1 } }
-  return stub
+    const stub = { preventDefaultCount: 0, preventDefault() {
+        stub.preventDefaultCount += 1;
+    } };
+    return stub;
 }
 
 function validateDirtyStateCallsPreventDefault() {
-  pageState.isDirty = true
-  const event = buildStubEvent()
-  notifyOnUnsavedClose(event as unknown as BeforeUnloadEvent)
-  expect(event.preventDefaultCount).toBe(1)
+    pageState.isDirty = true;
+    const event = buildStubEvent();
+    notifyOnUnsavedClose(event as unknown as BeforeUnloadEvent);
+    expect(event.preventDefaultCount).toBe(1);
 }
 
 function validateCleanStateDoesNotCallPreventDefault() {
-  pageState.isDirty = false
-  const event = buildStubEvent()
-  notifyOnUnsavedClose(event as unknown as BeforeUnloadEvent)
-  expect(event.preventDefaultCount).toBe(0)
+    pageState.isDirty = false;
+    const event = buildStubEvent();
+    notifyOnUnsavedClose(event as unknown as BeforeUnloadEvent);
+    expect(event.preventDefaultCount).toBe(0);
 }
 
 function validateActiveBatchRunCallsPreventDefaultEvenWhenClean() {
-  pageState.isDirty = false
-  pageState.batchRun = { item: 2, count: 5 }
-  const event = buildStubEvent()
-  notifyOnUnsavedClose(event as unknown as BeforeUnloadEvent)
-  pageState.batchRun = null
-  expect(event.preventDefaultCount).toBe(1)
+    pageState.isDirty = false;
+    pageState.batchRun = { item: 2, count: 5 };
+    const event = buildStubEvent();
+    notifyOnUnsavedClose(event as unknown as BeforeUnloadEvent);
+    pageState.batchRun = null;
+    expect(event.preventDefaultCount).toBe(1);
 }
 
-test('test_active_batch_run_calls_prevent_default_even_when_clean', validateActiveBatchRunCallsPreventDefaultEvenWhenClean)
-test('test_dirty_state_calls_prevent_default', validateDirtyStateCallsPreventDefault)
-test('test_clean_state_does_not_call_prevent_default', validateCleanStateDoesNotCallPreventDefault)
+function registerUnsavedCloseTests() {
+    afterEach(resetDirtyState);
+    test('test_active_batch_run_calls_prevent_default_even_when_clean', validateActiveBatchRunCallsPreventDefaultEvenWhenClean);
+    test('test_dirty_state_calls_prevent_default', validateDirtyStateCallsPreventDefault);
+    test('test_clean_state_does_not_call_prevent_default', validateCleanStateDoesNotCallPreventDefault);
+}
+
+describe('unsaved close', registerUnsavedCloseTests);

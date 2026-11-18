@@ -28,50 +28,63 @@ function listLabels(result: CompletionResult | null): string[] {
     return labels;
 }
 
+function listSimpleStates(): EditorState[] {
+    return [createJsonState('{"a": 1}')];
+}
+
+function buildNestedStateText(): string {
+    return '{"message": {"text": 1, "x": {"deep": 2}}, "other": 3}';
+}
+
+function listNestedStates(): EditorState[] {
+    return [createJsonState(buildNestedStateText())];
+}
+
 function validateNoListWithoutBacktick() {
-    const source = buildBacktickSource(() => [createJsonState('{"a": 1}')]);
+    const source = buildBacktickSource(listSimpleStates);
     expect(source(createContext('x'))).toBe(null);
     expect(source(createContext(''))).toBe(null);
 }
 
 function validateStatesAreReadWhenTyping() {
     const states = [createJsonState('{}')];
-    const source = buildBacktickSource(() => states);
+    function listCurrentStates(): EditorState[] {
+        return states;
+    }
+    const source = buildBacktickSource(listCurrentStates);
     states[0] = createJsonState('{"late": 1}');
     expect(listLabels(source(createContext('`')) as CompletionResult | null)).toEqual(['late']);
 }
 
-const NESTED_STATE_TEXT = '{"message": {"text": 1, "x": {"deep": 2}}, "other": 3}';
-
 function validateBacktickListsOnlyTopLevelStateKeys() {
     // Step: the state has a nested object with its own keys.
-    const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+    const source = buildBacktickSource(listNestedStates);
     // Step: after a lone backtick, only the top-level keys are offered.
     expect(listLabels(source(createContext('`')) as CompletionResult | null)).toEqual(['message', 'other']);
 }
 
 function validateDotListsChildKeysOfTheKey() {
-    const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
-    const result = source(createContext('`message.')) as CompletionResult | null;
+    const source = buildBacktickSource(listNestedStates);
+    const result =source(createContext('`message.')) as CompletionResult | null;
     expect(listLabels(result)).toEqual(['text', 'x']);
     expect(result?.from).toBe(9);
     expect(result?.options[0].apply).toBe('text`');
 }
 
 function validateDotListsChildKeysAtAnyDepth() {
-    const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+    const source = buildBacktickSource(listNestedStates);
     expect(listLabels(source(createContext('`message.x.')) as CompletionResult | null)).toEqual(['deep']);
 }
 
 function validateDotListsNothingWithoutObjectChildren() {
-    const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+    const source = buildBacktickSource(listNestedStates);
     expect(source(createContext('`other.'))).toBe(null);
     expect(source(createContext('`message.text.'))).toBe(null);
     expect(source(createContext('`missing.'))).toBe(null);
 }
 
 function validateDotOutsideABacktickKeyListsNothing() {
-    const source = buildBacktickSource(() => [createJsonState(NESTED_STATE_TEXT)]);
+    const source = buildBacktickSource(listNestedStates);
     expect(source(createContext('message.'))).toBe(null);
     expect(source(createContext('`message `.'))).toBe(null);
     expect(source(createContext('`.'))).toBe(null);
@@ -81,7 +94,7 @@ function validateDotOutsideABacktickKeyListsNothing() {
 function validateNoListWhileReadOnly() {
     const lockedState = EditorState.create({ doc: '`', extensions: [json(), EditorState.readOnly.of(true)] });
     const lockedContext = new CompletionContext(lockedState, 1, false);
-    const source = buildBacktickSource(() => [createJsonState('{"a": 1}')]);
+    const source = buildBacktickSource(listSimpleStates);
     expect(source(lockedContext)).toBe(null);
 }
 

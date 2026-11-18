@@ -4,66 +4,66 @@ import { EditorState } from '@codemirror/state';
 import { collectAllObjects, collectNamedObjectValues, collectPropertyNames, listChildNames, listEditorChildNames, listEditorNames, mergeNames, splitKeyPath } from './propertyNames';
 
 function validateCollectsDistinctNamesAtAnyDepth() {
-  const text = '{"a": {"b": 1, "a": 2}, "c": [{"d": 1}]}';
-  const tree = jsonLanguage.parser.parse(text);
-  expect(collectPropertyNames(tree, text)).toEqual(['a', 'b', 'c', 'd']);
+    const text = '{"a": {"b": 1, "a": 2}, "c": [{"d": 1}]}';
+    const tree = jsonLanguage.parser.parse(text);
+    expect(collectPropertyNames(tree, text)).toEqual(['a', 'b', 'c', 'd']);
 }
 
 function validateCollectsNamesFromBrokenJson() {
-  const text = '{"a": 1, "b": ';
-  const tree = jsonLanguage.parser.parse(text);
-  expect(collectPropertyNames(tree, text)).toEqual(['a', 'b']);
+    const text = '{"a": 1, "b": ';
+    const tree = jsonLanguage.parser.parse(text);
+    expect(collectPropertyNames(tree, text)).toEqual(['a', 'b']);
 }
 
 function validateSkipsEmptyNames() {
-  const text = '{"": 1, "a": 2}';
-  const tree = jsonLanguage.parser.parse(text);
-  expect(collectPropertyNames(tree, text)).toEqual(['a']);
+    const text = '{"": 1, "a": 2}';
+    const tree = jsonLanguage.parser.parse(text);
+    expect(collectPropertyNames(tree, text)).toEqual(['a']);
 }
 
 function validateMergeKeepsEachNameOnce() {
-  expect(mergeNames(['a', 'b'], ['b', 'c'])).toEqual(['a', 'b', 'c']);
+    expect(mergeNames(['a', 'b'], ['b', 'c'])).toEqual(['a', 'b', 'c']);
 }
 
 function validateListsNamesFromEditorState() {
-  const state = EditorState.create({ doc: '{"a": {"b": 1}}', extensions: [json()] });
-  expect(listEditorNames(state)).toEqual(['a', 'b']);
+    const state = EditorState.create({ doc: '{"a": {"b": 1}}', extensions: [json()] });
+    expect(listEditorNames(state)).toEqual(['a', 'b']);
 }
 
 function validateListsChildNamesByPath() {
-  const text = '{"a": {"b": {"c": 1, "d": {}}, "e": 2}, "z": {"a": {"f": 1}}}';
-  const tree = jsonLanguage.parser.parse(text);
-  expect(listChildNames(tree, text, ['a'])).toEqual(['b', 'e', 'f']);
-  expect(listChildNames(tree, text, ['a', 'b'])).toEqual(['c', 'd']);
-  expect(listChildNames(tree, text, ['a', 'b', 'd'])).toEqual([]);
-  expect(listChildNames(tree, text, ['b', 'c'])).toEqual([]);
-  expect(listChildNames(tree, text, ['e'])).toEqual([]);
-  expect(listChildNames(tree, text, ['missing'])).toEqual([]);
+    const text = '{"a": {"b": {"c": 1, "d": {}}, "e": 2}, "z": {"a": {"f": 1}}}';
+    const tree = jsonLanguage.parser.parse(text);
+    expect(listChildNames(tree, text, ['a'])).toEqual(['b', 'e', 'f']);
+    expect(listChildNames(tree, text, ['a', 'b'])).toEqual(['c', 'd']);
+    expect(listChildNames(tree, text, ['a', 'b', 'd'])).toEqual([]);
+    expect(listChildNames(tree, text, ['b', 'c'])).toEqual([]);
+    expect(listChildNames(tree, text, ['e'])).toEqual([]);
+    expect(listChildNames(tree, text, ['missing'])).toEqual([]);
 }
 
 function validateChildNamesWorkOnBrokenJson() {
-  const text = '{"a": {"b": 1, "c": ';
-  const tree = jsonLanguage.parser.parse(text);
-  expect(listChildNames(tree, text, ['a'])).toEqual(['b', 'c']);
+    const text = '{"a": {"b": 1, "c": ';
+    const tree = jsonLanguage.parser.parse(text);
+    expect(listChildNames(tree, text, ['a'])).toEqual(['b', 'c']);
 }
 
 function validateListsChildNamesFromEditorState() {
-  const state = EditorState.create({ doc: '{"a": {"b": 1}}', extensions: [json()] });
-  expect(listEditorChildNames(state, ['a'])).toEqual(['b']);
+    const state = EditorState.create({ doc: '{"a": {"b": 1}}', extensions: [json()] });
+    expect(listEditorChildNames(state, ['a'])).toEqual(['b']);
 }
 
 function validateCollectsEveryObjectAndNamedObjectValues() {
-  const text = '{"a": {"b": {}}, "c": [{"a": {}}]}';
-  const tree = jsonLanguage.parser.parse(text);
-  const objects = collectAllObjects(tree);
-  expect(objects.length).toBe(5);
-  expect(collectNamedObjectValues(objects, text, 'a').length).toBe(2);
+    const text = '{"a": {"b": {}}, "c": [{"a": {}}]}';
+    const tree = jsonLanguage.parser.parse(text);
+    const objects = collectAllObjects(tree);
+    expect(objects.length).toBe(5);
+    expect(collectNamedObjectValues(objects, text, 'a').length).toBe(2);
 }
 
 function validateSplitKeyPathKeepsIndexSteps() {
-  expect(splitKeyPath('a.b[0][1].c')).toEqual(['a', 'b', '[0]', '[1]', 'c']);
-  expect(splitKeyPath('a')).toEqual(['a']);
-  expect(splitKeyPath('.')).toEqual([]);
+    expect(splitKeyPath('a.b[0][1].c')).toEqual(['a', 'b', '[0]', '[1]', 'c']);
+    expect(splitKeyPath('a')).toEqual(['a']);
+    expect(splitKeyPath('.')).toEqual([]);
 }
 
 test('test_split_key_path_keeps_index_steps', validateSplitKeyPathKeepsIndexSteps);

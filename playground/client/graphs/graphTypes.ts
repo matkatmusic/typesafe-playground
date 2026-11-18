@@ -9,23 +9,21 @@ export interface Summary { low: number; high: number; average: number }
 export interface BarGeometry { x: number; y: number; width: number; height: number }
 export interface BarSpan { y: number; height: number }
 export interface RangeLineGeometry { x: number; y1: number; y2: number }
-// export interface PinnedData { id: number; answers: Answer[]; keys: string[] }
-// export interface PinnedData { answers: Answer[]; keys: string[] }
 export interface PinnedData { answers: Answer[]; providers: Provider[]; keys: string[] }
 export interface GraphBlock { block: HTMLDivElement; box: HTMLDivElement }
 export interface ChartLayout {
-  name: string;
-  block: HTMLElement;
-  box: HTMLElement;
-  svg: Element;
-  question: Question;
-  answers: Answer[];
-  providers: Provider[];
-  keys: string[];
-  slot: number;
-  plotH: number;
-  isAverageShown: boolean;
-  baseline: number;
-  pinned: PinnedData | null;
+    name: string;
+    block: HTMLElement;
+    box: HTMLElement;
+    svg: Element;
+    question: Question;
+    answers: Answer[];
+    providers: Provider[];
+    keys: string[];
+    slot: number;
+    plotH: number;
+    isAverageShown: boolean;
+    baseline: number;
+    pinned: PinnedData | null;
 }
 export type ChartsHook = (charts: ChartLayout[]) => void;

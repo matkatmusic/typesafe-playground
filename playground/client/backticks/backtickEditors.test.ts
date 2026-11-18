@@ -5,7 +5,9 @@ import type { EditorView, ViewUpdate } from '@codemirror/view';
 import { buildOtherEditorRelint, isOtherEditorChanged, listBothEditorStates } from './backtickEditors';
 
 function createFakeView(specs: TransactionSpec[]): EditorView {
-    return { dispatch(spec: TransactionSpec) { specs.push(spec); } } as unknown as EditorView;
+    return { dispatch(spec: TransactionSpec) {
+        specs.push(spec);
+    } } as unknown as EditorView;
 }
 
 function createFakeUpdate(view: EditorView, docChanged: boolean): ViewUpdate {
@@ -17,8 +19,15 @@ function createUpdateFromSpec(spec: TransactionSpec): ViewUpdate {
     return { transactions: [transaction] } as unknown as ViewUpdate;
 }
 
+function createRelintForViews(firstView: EditorView, secondView: EditorView) {
+    function getBothViews(): [EditorView, EditorView] {
+        return [firstView, secondView];
+    }
+    return buildOtherEditorRelint(getBothViews);
+}
+
 function validateListBothEditorStatesThrowsBeforeEditorsExist() {
-    expect(() => listBothEditorStates()).toThrow('state editor is not created yet');
+    expect(listBothEditorStates).toThrow('state editor is not created yet');
 }
 
 function validateRelintGoesOnlyToTheOtherViewOnDocChange() {
@@ -26,7 +35,7 @@ function validateRelintGoesOnlyToTheOtherViewOnDocChange() {
     const secondSpecs: TransactionSpec[] = [];
     const firstView = createFakeView(firstSpecs);
     const secondView = createFakeView(secondSpecs);
-    const relint = buildOtherEditorRelint(() => [firstView, secondView]);
+    const relint = createRelintForViews(firstView, secondView);
     relint(createFakeUpdate(firstView, false));
     expect(secondSpecs.length).toBe(0);
     relint(createFakeUpdate(firstView, true));

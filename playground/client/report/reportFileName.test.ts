@@ -2,19 +2,19 @@ import { test, expect } from 'bun:test';
 import { computeReportFileName } from './reportFileName';
 
 function validateOpenFileNameLosesItsExtension() {
-  expect(computeReportFileName('prompt-intent hook queries.json')).toBe('prompt-intent hook queries-notes.md');
+    expect(computeReportFileName('prompt-intent hook queries.json')).toBe('prompt-intent hook queries-notes.md');
 }
 
 function validateOnlyTheLastExtensionIsRemoved() {
-  expect(computeReportFileName('a.b.json')).toBe('a.b-notes.md');
+    expect(computeReportFileName('a.b.json')).toBe('a.b-notes.md');
 }
 
 function validateNameWithoutExtensionIsKept() {
-  expect(computeReportFileName('versions')).toBe('versions-notes.md');
+    expect(computeReportFileName('versions')).toBe('versions-notes.md');
 }
 
 function validateNewPageUsesNotesMd() {
-  expect(computeReportFileName(null)).toBe('notes.md');
+    expect(computeReportFileName(null)).toBe('notes.md');
 }
 
 test('test_open_file_name_loses_its_extension', validateOpenFileNameLosesItsExtension);

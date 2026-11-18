@@ -22,13 +22,19 @@
 :root[data-theme="dark"] {
     color-scheme: dark;
     --hit-stroke: #ffffff;
-    /* --surface: #1a1a19; */
+    /*
+      --surface: #1a1a19;
+    */
     --surface: #000000;
-    /* --panel: #262624; */
+    /*
+      --panel: #262624;
+    */
     --panel: #141414;
     --text: #f0efec;
     --text-muted: #c3c2b7;
-    /* --grid: #3a3a37; */
+    /*
+      --grid: #3a3a37;
+    */
     --grid: #2e2e2e;
     --button-border: #a8a7a1;
     --label-other: #e5c07b;
@@ -63,7 +69,7 @@ body { margin: 0; block-size: 100vb; display: flex; flex-direction: column; back
 #providerSubqLabel { color: #56B4E9; }
 #providerSwitch { appearance: none; position: relative; inline-size: 40px; block-size: 20px; margin: 0; border-radius: 10px; background: var(--button-border); cursor: pointer; transition: background 120ms; }
 #providerSwitch::before { content: ""; position: absolute; inset-block-start: 2px; inset-inline-start: 2px; inline-size: 16px; block-size: 16px; border-radius: 50%; background: white; transition: transform 120ms; }
-#providerSwitch:checked { background: var(--score); }
+#providerSwitch:checked { background: var(--score, #2a78d6); }
 #providerSwitch:checked::before { transform: translateX(20px); }
 #providerSwitch:disabled { opacity: 0.4; cursor: not-allowed; }
 /* #headerBox #lastEditedLabel { margin-left: auto; font-weight: 300; color: var(--text-muted); white-space: nowrap; } */

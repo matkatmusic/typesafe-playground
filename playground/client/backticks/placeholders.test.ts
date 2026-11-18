@@ -1,26 +1,23 @@
 import { test, expect } from 'bun:test';
-// import { snippet } from '@codemirror/autocomplete';
-// import { json } from '@codemirror/lang-json';
-// import { syntaxTree } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
-// import type { Transaction } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import type { DecorationSet } from '@codemirror/view';
-import { addPlaceholderRanges } from './placeholderRanges';
-import { buildPlaceholderDecorations, createPlaceholders, isAnyPlaceholderSelected, placeholderField } from './placeholders';
-// import { buildInsertPlan } from '../questions/questionSnippets';
+import { getAddPlaceholderRangesEffect } from './placeholderRanges';
+import { buildPlaceholderDecorations, createPlaceholders, getPlaceholderField, isAnyPlaceholderSelected } from './placeholders';
 
-const DOC = '{"a": "instruction", "b": "description"}';
+function getDoc(): string {
+    return '{"a": "instruction", "b": "description"}';
+}
 
 function findQuotedRange(doc: string, text: string) {
-  const from = doc.indexOf('"' + text + '"');
-  return { from: from, to: from + text.length + 2 };
+    const from = doc.indexOf('"' + text + '"');
+    return { from: from, to: from + text.length + 2 };
 }
 
 function buildMarkedState(selection: { anchor: number; head?: number }): EditorState {
-  const ranges = [findQuotedRange(DOC, 'instruction'), findQuotedRange(DOC, 'description')];
-  const state = EditorState.create({ doc: DOC, extensions: [createPlaceholders()] });
-  return state.update({ effects: addPlaceholderRanges.of(ranges), selection: selection }).state;
+    const ranges = [findQuotedRange(getDoc(), 'instruction'), findQuotedRange(getDoc(), 'description')];
+    const state = EditorState.create({ doc: getDoc(), extensions: [createPlaceholders()] });
+    return state.update({ effects: getAddPlaceholderRangesEffect().of(ranges), selection: selection }).state;
 }
 /* Disabled with the text-matching rule in placeholders.ts.
 function buildChoiceInsertText(): string {
@@ -85,66 +82,62 @@ function validateEscapedQuoteDoesNotEndTheString() {
 */
 
 function listMarkClasses(state: EditorState): string[] {
-  return listDecorationClasses(buildPlaceholderDecorations(state));
+    return listDecorationClasses(buildPlaceholderDecorations(state));
 }
 
 function listDecorationClasses(decorations: DecorationSet): string[] {
-  const classes: string[] = [];
-  const cursor = decorations.iter();
-  while (cursor.value !== null) {
-    classes.push(cursor.value.spec.class);
-    cursor.next();
-  }
-  return classes;
+    const classes: string[] = [];
+    const cursor = decorations.iter();
+    while (cursor.value !== null) {
+        classes.push(cursor.value.spec.class);
+        cursor.next();
+    }
+    return classes;
 }
 
 function validateOnlyAFullySelectedPlaceholderGetsTheSelectedClass() {
-  const first = findQuotedRange(DOC, 'instruction');
-  const plain = 'cm-placeholderValue';
-  const selected = 'cm-placeholderValue cm-placeholderSelected';
-  const cursorOnly = buildMarkedState({ anchor: first.from + 3 });
-  expect(listMarkClasses(cursorOnly)).toEqual([plain, plain]);
-  const partial = buildMarkedState({ anchor: first.from + 2, head: first.to - 1 });
-  expect(listMarkClasses(partial)).toEqual([plain, plain]);
-  const inner = buildMarkedState({ anchor: first.from + 1, head: first.to - 1 });
-  expect(listMarkClasses(inner)).toEqual([selected, plain]);
+    const first = findQuotedRange(getDoc(), 'instruction');
+    const plain = 'cm-placeholderValue';
+    const selected = 'cm-placeholderValue cm-placeholderSelected';
+    const cursorOnly = buildMarkedState({ anchor: first.from + 3 });
+    expect(listMarkClasses(cursorOnly)).toEqual([plain, plain]);
+    const partial = buildMarkedState({ anchor: first.from + 2, head: first.to - 1 });
+    expect(listMarkClasses(partial)).toEqual([plain, plain]);
+    const inner = buildMarkedState({ anchor: first.from + 1, head: first.to - 1 });
+    expect(listMarkClasses(inner)).toEqual([selected, plain]);
 }
 
 function validateSelectionChangeAloneRebuildsTheDecorations() {
-  const range = findQuotedRange(DOC, 'instruction');
-  const state = buildMarkedState({ anchor: 0 });
-  expect(listDecorationClasses(state.field(placeholderField))).toEqual(['cm-placeholderValue', 'cm-placeholderValue']);
-  const selection = { anchor: range.from + 1, head: range.to - 1 };
-  const moved = state.update({ selection: selection }).state;
-  expect(listDecorationClasses(moved.field(placeholderField))).toEqual(['cm-placeholderValue cm-placeholderSelected', 'cm-placeholderValue']);
+    const range = findQuotedRange(getDoc(), 'instruction');
+    const state = buildMarkedState({ anchor: 0 });
+    expect(listDecorationClasses(state.field(getPlaceholderField()))).toEqual(['cm-placeholderValue', 'cm-placeholderValue']);
+    const selection = { anchor: range.from + 1, head: range.to - 1 };
+    const moved = state.update({ selection: selection }).state;
+    expect(listDecorationClasses(moved.field(getPlaceholderField()))).toEqual(['cm-placeholderValue cm-placeholderSelected', 'cm-placeholderValue']);
 }
 
 function listEditorClasses(state: EditorState): string[] {
-  const classes: string[] = [];
-  for (const attributes of state.facet(EditorView.editorAttributes)) {
-    const attributeClass = (attributes as Record<string, string>).class;
-    if (attributeClass !== undefined)
-      classes.push(attributeClass);
-  }
-  return classes;
+    const classes: string[] = [];
+    for (const attributes of state.facet(EditorView.editorAttributes)) {
+        const attributeClass = (attributes as Record<string, string>).class;
+        if (attributeClass !== undefined)
+            classes.push(attributeClass);
+    }
+    return classes;
 }
 
 function validateEditorGetsAClassOnlyWhileAPlaceholderIsSelected() {
-  const range = findQuotedRange(DOC, 'instruction');
-  const state = buildMarkedState({ anchor: 0 });
-  expect(isAnyPlaceholderSelected(state)).toBe(false);
-  expect(listEditorClasses(state)).toEqual([]);
-  const plainSelection = state.update({ selection: { anchor: 2, head: 3 } }).state;
-  expect(listEditorClasses(plainSelection)).toEqual([]);
-  const placeholderSelection = state.update({ selection: { anchor: range.from + 1, head: range.to - 1 } }).state;
-  expect(isAnyPlaceholderSelected(placeholderSelection)).toBe(true);
-  expect(listEditorClasses(placeholderSelection)).toEqual(['cm-placeholderIsSelected']);
+    const range = findQuotedRange(getDoc(), 'instruction');
+    const state = buildMarkedState({ anchor: 0 });
+    expect(isAnyPlaceholderSelected(state)).toBe(false);
+    expect(listEditorClasses(state)).toEqual([]);
+    const plainSelection = state.update({ selection: { anchor: 2, head: 3 } }).state;
+    expect(listEditorClasses(plainSelection)).toEqual([]);
+    const placeholderSelection = state.update({ selection: { anchor: range.from + 1, head: range.to - 1 } }).state;
+    expect(isAnyPlaceholderSelected(placeholderSelection)).toBe(true);
+    expect(listEditorClasses(placeholderSelection)).toEqual(['cm-placeholderIsSelected']);
 }
 
 test('test_editor_gets_a_class_only_while_a_placeholder_is_selected', validateEditorGetsAClassOnlyWhileAPlaceholderIsSelected);
 test('test_only_a_fully_selected_placeholder_gets_the_selected_class',validateOnlyAFullySelectedPlaceholderGetsTheSelectedClass);
 test('test_selection_change_alone_rebuilds_the_decorations', validateSelectionChangeAloneRebuildsTheDecorations);
-// test('test_placeholders_stay_found_after_typing_over_one',validatePlaceholdersSurviveTypingOverOne);
-// test('test_generated_names_and_defaults_are_found', validateGeneratedNamesAndDefaultsAreFoundButUserTextIsNot);
-// test('test_edited_names_are_regular_text', validateEditedNamesAreRegularText);
-// test('test_escaped_quote_does_not_end_the_string', validateEscapedQuoteDoesNotEndTheString);

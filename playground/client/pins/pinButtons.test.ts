@@ -1,60 +1,66 @@
-import { test, expect, afterEach } from 'bun:test'
-import { applyPinButtons, computePinButtonText, PIN_INSTEAD_TEXT, PIN_TEXT } from './pinButtons'
-import { pageState } from '../page/state'
-
-afterEach(removeFakeState)
+import { describe, test, expect, afterEach } from 'bun:test';
+import { applyPinButtons, computePinButtonText, getPinInsteadText, getPinText } from './pinButtons';
+import { pageState } from '../page/state';
 
 function removeFakeState() {
-  Reflect.deleteProperty(globalThis, 'document')
-  Reflect.deleteProperty(globalThis, 'HTMLButtonElement')
-  pageState.pinnedIndex = null
-  pageState.versions = []
-  pageState.index = 0
+    Reflect.deleteProperty(globalThis, 'document');
+    Reflect.deleteProperty(globalThis, 'HTMLButtonElement');
+    pageState.pinnedIndex = null;
+    pageState.versions = [];
+    pageState.index = 0;
 }
 
-class FakeButton { disabled = false; textContent = '' }
+class FakeButton {
+    public disabled = false;
+    public textContent = '';
+}
 
 function installFakeButtons(pinnedIndex: number | null, shownIndex: number) {
-  const buttons = { pinButton: new FakeButton(), unpinButton: new FakeButton() }
-  const getById = (id: string) => buttons[id as keyof typeof buttons]
-  Object.assign(globalThis, { document: { getElementById: getById }, HTMLButtonElement: FakeButton })
-  pageState.versions = [{ time: 't', state: {}, questions: {}, calls: 0, outputs: [] }, { time: 't', state: {}, questions: {}, calls: 0, outputs: [] }]
-  pageState.index = shownIndex
-  pageState.pinnedIndex = pinnedIndex
-  return buttons
+    const buttons = { pinButton: new FakeButton(), unpinButton: new FakeButton() };
+    const getById = (id: string) => buttons[id as keyof typeof buttons];
+    Object.assign(globalThis, { document: { getElementById: getById }, HTMLButtonElement: FakeButton });
+    pageState.versions = [{ time: 't', state: {}, questions: {}, calls: 0, outputs: [] }, { time: 't', state: {}, questions: {}, calls: 0, outputs: [] }];
+    pageState.index = shownIndex;
+    pageState.pinnedIndex = pinnedIndex;
+    return buttons;
 }
 
 function validateNothingPinnedEnablesPinAndDisablesUnpin() {
-  const buttons = installFakeButtons(null, 0)
-  applyPinButtons()
-  expect(buttons.pinButton.disabled).toBe(false)
-  expect(buttons.pinButton.textContent).toBe(PIN_TEXT)
-  expect(buttons.unpinButton.disabled).toBe(true)
+    const buttons = installFakeButtons(null, 0);
+    applyPinButtons();
+    expect(buttons.pinButton.disabled).toBe(false);
+    expect(buttons.pinButton.textContent).toBe(getPinText());
+    expect(buttons.unpinButton.disabled).toBe(true);
 }
 
 function validateShownVersionPinnedDisablesPinAndEnablesUnpin() {
-  const buttons = installFakeButtons(0, 0)
-  applyPinButtons()
-  expect(buttons.pinButton.disabled).toBe(true)
-  expect(buttons.pinButton.textContent).toBe(PIN_TEXT)
-  expect(buttons.unpinButton.disabled).toBe(false)
+    const buttons = installFakeButtons(0, 0);
+    applyPinButtons();
+    expect(buttons.pinButton.disabled).toBe(true);
+    expect(buttons.pinButton.textContent).toBe(getPinText());
+    expect(buttons.unpinButton.disabled).toBe(false);
 }
 
 function validateOtherVersionPinnedEnablesPinInsteadAndUnpin() {
-  const buttons = installFakeButtons(0, 1)
-  applyPinButtons()
-  expect(buttons.pinButton.disabled).toBe(false)
-  expect(buttons.pinButton.textContent).toBe(PIN_INSTEAD_TEXT)
-  expect(buttons.unpinButton.disabled).toBe(false)
+    const buttons = installFakeButtons(0, 1);
+    applyPinButtons();
+    expect(buttons.pinButton.disabled).toBe(false);
+    expect(buttons.pinButton.textContent).toBe(getPinInsteadText());
+    expect(buttons.unpinButton.disabled).toBe(false);
 }
 
 function validateButtonTextFollowsTheShownVersion() {
-  expect(computePinButtonText(null, 6)).toBe('Pin')
-  expect(computePinButtonText(6, 6)).toBe('Pin')
-  expect(computePinButtonText(5, 6)).toBe('Pin this version instead')
+    expect(computePinButtonText(null, 6)).toBe('Pin');
+    expect(computePinButtonText(6, 6)).toBe('Pin');
+    expect(computePinButtonText(5, 6)).toBe('Pin this version instead');
 }
 
-test('test_nothing_pinned_enables_pin_and_disables_unpin', validateNothingPinnedEnablesPinAndDisablesUnpin)
-test('test_shown_version_pinned_disables_pin_and_enables_unpin', validateShownVersionPinnedDisablesPinAndEnablesUnpin)
-test('test_other_version_pinned_enables_pin_instead_and_unpin', validateOtherVersionPinnedEnablesPinInsteadAndUnpin)
-test('test_button_text_follows_the_shown_version', validateButtonTextFollowsTheShownVersion)
+function registerPinButtonTests() {
+    afterEach(removeFakeState);
+    test('test_nothing_pinned_enables_pin_and_disables_unpin', validateNothingPinnedEnablesPinAndDisablesUnpin);
+    test('test_shown_version_pinned_disables_pin_and_enables_unpin', validateShownVersionPinnedDisablesPinAndEnablesUnpin);
+    test('test_other_version_pinned_enables_pin_instead_and_unpin', validateOtherVersionPinnedEnablesPinInsteadAndUnpin);
+    test('test_button_text_follows_the_shown_version', validateButtonTextFollowsTheShownVersion);
+}
+
+describe('pin buttons', registerPinButtonTests);
