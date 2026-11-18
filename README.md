@@ -57,6 +57,7 @@ A `noul` question (yes or no) has a graph with one bar per call, above or below 
 ![A noul graph with its result box](docs/graph-noul.png)
 
 A `score` question has a graph with one group of bars for each criterion.
+This graph shows the results for 3 separate API calls each to Typesafe and SubQ. 
 
 ![A score graph with its result box](docs/graph-score.png)
 
