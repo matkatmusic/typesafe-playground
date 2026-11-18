@@ -114,8 +114,7 @@ In the state editor or the questions editor, type a backtick (`` ` ``). A list s
 
 ## Back-ticked name checks
 
-A back-ticked name that no editor defines gets a red squiggle. The message says `` `<name>` is not in state or in this question ``. A back-ticked name that points to an object or an array also gets a squiggle. The message says `` `<name>` must not point to an object or array ``.
-
+A back-ticked name that no editor defines gets a red squiggle. The message says `` `<name>` is not in state or in this question ``.
 - The squiggles update when the other editor changes. For example, rename a key in the state editor. The old name gets a squiggle in the questions editor.
 - To point at an item in an array, write the index in square brackets, for example `` `userMessageArray[0]` ``. A name like `` `userMessageArray.0` `` is not an index, so it gets a squiggle.
 

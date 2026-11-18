@@ -20,13 +20,8 @@ function validateNamesPointingToObjectsGetErrors() {
     // Step: data is an object in the state, localValue is an object in the question.
     const questionsText = '{"dataCheck":{"type":"noul","localValue":{"a":"fruit"},"instructions":"is `data` the same as `localValue`?","criteria":{"true":"Yes, they\'re the same","false":"No, they are different"}}}';
     const diagnostics = collectQuestionsEditorDiagnostics('{"fruit":"apple","data":{"a":"fruit"}}', questionsText);
-    // Step: both names are wrong, because a name must not point to an object or array.
-    const dataFrom = questionsText.indexOf('`data`') + 1;
-    const localValueFrom = questionsText.indexOf('`localValue`') + 1;
-    expect(diagnostics).toEqual([
-        { from: dataFrom, to: dataFrom + 'data'.length, severity: 'error', message: '`data` must not point to an object or array' },
-        { from: localValueFrom, to: localValueFrom + 'localValue'.length, severity: 'error', message: '`localValue` must not point to an object or array' },
-    ]);
+    // Step: no name is wrong, because a name may point to an object or array.
+    expect(diagnostics).toEqual([]);
 }
 
 function validateBacktickedNameInAKeyGetsNoNameError() {
