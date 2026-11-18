@@ -52,6 +52,18 @@ Each saved output stores its `provider`. An old output without a `provider` coun
 
 The cost uses $0.042 per 1M input tokens for TypeSafe and $0.04 per 1M input tokens for SubQ.
 
+A `noul` question (yes or no) has a graph with one bar per call, above or below the middle line.
+
+![A noul graph with its result box](docs/graph-noul.png)
+
+A `score` question has a graph with one group of bars for each criterion.
+
+![A score graph with its result box](docs/graph-score.png)
+
+A `choice` question has a graph with one group of bars for each choice.
+
+![A choice graph with its result box](docs/graph-choice.png)
+
 ## Data on disk
 
 - `playground/results/playground-history.json` holds every version: its state, its questions, the output of each run, and its notes. The server makes this file when it first starts. It writes the file again after each Submit, New, Open, note change, and **Reset this version's runs**. `results/` is in `playground/.gitignore`.
