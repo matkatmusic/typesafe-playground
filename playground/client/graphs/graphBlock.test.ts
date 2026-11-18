@@ -13,10 +13,18 @@ function createFakeElement() {
     id: '', scrollTop: 0, className: '', textContent: '', title: '', type: '', checked: false,
     children: [] as unknown[], classes: [] as string[], attrs: {} as Record<string, string>, listeners: {} as Record<string, () => void>,
     scrollIntoView(_options: unknown) {},
-    classList: { add(name: string) { element.classes.push(name); } },
-    setAttribute(key: string, value: string) { element.attrs[key] = value; },
-    appendChild(child: unknown) { element.children.push(child); },
-    addEventListener(type: string, listener: () => void) { element.listeners[type] = listener; },
+    classList: { add(name: string) {
+      element.classes.push(name);
+    } },
+    setAttribute(key: string, value: string) {
+      element.attrs[key] = value;
+    },
+    appendChild(child: unknown) {
+      element.children.push(child);
+    },
+    addEventListener(type: string, listener: () => void) {
+      element.listeners[type] = listener;
+    },
   };
   return element;
 }

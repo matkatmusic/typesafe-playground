@@ -17,10 +17,18 @@ class FakeElement {
   classes: string[] = [];
   listeners: Record<string, () => void> = {};
   classList = { add: (className: string) => this.classes.push(className) };
-  setAttribute(key: string, value: string) { this.attrs[key] = value; }
-  appendChild(child: FakeElement) { this.children.push(child); }
-  replaceChildren(...children: FakeElement[]) { this.children = children; }
-  addEventListener(type: string, listener: () => void) { this.listeners[type] = listener; }
+  setAttribute(key: string, value: string) {
+    this.attrs[key] = value;
+  }
+  appendChild(child: FakeElement) {
+    this.children.push(child);
+  }
+  replaceChildren(...children: FakeElement[]) {
+    this.children = children;
+  }
+  addEventListener(type: string, listener: () => void) {
+    this.listeners[type] = listener;
+  }
 }
 
 function createFakeElementNamed(namespace: string, name: string) {

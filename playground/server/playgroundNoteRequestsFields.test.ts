@@ -1,75 +1,75 @@
-import { test, expect } from 'bun:test'
-import { mkdtempSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { loadHistory, writeHistory, type RunOutput, type Version } from '../history/playgroundHistory'
-import { executeNoteRequest, findInvalidNoteField } from './playgroundNoteRequests'
+import { test, expect } from 'bun:test';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { loadHistory, writeHistory, type RunOutput, type Version } from '../history/playgroundHistory';
+import { executeNoteRequest, findInvalidNoteField } from './playgroundNoteRequests';
 
-const OUTPUT = { answers: {}, usage: { input_tokens: 5, output_tokens: 1 } } as unknown as RunOutput
+const OUTPUT = { answers: {}, usage: { input_tokens: 5, output_tokens: 1 } } as unknown as RunOutput;
 
 function buildTempHistoryPath() {
-  return `${mkdtempSync(`${tmpdir()}/playground-note-fields-test-`)}/results/playground-history.json`
+  return `${mkdtempSync(`${tmpdir()}/playground-note-fields-test-`)}/results/playground-history.json`;
 }
 
 function buildPostRequest(body: unknown) {
-  return new Request('http://127.0.0.1:4399/note', { method: 'POST', body: JSON.stringify(body) })
+  return new Request('http://127.0.0.1:4399/note', { method: 'POST', body: JSON.stringify(body) });
 }
 
 function buildVersion(outputCount: number): Version {
-  const outputs: RunOutput[] = []
+  const outputs: RunOutput[] = [];
   for (let i = 0; i < outputCount; i++)
-    outputs.push(OUTPUT)
-  return { time: 't', state: {}, questions: {}, calls: outputCount, outputs: outputs }
+    outputs.push(OUTPUT);
+  return { time: 't', state: {}, questions: {}, calls: outputCount, outputs: outputs };
 }
 
 async function validateQuestionsNoteIsStoredOnAVersionWithoutRuns() {
-  const historyPath = buildTempHistoryPath()
-  await writeHistory(historyPath, [buildVersion(0)])
-  const response = await executeNoteRequest(buildPostRequest({ index: 0, questionsNote: 'about questions' }), historyPath)
-  expect(response.status).toBe(200)
-  const history: Version[] = await loadHistory(historyPath)
-  expect(history[0].questionsNote).toBe('about questions')
+  const historyPath = buildTempHistoryPath();
+  await writeHistory(historyPath, [buildVersion(0)]);
+  const response = await executeNoteRequest(buildPostRequest({ index: 0, questionsNote: 'about questions' }), historyPath);
+  expect(response.status).toBe(200);
+  const history: Version[] = await loadHistory(historyPath);
+  expect(history[0].questionsNote).toBe('about questions');
 }
 
 async function validateQuestionsNoteRejectsANonString() {
-  const historyPath = buildTempHistoryPath()
-  await writeHistory(historyPath, [buildVersion(1)])
-  const response = await executeNoteRequest(buildPostRequest({ index: 0, questionsNote: ['x'] }), historyPath)
-  expect(response.status).toBe(400)
+  const historyPath = buildTempHistoryPath();
+  await writeHistory(historyPath, [buildVersion(1)]);
+  const response = await executeNoteRequest(buildPostRequest({ index: 0, questionsNote: ['x'] }), historyPath);
+  expect(response.status).toBe(400);
 }
 
 async function validateResultNotesMergeKeysOnACompletedRun() {
-  const historyPath = buildTempHistoryPath()
-  await writeHistory(historyPath, [{ ...buildVersion(1), resultNotes: { first: 'one', second: 'two' } }])
-  const response = await executeNoteRequest(buildPostRequest({ index: 0, resultNotes: { second: 'changed', third: 'three' } }), historyPath)
-  expect(response.status).toBe(200)
-  const history: Version[] = await loadHistory(historyPath)
-  expect(history[0].resultNotes).toEqual({ first: 'one', second: 'changed', third: 'three' })
+  const historyPath = buildTempHistoryPath();
+  await writeHistory(historyPath, [{ ...buildVersion(1), resultNotes: { first: 'one', second: 'two' } }]);
+  const response = await executeNoteRequest(buildPostRequest({ index: 0, resultNotes: { second: 'changed', third: 'three' } }), historyPath);
+  expect(response.status).toBe(200);
+  const history: Version[] = await loadHistory(historyPath);
+  expect(history[0].resultNotes).toEqual({ first: 'one', second: 'changed', third: 'three' });
 }
 
 async function validateResultNotesRejectBadShapesAndVersionsWithoutRuns() {
-  const historyPath = buildTempHistoryPath()
-  await writeHistory(historyPath, [buildVersion(1), buildVersion(0)])
-  const notAnObject = await executeNoteRequest(buildPostRequest({ index: 0, resultNotes: 'x' }), historyPath)
-  expect(notAnObject.status).toBe(400)
-  const notAList = await executeNoteRequest(buildPostRequest({ index: 0, resultNotes: ['x'] }), historyPath)
-  expect(notAList.status).toBe(400)
-  const badValue = await executeNoteRequest(buildPostRequest({ index: 0, resultNotes: { first: 5 } }), historyPath)
-  expect(badValue.status).toBe(400)
-  const noRun = await executeNoteRequest(buildPostRequest({ index: 1, resultNotes: { first: 'one' } }), historyPath)
-  expect(noRun.status).toBe(400)
-  const history: Version[] = await loadHistory(historyPath)
-  expect(history[0].resultNotes).toBeUndefined()
-  expect(history[1].resultNotes).toBeUndefined()
+  const historyPath = buildTempHistoryPath();
+  await writeHistory(historyPath, [buildVersion(1), buildVersion(0)]);
+  const notAnObject = await executeNoteRequest(buildPostRequest({ index: 0, resultNotes: 'x' }), historyPath);
+  expect(notAnObject.status).toBe(400);
+  const notAList = await executeNoteRequest(buildPostRequest({ index: 0, resultNotes: ['x'] }), historyPath);
+  expect(notAList.status).toBe(400);
+  const badValue = await executeNoteRequest(buildPostRequest({ index: 0, resultNotes: { first: 5 } }), historyPath);
+  expect(badValue.status).toBe(400);
+  const noRun = await executeNoteRequest(buildPostRequest({ index: 1, resultNotes: { first: 'one' } }), historyPath);
+  expect(noRun.status).toBe(400);
+  const history: Version[] = await loadHistory(historyPath);
+  expect(history[0].resultNotes).toBeUndefined();
+  expect(history[1].resultNotes).toBeUndefined();
 }
 
 function validateFindInvalidNoteFieldNamesTheBadField() {
-  expect(findInvalidNoteField({ note: 'a', stateNote: 'b', questionsNote: 'c', resultNotes: { k: 'v' } })).toBeUndefined()
-  expect(findInvalidNoteField({ questionsNote: 1 })).toBe('questionsNote must be a string')
-  expect(findInvalidNoteField({ resultNotes: null })).toBe('resultNotes must be an object')
+  expect(findInvalidNoteField({ note: 'a', stateNote: 'b', questionsNote: 'c', resultNotes: { k: 'v' } })).toBeUndefined();
+  expect(findInvalidNoteField({ questionsNote: 1 })).toBe('questionsNote must be a string');
+  expect(findInvalidNoteField({ resultNotes: null })).toBe('resultNotes must be an object');
 }
 
-test('test_questions_note_is_stored_on_a_version_without_runs', validateQuestionsNoteIsStoredOnAVersionWithoutRuns)
-test('test_questions_note_rejects_a_non_string', validateQuestionsNoteRejectsANonString)
-test('test_result_notes_merge_keys_on_a_completed_run', validateResultNotesMergeKeysOnACompletedRun)
-test('test_result_notes_reject_bad_shapes_and_versions_without_runs', validateResultNotesRejectBadShapesAndVersionsWithoutRuns)
-test('test_find_invalid_note_field_names_the_bad_field', validateFindInvalidNoteFieldNamesTheBadField)
+test('test_questions_note_is_stored_on_a_version_without_runs', validateQuestionsNoteIsStoredOnAVersionWithoutRuns);
+test('test_questions_note_rejects_a_non_string', validateQuestionsNoteRejectsANonString);
+test('test_result_notes_merge_keys_on_a_completed_run', validateResultNotesMergeKeysOnACompletedRun);
+test('test_result_notes_reject_bad_shapes_and_versions_without_runs', validateResultNotesRejectBadShapesAndVersionsWithoutRuns);
+test('test_find_invalid_note_field_names_the_bad_field', validateFindInvalidNoteFieldNamesTheBadField);

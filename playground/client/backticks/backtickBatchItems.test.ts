@@ -5,36 +5,36 @@ import { listBatchItems } from './backtickBatchItems';
 import { pageState } from '../page/state';
 
 afterEach(() => {
-    pageState.isBatchOn = false;
+  pageState.isBatchOn = false;
 });
 
 function createJsonState(text: string): EditorState {
-    return EditorState.create({ doc: text, extensions: [json()] });
+  return EditorState.create({ doc: text, extensions: [json()] });
 }
 
 function validateBatchOffListsNoItems() {
-    pageState.isBatchOn = false;
-    expect(listBatchItems([createJsonState('[{"a": 1}]')])).toBe(null);
+  pageState.isBatchOn = false;
+  expect(listBatchItems([createJsonState('[{"a": 1}]')])).toBe(null);
 }
 
 function validateBatchOnListsTheArrayItems() {
-    pageState.isBatchOn = true;
-    expect(listBatchItems([createJsonState('[{"a": 1}, {"a": 2}]')])).toEqual([{ a: 1 }, { a: 2 }]);
+  pageState.isBatchOn = true;
+  expect(listBatchItems([createJsonState('[{"a": 1}, {"a": 2}]')])).toEqual([{ a: 1 }, { a: 2 }]);
 }
 
 function validateBatchOnListsNoItemsForBrokenJson() {
-    pageState.isBatchOn = true;
-    expect(listBatchItems([createJsonState('[{"a": 1}, ')])).toBe(null);
+  pageState.isBatchOn = true;
+  expect(listBatchItems([createJsonState('[{"a": 1}, ')])).toBe(null);
 }
 
 function validateBatchOnListsNoItemsForAnObject() {
-    pageState.isBatchOn = true;
-    expect(listBatchItems([createJsonState('{"a": 1}')])).toBe(null);
+  pageState.isBatchOn = true;
+  expect(listBatchItems([createJsonState('{"a": 1}')])).toBe(null);
 }
 
 function validateBatchOnListsNoItemsForAnEmptyArray() {
-    pageState.isBatchOn = true;
-    expect(listBatchItems([createJsonState('[]')])).toBe(null);
+  pageState.isBatchOn = true;
+  expect(listBatchItems([createJsonState('[]')])).toBe(null);
 }
 
 test('test_batch_off_lists_no_items', validateBatchOffListsNoItems);

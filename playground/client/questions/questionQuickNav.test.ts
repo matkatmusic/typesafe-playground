@@ -23,9 +23,15 @@ function createFakeElement() {
   const element = {
     className: '', textContent: '', value: '', hidden: false,
     children: [] as unknown[], attrs: {} as Record<string, string>, listeners: {} as Record<string, () => void>,
-    setAttribute(key: string, value: string) { element.attrs[key] = value; },
-    addEventListener(type: string, listener: () => void) { element.listeners[type] = listener; },
-    replaceChildren(...children: unknown[]) { element.children = children; },
+    setAttribute(key: string, value: string) {
+      element.attrs[key] = value;
+    },
+    addEventListener(type: string, listener: () => void) {
+      element.listeners[type] = listener;
+    },
+    replaceChildren(...children: unknown[]) {
+      element.children = children;
+    },
   };
   return element;
 }

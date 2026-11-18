@@ -4,7 +4,11 @@ import { removeValueLabels, renderValueLabels } from './infoLabels';
 function createFakeNode(namespace: string, name: string) {
   const attrs: Record<string, string> = {};
   const children: unknown[] = [];
-  return { name, attrs, children, textContent: '', setAttribute(key: string, value: string) { attrs[key] = value; }, appendChild(child: unknown) { children.push(child); } };
+  return { name, attrs, children, textContent: '', setAttribute(key: string, value: string) {
+    attrs[key] = value;
+  }, appendChild(child: unknown) {
+    children.push(child);
+  } };
 }
 
 type FakeNode = ReturnType<typeof createFakeNode>;
@@ -16,7 +20,9 @@ function removeFakeDocument() {
 function drawLabels(isAverageShown: boolean): FakeNode {
   Object.assign(globalThis, { document: { createElementNS: createFakeNode } });
   const appended: FakeNode[] = [];
-  const svg = { appendChild(child: FakeNode) { appended.push(child); } };
+  const svg = { appendChild(child: FakeNode) {
+    appended.push(child);
+  } };
   renderValueLabels(svg as unknown as Element, [0.2, 0.6], 100, 100, isAverageShown, 0);
   return appended[0];
 }
@@ -41,8 +47,12 @@ function validateRemoveTakesTheGroupOut() {
   function removeGroup() {
     removeCount++;
   }
-  const svgWithGroup = { querySelector() { return { remove: removeGroup }; } };
-  const svgWithout = { querySelector() { return null; } };
+  const svgWithGroup = { querySelector() {
+    return { remove: removeGroup };
+  } };
+  const svgWithout = { querySelector() {
+    return null;
+  } };
   removeValueLabels(svgWithGroup as unknown as Element);
   removeValueLabels(svgWithout as unknown as Element);
   expect(removeCount).toBe(1);

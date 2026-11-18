@@ -22,9 +22,15 @@ const bodyChildren: FakeNode[] = [];
 function createFakeNode(): FakeNode {
   const node: FakeNode = {
     className: '', textContent: '', title: '', style: {}, listeners: {},
-    addEventListener(type, listener) { node.listeners[type] = listener; },
-    getBoundingClientRect() { return { left: 10, bottom: 20 }; },
-    remove() { bodyChildren.splice(bodyChildren.indexOf(node), 1); },
+    addEventListener(type, listener) {
+      node.listeners[type] = listener;
+    },
+    getBoundingClientRect() {
+      return { left: 10, bottom: 20 };
+    },
+    remove() {
+      bodyChildren.splice(bodyChildren.indexOf(node), 1);
+    },
   };
   return node;
 }

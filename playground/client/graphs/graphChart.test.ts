@@ -9,7 +9,11 @@ import { graphState } from './graphState';
 function createFakeNode(namespace: string, name: string) {
   const attrs: Record<string, string> = {};
   const children: unknown[] = [];
-  return { name, attrs, children, textContent: '', setAttribute(key: string, value: string) { attrs[key] = value; }, appendChild(child: unknown) { children.push(child); } };
+  return { name, attrs, children, textContent: '', setAttribute(key: string, value: string) {
+    attrs[key] = value;
+  }, appendChild(child: unknown) {
+    children.push(child);
+  } };
 }
 
 type FakeNode = ReturnType<typeof createFakeNode>;

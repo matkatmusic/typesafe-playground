@@ -17,11 +17,21 @@ class FakeElement {
   children: FakeElement[] = [];
   listeners: Record<string, () => void> = {};
   classList = { add: (className: string) => className };
-  setAttribute(key: string, value: string) { this.attrs[key] = value; }
-  removeAttribute(key: string) { delete this.attrs[key]; }
-  appendChild(child: FakeElement) { this.children.push(child); }
-  replaceChildren(...children: FakeElement[]) { this.children = children; }
-  addEventListener(type: string, listener: () => void) { this.listeners[type] = listener; }
+  setAttribute(key: string, value: string) {
+    this.attrs[key] = value;
+  }
+  removeAttribute(key: string) {
+    delete this.attrs[key];
+  }
+  appendChild(child: FakeElement) {
+    this.children.push(child);
+  }
+  replaceChildren(...children: FakeElement[]) {
+    this.children = children;
+  }
+  addEventListener(type: string, listener: () => void) {
+    this.listeners[type] = listener;
+  }
   querySelector(selector: string): FakeElement | null {
     const wanted = selector.slice(1);
     for (const child of this.children) {
@@ -31,7 +41,9 @@ class FakeElement {
     }
     return null;
   }
-  remove() { this.name = 'removed'; }
+  remove() {
+    this.name = 'removed';
+  }
 }
 
 function createFakeElementNamed(namespace: string, name: string) {

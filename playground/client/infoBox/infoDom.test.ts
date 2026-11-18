@@ -5,8 +5,12 @@ import { pageState } from '../page/state';
 function createFakeElement() {
   const element = {
     className: '', textContent: '', title: '', children: [] as unknown[], listeners: {} as Record<string, () => void>,
-    appendChild(child: unknown) { element.children.push(child); },
-    addEventListener(type: string, listener: () => void) { element.listeners[type] = listener; },
+    appendChild(child: unknown) {
+      element.children.push(child);
+    },
+    addEventListener(type: string, listener: () => void) {
+      element.listeners[type] = listener;
+    },
   };
   return element;
 }

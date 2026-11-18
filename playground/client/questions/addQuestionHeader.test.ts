@@ -21,7 +21,9 @@ function validatePickedQuestionIsInsertedIntoTheQuestionsEditor() {
 }
 
 function validateHeaderButtonReusesTheSameMenuElementAndInsertFunction() {
-  const slot = { appended: [] as unknown[], append(child: unknown) { slot.appended.push(child); } };
+  const slot = { appended: [] as unknown[], append(child: unknown) {
+    slot.appended.push(child);
+  } };
   Object.assign(globalThis, { document: { getElementById: () => slot } });
   const menuElement = { id: 'menu element' } as unknown as HTMLElement;
   const createSpy = spyOn(addQuestionMenu, 'createAddQuestionElement').mockReturnValue(menuElement);

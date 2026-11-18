@@ -4,7 +4,9 @@ import { renderOption, renderProviderLetters } from './graphOption';
 
 function createFakeNode(namespace: string, name: string) {
   const attrs: Record<string, string> = {};
-  return { name, attrs, setAttribute(key: string, value: string) { attrs[key] = value; } };
+  return { name, attrs, setAttribute(key: string, value: string) {
+    attrs[key] = value;
+  } };
 }
 
 function removeFakeDocument() {
@@ -14,7 +16,9 @@ function removeFakeDocument() {
 function drawOption(isAverageShown: boolean, isPinned = false) {
   Object.assign(globalThis, { document: { createElementNS: createFakeNode } });
   const nodes: ReturnType<typeof createFakeNode>[] = [];
-  const svg = { appendChild(child: ReturnType<typeof createFakeNode>) { nodes.push(child); } };
+  const svg = { appendChild(child: ReturnType<typeof createFakeNode>) {
+    nodes.push(child);
+  } };
   renderOption(svg as unknown as Element, [0.2, 0.6], 100, 100, isAverageShown, 0, isPinned, ['SubQ', 'TypeSafe']);
   return nodes;
 }
@@ -74,11 +78,17 @@ function drawProviderLetters(isAverageShown: boolean, isPinned = false) {
   function createFakeGroupNode(namespace: string, name: string) {
     const attrs: Record<string, string> = {};
     const children: unknown[] = [];
-    return { name, attrs, children, textContent: '', setAttribute(key: string, value: string) { attrs[key] = value; }, appendChild(child: unknown) { children.push(child); } };
+    return { name, attrs, children, textContent: '', setAttribute(key: string, value: string) {
+      attrs[key] = value;
+    }, appendChild(child: unknown) {
+      children.push(child);
+    } };
   }
   Object.assign(globalThis, { document: { createElementNS: createFakeGroupNode } });
   const nodes: ReturnType<typeof createFakeGroupNode>[] = [];
-  const svg = { appendChild(child: ReturnType<typeof createFakeGroupNode>) { nodes.push(child); } };
+  const svg = { appendChild(child: ReturnType<typeof createFakeGroupNode>) {
+    nodes.push(child);
+  } };
   renderProviderLetters(svg as unknown as Element, ['SubQ', 'TypeSafe'], 100, 100, isAverageShown, isPinned);
   return nodes;
 }

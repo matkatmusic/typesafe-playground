@@ -11,9 +11,15 @@ class FakeElement {
   title = '';
   children: FakeElement[] = [];
   listeners: Record<string, () => void> = {};
-  addEventListener(type: string, listener: () => void) { this.listeners[type] = listener; }
-  appendChild(child: FakeElement) { this.children.push(child); }
-  replaceChildren(...nodes: FakeElement[]) { this.children = nodes; }
+  addEventListener(type: string, listener: () => void) {
+    this.listeners[type] = listener;
+  }
+  appendChild(child: FakeElement) {
+    this.children.push(child);
+  }
+  replaceChildren(...nodes: FakeElement[]) {
+    this.children = nodes;
+  }
 }
 
 function createFakeText(text: string) {

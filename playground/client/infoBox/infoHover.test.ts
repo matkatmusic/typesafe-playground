@@ -4,12 +4,20 @@ import type { HoverTracker } from './infoTypes';
 
 function createFakeHit() {
   const attrs: Record<string, string> = {};
-  return { attrs, setAttribute(key: string, value: string) { attrs[key] = value; }, removeAttribute(key: string) { delete attrs[key]; } };
+  return { attrs, setAttribute(key: string, value: string) {
+    attrs[key] = value;
+  }, removeAttribute(key: string) {
+    delete attrs[key];
+  } };
 }
 
 function validateOutlineMovesToTheLatestHit() {
   const appended: unknown[] = [];
-  const block = { querySelector() { return null; }, appendChild(child: unknown) { appended.push(child); } };
+  const block = { querySelector() {
+    return null;
+  }, appendChild(child: unknown) {
+    appended.push(child);
+  } };
   const tracker = { block, shownHit: null } as unknown as HoverTracker;
   const first = createFakeHit();
   const second = createFakeHit();
@@ -28,7 +36,9 @@ function validateOldInfoBoxIsRemoved() {
   function removeShown() {
     removeCount++;
   }
-  const block = { querySelector() { return { remove: removeShown }; }, appendChild() {} };
+  const block = { querySelector() {
+    return { remove: removeShown };
+  }, appendChild() {} };
   const tracker = { block, shownHit: null } as unknown as HoverTracker;
   updateShownInfo(tracker, {} as HTMLElement, null);
   expect(removeCount).toBe(1);

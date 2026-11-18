@@ -22,13 +22,19 @@
 :root[data-theme="dark"] {
     color-scheme: dark;
     --hit-stroke: #ffffff;
-    /* --surface: #1a1a19; */
+    /*
+      --surface: #1a1a19;
+    */
     --surface: #000000;
-    /* --panel: #262624; */
+    /*
+      --panel: #262624;
+    */
     --panel: #141414;
     --text: #f0efec;
     --text-muted: #c3c2b7;
-    /* --grid: #3a3a37; */
+    /*
+      --grid: #3a3a37;
+    */
     --grid: #2e2e2e;
     --button-border: #a8a7a1;
     --label-other: #e5c07b;

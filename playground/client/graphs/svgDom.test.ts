@@ -3,7 +3,9 @@ import { createSvgNode, SVG_NAMESPACE } from './svgDom';
 
 function createFakeNode(namespace: string, name: string) {
   const attrs: Record<string, string> = {};
-  return { namespace, name, attrs, textContent: '', setAttribute(key: string, value: string) { attrs[key] = value; } };
+  return { namespace, name, attrs, textContent: '', setAttribute(key: string, value: string) {
+    attrs[key] = value;
+  } };
 }
 
 function removeFakeDocument() {
